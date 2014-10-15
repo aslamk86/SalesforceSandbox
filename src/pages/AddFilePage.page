@@ -7,10 +7,10 @@
     </div>
     <apex:form >
     <div>
-    <apex:outputPanel >
+    <apex:outputPanel>
     <h4>Uploaded Documents</h4>
     <apex:dataList value="{!Attachments}" var="att">
-        <apex:outputPanel >
+        <apex:outputPanel>
             <apex:outputField value="{!att.Name}"/>
             <apex:commandLink action="{!deleteAttachment}" value="Delete" style="padding-left:10px">
                 <apex:param assignTo="{!deleteAttachmentId}" name="delAtt" value="{!att.id}"/>
