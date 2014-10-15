@@ -1,0 +1,33 @@
+<apex:page standardcontroller="Account" extensions="EcosSystemController" sidebar="false">
+<c:LockComponent />
+<apex:form >
+<apex:outputPanel layout="block">
+<apex:outputLink value="/{!Account.id}"><h1 style="font-size:25px; padding-right:20px;">{!Account.Name}</h1></apex:outputLink><apex:commandButton value="View Entitree" onclick="window.open('http://dma.rpxcorp.local/labs/entities?ent_id={!Account.Entity_ID__c}')" rerender="nothing"/>   
+</apex:outputPanel>
+<apex:outputPanel layout="block">
+    <apex:outputPanel layout="block">
+        <apex:outputLabel ><b>Account to clone the EcoSystem from </b></apex:outputLabel><apex:inputField value="{!newClonedEcosystemFromOther.Company__c}"/>
+        <apex:commandButton value="Fetch Ecosystems" reRender="relatedEcos" action="{!fetchEcosystemForTheAccount}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" />
+    </apex:outputPanel>        
+</apex:outputPanel>
+
+
+<apex:pageBlock >
+<apex:outputPanel id="relatedEcos">
+<apex:pageBlockTable value="{!listOfOtherAccEcosystems}" var="eco" rendered="{!listOfOtherAccEcosystems!=null && listOfOtherAccEcosystems.size>0}">
+    <apex:column value="{!eco.Version_Name__c}"/>
+    <apex:column value="{!eco.Version__c}"/>
+    <apex:column value="{!eco.Status__c}"/>    
+    <apex:column value="{!eco.createdDate}"/>
+    <apex:column value="{!eco.createdById}"/>    
+    <apex:column >
+        <apex:commandButton value="Clone" action="{!cloneEcosystemFromOtherAccount}" rerender="relatedEcos" onclick="lockScreen(true);">
+            <apex:param assignTo="{!cloneId}" value="{!eco.id}" name="cloneEcos"/>
+        </apex:commandButton>
+    </apex:column>
+</apex:pageBlockTable>
+
+</apex:outputPanel>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

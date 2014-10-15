@@ -1,0 +1,78 @@
+<apex:page controller="AutoFollowOppController" tabStyle="Opportunity" title="Auto Chatter Follow">
+	
+	<apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"/>
+	
+	<script>
+		function selectAll(target,parentId){
+            var parent = 'div[id=' + parentId + ']';
+            $(parent).find('input[type=checkbox]').attr('checked', $(target).is(':checked'));
+        }
+	</script>
+	
+	<style>
+		.handcursor {cursor: hand; cursor: pointer;}
+		.customlink{color : blue !important; text-decoration:underline; padding-top:5px;padding-bottom:5px;}
+		.customlink:hover{color:#00A3F5 !important;}
+	</style>
+	
+	<apex:sectionHeader title="Auto Chatter Follow" subTitle="Opportunities"/>
+	<c:LockComponent />
+	<apex:form >
+		
+		<apex:pageBlock id="pbFilter">
+			<apex:pageBlockButtons location="bottom">
+               	<apex:commandButton value="Search" action="{!searchUser}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pbUnfollowers"/> 
+           	</apex:pageBlockButtons>
+			
+			<apex:pageBlockSection id="pbsFilter" title="Filter By">
+				<apex:inputField value="{!filter.FirstName}" label="Name"/>
+				<apex:inputField value="{!filter.Division}" label="Email"/>
+				<apex:inputField value="{!filter.Title}"/>
+				<apex:inputField value="{!filter.Department}"/>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+		
+		<apex:pageBlock id="pbUnfollowers">
+			<apex:commandLink styleClass="handcursor customlink" action="{!follow}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pbUnfollowers,pbFollowers">Auto Follow</apex:commandLink>
+			<div style="height:200px;overflow:auto;" id="unfollowers">
+				<apex:pageBlockTable value="{!unfollowers}" var="f" columnsWidth="5%,25%,25%,25%,25%">
+				
+					<apex:column >
+						<apex:facet name="header">
+							<apex:inputCheckbox value="{!unfollowAll}" onclick="selectAll(this,'unfollowers');" id="unfollowAll"/>
+						</apex:facet>
+						<apex:inputCheckbox value="{!f.selected}"/>
+					</apex:column>
+					<apex:column value="{!f.user.Name}"/>
+					<apex:column value="{!f.user.Email}"/>
+					<apex:column value="{!f.user.Title}"/>
+					<apex:column value="{!f.user.Department}"/>
+					
+				</apex:pageBlockTable>
+			</div>
+			<apex:commandLink styleClass="handcursor customlink" action="{!follow}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pbUnfollowers,pbFollowers">Auto Follow</apex:commandLink>			
+		</apex:pageBlock>
+		
+		<apex:pageBlock title="Followers" id="pbFollowers">
+			<apex:commandLink styleClass="handcursor customlink" action="{!unfollow}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pbUnfollowers,pbFollowers">Unfollow</apex:commandLink>
+			<div style="height:200px;overflow:auto;" id="followers">
+				<apex:pageBlockTable value="{!followers}" var="f" columnsWidth="5%,25%,25%,25%,25%">
+				
+					<apex:column >
+						<apex:facet name="header">
+							<apex:inputCheckbox value="{!followAll}" onclick="selectAll(this,'followers');" id="followAll"/>
+						</apex:facet>
+						<apex:inputCheckbox value="{!f.selected}"/>
+					</apex:column>
+					<apex:column value="{!f.user.Name}"/>
+					<apex:column value="{!f.user.Email}"/>
+					<apex:column value="{!f.user.Title}"/>
+					<apex:column value="{!f.user.Department}"/>
+					
+				</apex:pageBlockTable>
+			</div>
+			<apex:commandLink styleClass="handcursor customlink" action="{!unfollow}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pbUnfollowers,pbFollowers">Unfollow</apex:commandLink>
+			
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

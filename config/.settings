@@ -1,0 +1,19 @@
+{
+    "username": "akamal@rpxcorp.com.rpxtst01", 
+    "environment": "sandbox", 
+    "project_name": "Sandbox", 
+    "workspace": "C:\\Users\\madant\\ProjectWorkspace", 
+    "org_url": "", 
+    "namespace": "", 
+    "id": "SQ61TDTQOILFCE8X9NND5LHSQ0VIC01J", 
+    "metadata_container": "1dcL00000005D7KIAU", 
+    "subscription": [
+        "ApexClass", 
+        "ApexComponent", 
+        "ApexPage", 
+        "ApexTrigger", 
+        "StaticResource", 
+        "CustomObject", 
+        "Profile"
+    ]
+}

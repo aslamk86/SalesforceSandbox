@@ -1,0 +1,703 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!getNPEHistory}" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        .crumbs { margin-left:auto; margin-right:auto; position:relative; }
+.crumbs li a{
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin-left: -13px;
+    padding: 5px 17px 8px 15px;
+    position: relative;
+    text-decoration: none;
+    font-weight:bold;
+}
+.crumbs li a:hover {
+    color: white;
+}
+
+.selected{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    width:134px;
+    background-position: 100% -96px;
+}
+
+.otherSteps{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    background-position: 100% -48px;
+    width:134px;
+    cursor: pointer;
+}
+
+.customTable{
+    font-size: 12px;
+    font-weight:bold;
+}
+
+.customDivContainer{
+    float:left;padding-left:20px;
+
+    //width:120px;
+}
+.customDivContainerMultiLine{
+    
+}
+.dateFormat{
+padding-left:10px;
+}
+
+textarea {
+    resize: none;
+}
+
+    </style>
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <apex:inputHidden value="{!Application__c.Company_Name__c}"/>
+    <apex:inputHidden value="{!Application__c.Status__c}"/>
+    <apex:inputHidden value="{!Application__c.Short_Form__c}"/>    
+    <apex:inputHidden value="{!Application__c.Company_Name__r.Entity_ID__c}"/>
+    
+    <div style="display:inline-block;width:100%;">
+
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+    </div>
+    <div>
+        <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">{!$Label.Home}</apex:outputLink>
+    </div>
+
+    </div>
+   
+         <fieldset>
+            <div style="text-align:center;">
+                <h5>RPXIS Insurance Application</h5>
+                <br/><br />
+                <div>
+                <ul class="crumbs">
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:8;" action="{!back1}">General Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:7;" action="{!next1}">Financial Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:6;" action="{!next2}">Forward Looking Events</apex:commandLink></li>
+                    <li><a href="" class="selected" style="z-index:5;" >NPE History</a></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:4;" action="{!next4}">IP Practices</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:3;" action="{!next5}">Summary</apex:commandLink></li>                                        
+                </ul>
+                </div>
+                <div style="text-align:center;padding-top: 50px;">
+                    <apex:commandButton value="Back" action="{!next2}"/>
+                    <apex:commandButton value="Save" action="{!saveApplication}" />
+                    <apex:commandButton value="Next" action="{!next4}"/>
+                </div>
+            </div>      
+            
+            <ul>
+                <li class="form-section" style="padding-left:0px;margin-left:0px;">
+                    NPE Activity
+                </li>
+                <apex:outputPanel rendered="{!!shortForm}">
+                <li style="margin-left:-2px;">             
+                   <b>{!$Label.Insurance_NPELitigations}</b>
+                </li>
+               </apex:outputPanel>
+            </ul>
+            <ul>
+                
+                <apex:outputPanel rendered="{!shortForm}">
+                <li >
+
+                <apex:actionRegion >
+                <apex:outputLabel style="width: 450px;text-align:left;margin-left:-20px;"><b>Has the Applicant ever been in a Patent Infringement litigation?</b></apex:outputLabel>
+                <!-- apex:inputField value="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c}">
+                    <apex:actionSupport action="{!addFirstDefHistory}" event="onchange" reRender="litSection,addCaseButton,newdefHist,npelit"/>
+                </apex:inputField -->
+                
+                 <apex:selectList size="1" value="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport action="{!addFirstDefHistory}" event="onchange" reRender="litSection,addCaseButton,newdefHist,npelit,rendspace"/>
+                </apex:selectList>              
+                </apex:actionRegion>
+                </li>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c=='Yes' && Application__c.Short_Form__c==true}" layout="none" id="rendspace">
+                <br/><br/>
+                </apex:outputPanel>
+                <apex:outputPanel id="npelit" layout="none">                    
+                    <apex:outputPanel rendered="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c=='Yes' || Application__c.Short_Form__c==false}">
+                        <li  style="margin-left:0px;"><b>NPE Litigation History</b></li>     
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                <div style="width:950px;" >
+                <apex:outputPanel id="litSection">
+                <apex:outputPanel rendered="{!!shortForm}">
+                <!-- <li class="form-section" style="padding-left:0px;"><br/>Please provide the following details about the Applicant&#39;s Litigation History</li>  -->               
+                <apex:repeat value="{!defHistory}" var="def">
+                    
+                    <div style="clear:both; height:400px; padding-top:20px;background-color: #F2F2F2;width:950px;" >
+                        <div style="font-weight:bold;padding-bottom:10px;padding-left:20px;">Case Name :&nbsp; <apex:outputText value="{!def.Case_Name__c}"/></div>
+                        <div style="clear:both;">
+                            <div class="customDivContainer">
+                                <div class="customTable">File Date</div>
+                                <div><apex:outputText value="{!def.File_date__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolve Date</div>
+                                <div><apex:outputText value="{!def.Resolve_Date__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Parent Plaintiff</div>
+                                <div style="height: 40px; overflow: auto; vertical-align:top;"><apex:outputText value="{!def.Parent_Plaintiff__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Named Defendant</div>
+                                <div><apex:outputText value="{!def.Defendant_names__c}"/></div>
+                            </div>                      
+                            <div class="customDivContainer" >
+                                <div class="customTable">Applicant Law Firm</div>
+                                <div><apex:inputField value="{!def.Applicant_Law_Firm__c}"/></div>
+                            </div>    
+                        </div> 
+                        <div style="clear:both; padding-top:25px;">
+                            <div class="customDivContainer" >
+                                <div class="customTable">Status</div>
+                                <div>
+                                    <apex:selectList size="1" value="{!def.Status__c}">
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Active" itemLabel="Active"/>
+                                        <apex:selectOption itemvalue="Closed" itemLabel="Closed"/>      
+                                    </apex:selectList>
+                                </div>
+                            </div> 
+                             <div style="margin-top: -20px;margin-left: 18px;" class="customDivContainer">
+                                <div class="customTable">Final Litigation Expenses /<br/>Litigation Expenses to Date (in 000's)</div>
+                                <div><apex:inputField value="{!def.Litigation_Expenses__c}" /></div>
+                            </div> 
+                            <div class="customDivContainer" >
+                                <div class="customTable">Settlement Amount (in 000's)</div>
+                                <div><apex:inputField value="{!def.Settlement__c}" /></div>
+                            </div>
+                            <div class="customDivContainer" >
+                                <div class="customTable">Cost/Offer to License (in 000's)</div>
+                                <div><apex:inputField value="{!def.Settlement_Offer__c}"/></div>
+                            </div>  
+                            <div class="customDivContainer" >
+                                <div class="customTable">Damage Award (in 000's)</div>
+                                <div><apex:inputField value="{!def.Damage_Award__c}"/></div>
+                            </div>  
+                                                    
+                                                                                 
+                        </div>                        
+                       
+                        <div style="clear:both; padding-top:25px;">        
+                            <div class="customDivContainer" >
+                                <div style="margin-top: -20px;" class="customTable">Did you request<br/> indemnification?</div>
+                                <apex:actionRegion >
+                                <div><!-- apex:inputField value="{!def.Did_you_request_indemnification__c}">
+                                        <apex:actionSupport event="onchange" reRender="indemPanel"/>                                    
+                                    </apex:inputField -->
+                                     <apex:selectList size="1" value="{!def.Did_you_request_indemnification__c}">
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                        <apex:actionSupport event="onchange" reRender="indemPanel"/>                                            
+                                    </apex:selectList>
+                                </div>
+                                </apex:actionRegion>
+                            </div>           
+                           <div class="customDivContainer" >
+                                <div style="margin-top: -20px;" class="customTable">Did you receive<br/> any Indemnification?</div>
+                                <apex:actionRegion >
+                                <div><!-- apex:inputField value="{!def.Indemnification_Recieved__c}">
+                                        <apex:actionSupport event="onchange" reRender="indemPanel2"/>                                       
+                                     </apex:inputField -->
+                                     <apex:selectList size="1" value="{!def.Indemnification_Recieved__c}">
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                        <apex:actionSupport event="onchange" reRender="indemPanel2"/>                                            
+                                    </apex:selectList>
+                                </div>
+                                </apex:actionRegion>
+                            </div>
+                            
+                            <apex:outputPanel id="indemPanel">
+                            <apex:outputPanel rendered="{!def.Did_you_request_indemnification__c=='Yes'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Company</div>
+                                <div><apex:inputField value="{!def.Company__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                            
+                            <apex:outputPanel id="indemPanel2">
+                            <apex:outputPanel rendered="{!def.Indemnification_Recieved__c=='Yes'}">                            
+                            <div class="customDivContainer">
+                                <div class="customTable">Amount (in 000&#39;s)</div>
+                                <div><apex:inputField value="{!def.Amount_Indemnified_for__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                            
+                            <div class="customDivContainer" >
+                                <div class="customTable">Notes</div>
+                                <div><apex:inputField value="{!def.Notes__c}" /></div>
+                            </div>
+                       </div>
+                       
+                       <div style="clear:both; padding-top:25px;padding-bottom:25px;">     
+                           <div class="customDivContainer">
+                                <div class="customTable">Did you receive an Assertion letter or offer to license?
+                                &nbsp;
+                                <apex:actionRegion >                              
+                                      <apex:selectList size="1" value="{!def.Did_you_receive_an_Assertion_letter__c}" >
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                        <apex:actionSupport event="onchange" reRender="assertPanel"/>
+                                     </apex:selectList>                                
+                                </apex:actionRegion>
+                                </div>
+                            </div>
+                        </div>
+                       <div style="clear:both; padding-top:25px;">
+                            <apex:outputPanel id="assertPanel" layout="block">
+                            <apex:outputPanel rendered="{!def.Did_you_receive_an_Assertion_letter__c=='Yes'}" layout="none">
+                            <div class="customDivContainer">
+                                <div class="customTable">Received Date</div>
+                                <div><apex:inputField value="{!def.Received_Date__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Legal cost prior to Litigation (in 000&#39;s)</div>
+                                <div><apex:inputField value="{!def.Legal_cost_prior_to_litigation__c}" /></div>
+                            </div>
+                           <div class="customDivContainer">
+                              <apex:commandButton value="Upload Assertion Letter" action="{!saveApplication}" style="margin-top: 20px;"  onclick="openWindow('{!$Page.AddFilePage}','{!def.id}');" rerender="nothing"></apex:commandButton>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                      </div>                                               
+                    </div>       
+                    <hr/>             
+                
+                </apex:repeat>
+                </apex:outputPanel>                
+                </apex:outputPanel>                
+                
+                <apex:outputPanel id="newdefHist">
+                <apex:repeat value="{!newDefHistory}" var="def" rendered="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c=='Yes' || Application__c.Short_Form__c==false}">
+                    
+                    <div style="clear:both; height:400px; padding-top:20px;background-color: #F2F2F2;width:950px;" >
+                        <div style="font-weight:bold;padding-bottom:10px;padding-left:20px;">Case Name :&nbsp; <apex:inputField value="{!def.Case_Name__c}" style="width:435px"/><apex:actionRegion >
+                                <apex:commandLink action="{!DeleteNewEntry}" style="float:right;margin-right:10px;" onclick="return confirm('Do you really want to delete the record?');">
+                                <apex:param value="{!def.id}" assignTo="{!deletedId}" name="newdefendantDel"/><apex:param value="def" assignTo="{!typeOfObjectToDelete}" name="typeOfObjectToDelete"/> X</apex:commandLink></apex:actionRegion></div>
+                        <div style="clear:both;">
+                            <div class="customDivContainer">
+                                <div class="customTable">File Date</div>
+                                <div><apex:inputField value="{!def.File_date__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolve Date</div>
+                                <div><apex:inputField value="{!def.Resolve_Date__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Parent Plaintiff</div>
+                                <div style="height: 40px; overflow: auto; vertical-align:top;"><apex:inputField value="{!def.Parent_Plaintiff__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Named Defendant</div>
+                                <div><apex:inputField value="{!def.Defendant_names__c}"/></div>
+                            </div>                   
+                            <div class="customDivContainer" >
+                                <div class="customTable">Applicant Law Firm</div>
+                                <div><apex:inputField value="{!def.Applicant_Law_Firm__c}"/></div>
+                            </div>       
+                        </div> 
+                        <div style="clear:both; padding-top:25px;">
+                            <div class="customDivContainer" >
+                                <div class="customTable">Status</div>
+                                <div><!-- apex:inputField value="{!def.Status__c}" / -->
+                                 <apex:selectList size="1" value="{!def.Status__c}">
+                                    <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                    <apex:selectOption itemvalue="Active" itemLabel="Active"/>
+                                    <apex:selectOption itemvalue="Closed" itemLabel="Closed"/>
+                                </apex:selectList>
+                                </div>
+                            </div> 
+                             <div style="margin-top: -20px;margin-left: 18px;" class="customDivContainer">
+                                <div class="customTable">Final Litigation Expenses /<br/>Litigation Expenses to Date (in 000's)</div>
+                                <div><apex:inputField value="{!def.Litigation_Expenses__c}" /></div>
+                            </div> 
+                            <div class="customDivContainer" >
+                                <div class="customTable">Settlement Amount (in 000's)</div>
+                                <div><apex:inputField value="{!def.Settlement__c}" /></div>
+                            </div>
+                            <div class="customDivContainer" >
+                                <div class="customTable">Cost/Offer to License (in 000's)</div>
+                                <div><apex:inputField value="{!def.Settlement_Offer__c}"/></div>
+                            </div>  
+                            <div class="customDivContainer" >
+                                <div class="customTable">Damage Award (in 000's)</div>
+                                <div><apex:inputField value="{!def.Damage_Award__c}"/></div>
+                            </div>                                                      
+                        </div>
+
+                       
+                        <div style="clear:both; padding-top:25px;">        
+                            <div class="customDivContainer" >
+                                <div style="margin-top: -20px;" class="customTable">Did you request<br/> indemnification?</div>
+                                <apex:actionRegion >
+                                <div><!-- apex:inputField value="{!def.Did_you_request_indemnification__c}">
+                                        <apex:actionSupport event="onchange" reRender="indemPanel"/>                                    
+                                    </apex:inputField -->
+                                     <apex:selectList size="1" value="{!def.Did_you_request_indemnification__c}">
+                                            <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                            <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                            <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                            <apex:actionSupport event="onchange" reRender="indemPanel"/>
+                                    </apex:selectList>
+                                </div>
+                                </apex:actionRegion>
+                            </div>           
+                           <div class="customDivContainer" >
+                                <div style="margin-top: -20px;" class="customTable">Did you receive<br/> any Indemnification?</div>
+                                <apex:actionRegion >
+                                <div><!-- apex:inputField value="{!def.Indemnification_Recieved__c}">
+                                        <apex:actionSupport event="onchange" reRender="indemPanel"/>                                       
+                                     </apex:inputField -->
+                                     <apex:selectList size="1" value="{!def.Indemnification_Recieved__c}">
+                                            <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                            <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                            <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                            <apex:actionSupport event="onchange" reRender="indemPanel2"/>   
+                                    </apex:selectList>
+                                </div>
+                                </apex:actionRegion>
+                            </div>
+                            
+                            <apex:outputPanel id="indemPanel">
+                            <apex:outputPanel rendered="{!def.Did_you_request_indemnification__c=='Yes'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Company</div>
+                                <div><apex:inputField value="{!def.Company__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                            
+                            <apex:outputPanel id="indemPanel2">
+                            <apex:outputPanel rendered="{!def.Indemnification_Recieved__c=='Yes'}">                            
+                            <div class="customDivContainer">
+                                <div class="customTable">Amount (in 000&#39;s)</div>
+                                <div><apex:inputField value="{!def.Amount_Indemnified_for__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                            
+                            <div class="customDivContainer" >
+                                <div class="customTable">Notes</div>
+                                <div><apex:inputField value="{!def.Notes__c}" /></div>
+                            </div>
+                       </div>
+                       
+                       <div style="clear:both; padding-top:25px;">     
+                            <div class="customDivContainer">
+                                <div class="customTable">Did you receive an Assertion letter or offer to license?
+                                &nbsp;
+                                <apex:actionRegion >                                
+                                    <apex:selectList size="1" value="{!def.Did_you_receive_an_Assertion_letter__c}">
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                        <apex:actionSupport event="onchange" reRender="assertPanel1"/>
+                                    </apex:selectList>                                
+                                </apex:actionRegion>
+                                </div> 
+                            </div>                         
+                            
+                       </div>
+                       <div style="clear:both; padding-top:25px;">
+                            <apex:outputPanel id="assertPanel1" layout="block">
+                            <apex:outputPanel rendered="{!def.Did_you_receive_an_Assertion_letter__c=='Yes'}" layout="none">
+                            <div class="customDivContainer">
+                                <div class="customTable">Received Date</div>
+                                <div><apex:inputField value="{!def.Received_Date__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Legal cost prior to Litigation (in 000&#39;s)</div>
+                                <div><apex:inputField value="{!def.Legal_cost_prior_to_litigation__c}" /></div>
+                            </div>
+                           <div class="customDivContainer">
+                              <apex:commandButton value="Upload Assertion Letter" action="{!saveApplication}" style="margin-top: 20px;"  onclick="openWindow('{!$Page.AddFilePage}','{!def.id}');" rerender="nothing"></apex:commandButton>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                      </div>                                               
+                    </div>       
+                    <hr/>             
+                
+                </apex:repeat>
+                </apex:outputPanel>                                
+
+                <apex:outputPanel id="addCaseButton" layout="block" >
+                <apex:commandButton value="Add Another NPE Litigation" reRender="newdefHist" action="{!AddNewDefHistory}" rendered="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c=='Yes' || Application__c.Short_Form__c=false}" />
+                </apex:outputPanel>
+                
+           
+                <br/><br/>    
+                <apex:actionRegion >
+                <apex:outputLabel style="width: auto;padding-left:0px;"><b>Have you received any assertion letters or offers to licenses within the last 36 months?</b></apex:outputLabel>
+                <!-- apex:inputField value="{!Application__c.Have_you_received_any_assertion_letters__c}">
+                    <apex:actionSupport action="{!firstAssertion}" event="onchange" reRender="assertionPanel"/>
+                </apex:inputField -->
+                
+                 <apex:selectList size="1" value="{!Application__c.Have_you_received_any_assertion_letters__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport action="{!firstAssertion}" event="onchange" reRender="assertionPanel"/>
+                    </apex:selectList>
+                </apex:actionRegion>
+                </div>
+                <apex:outputPanel layout="block" id="assertionPanel" style="padding-top:50px;">
+                <apex:outputPanel rendered="{!Application__c.Have_you_received_any_assertion_letters__c=='Yes'}">
+                <li style="margin-left:0px;">
+                    <b>Assertion Letter History</b><br/><br/>             
+                    <b>{!$Label.Insurance_AssertionLetter}</b>                    
+                </li>
+
+                <!-- <li class="form-section" style="padding-left:0px;">Please add complete assertion letter or offer to license history</li> -->
+                <div style="width:950px;">
+                <apex:outputPanel id="assertionList" layout="none">
+                <apex:repeat value="{!assertionList}" var="assert">
+                   <div style="clear:both; height:220px; padding-top:20px;background-color: #F2F2F2;width:950px;" >
+                            <div>
+                                <apex:actionRegion >
+                                <apex:commandLink action="{!DeleteNewEntry}" style="float:right;margin-right:10px;" onclick="return confirm('Do you really want to delete the record?');">                            
+                                <apex:param value="{!assert.id}" assignTo="{!deletedId}" name="newAssDel"/><apex:param value="ass" assignTo="{!typeOfObjectToDelete}" name="typeOfObjectToDeleteAss"/> X</apex:commandLink>
+                                </apex:actionRegion>                                
+                            </div>
+                   
+                        <div style="clear:both;">                        
+                            <div class="customDivContainer">
+                                <div class="customTable">Asserting Party</div>
+                                <div><apex:inputField value="{!assert.Parent_Plaintiff__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Date Letter Received</div>
+                                <div><apex:inputField value="{!assert.First_Contact_Date__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Status</div>
+                                <apex:actionRegion >
+                                <div><!-- apex:inputField value="{!assert.Assertion_Status__c}">
+                                        <apex:actionSupport event="onchange" reRender="assertionStatus"/>
+                                     </apex:inputField -->
+                                     
+                                     <apex:selectList size="1" value="{!assert.Assertion_Status__c}">
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Active" itemLabel="Active"/>
+                                        <apex:selectOption itemvalue="Resolved" itemLabel="Resolved"/>
+                                        <apex:actionSupport event="onchange" reRender="assertionStatus"/>
+                                     </apex:selectList>
+                                     
+                                </div>
+                                </apex:actionRegion>
+                            </div>
+                            <apex:outputPanel layout="none" id="assertionStatus">
+                            <apex:outputPanel rendered="{!assert.Assertion_Status__c=='Resolved'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolved Date</div>
+                                <div><apex:inputField value="{!assert.Resolved_Date__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                            <div class="customDivContainer">
+                                <div class="customTable">Patents Asserted (Optional)</div>
+                                <div><apex:inputField value="{!assert.Patents__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Technology Asserted</div>
+                                <div><apex:inputField value="{!assert.Technology_Asserted__c}"/></div>
+                            </div>
+                            </div>
+                            <div style="clear:both;">                                                        
+                            
+                            <div class="customDivContainer">
+                                <div class="customTable">Legal Cost</div>
+                                <div><apex:inputField value="{!assert.Legal_Cost__c}"/></div>
+                            </div>
+                           <div class="customDivContainer">
+                                <div class="customTable">Resolution / Settlement cost</div>
+                                <div><apex:inputField value="{!assert.License_Resolution__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Comments</div>
+                                <div><apex:inputField value="{!assert.Comments__c}"/></div>
+                            </div>
+                        </div>
+
+                        <div style="clear:both;">
+                            <div class="customDivContainer">                                
+                                Please attach copies of assertion letters if available.
+                                <apex:commandButton value="Upload Assertion Letter" action="{!saveApplication}" style="margin-top: 20px;"  onclick="openWindow('{!$Page.AddFilePage}','{!assert.id}');" rerender="nothing"></apex:commandButton>                                                                                                 
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <hr/>
+                </apex:repeat>  
+                <script>
+                    function openWindow(page,id){
+                        window.open(page+'?parentId='+id, '_blank', 'toolbar=yes, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400');
+                    }
+                </script>
+                </apex:outputPanel>  
+            
+                <div  style="clear:both;text-align:left;">
+                      <apex:commandButton rerender="assertionPanel" value="Add Another Assertion Letter" style="margin-top: 20px;margin-left:0px;" action="{!addMoreAssertions}"/>
+                </div>
+             
+                </div>
+                </apex:outputPanel>   
+                </apex:outputPanel>                   
+                <div style="width:950px;clear:both;padding-top:20px;">
+                    <div class="customDivContainer">
+                          <li style="margin-bottom:30px;width:auto;margin-left: -20px;">
+                                <apex:actionRegion >
+                                <apex:outputLabel value="<b>Have you received any other indemnification requests?</b>" style="width:auto;"  escape="false"/>
+                                <!-- apex:inputField value="{!Application__c.Any_other_indemnification_requests__c}">
+                                    <apex:actionSupport action="{!firstIndemnification}" event="onchange" reRender="indemList"/>
+                                </apex:inputField -->
+                                
+                                 <apex:selectList size="1" value="{!Application__c.Any_other_indemnification_requests__c}">
+                                    <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                    <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                                <apex:selectOption itemvalue="No" itemLabel="No"/>
+                                <apex:actionSupport action="{!firstIndemnification}" event="onchange" reRender="indemList"/>
+                                </apex:selectList>
+                                
+                                </apex:actionRegion>
+                          </li>
+                    </div>
+                    <div>
+                <apex:outputPanel id="indemList" layout="none">
+                <apex:outputPanel rendered="{!Application__c.Any_other_indemnification_requests__c=='Yes'}">
+                <br/><br/><br/>
+                <li style="margin-left:0px;">
+                    <b>Indemnification History</b><br/><br/>                    
+                    <b>{!$Label.Insurance_IndemnificationHistory}</b>
+                </li>
+                <!-- <li class="form-section" >Please add Indemnification Requests</li> -->
+                <apex:repeat value="{!indemnificationList}" var="assert">                    
+                   <div style="clear:both; height:200px; padding-top:20px;background-color: #F2F2F2;width:950px;" >
+                   <div>
+                       <apex:actionRegion >
+                       <apex:commandLink action="{!DeleteNewEntry}" style="float:right;margin-right:10px;" onclick="return confirm('Do you really want to delete the record?');">
+                       <apex:param value="{!assert.id}" assignTo="{!deletedId}" name="newIndemDel"/><apex:param value="indem" assignTo="{!typeOfObjectToDelete}" name="typeOfObjectToDelIndem"/> X</apex:commandLink>
+                       </apex:actionRegion>                       
+                   </div> 
+                   
+                        <div style="clear:both;"> 
+                            <div class="customDivContainer">
+                                <div class="customTable">Requesting Party</div>
+                                <div><apex:inputField value="{!assert.Requesting_Party__c}" /></div>
+                            </div>
+                            <div class="customDivContainer" style="margin-left:9px;">
+                                <div class="customTable">Asserting Party</div>
+                                <div><apex:inputField value="{!assert.Parent_Plaintiff__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Date Letter Received</div>
+                                <div><apex:inputField value="{!assert.First_Contact_Date__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Status</div>
+                                <apex:actionRegion >
+                                <div><!-- apex:inputField value="{!assert.Assertion_Status__c}">
+                                        <apex:actionSupport event="onchange" reRender="indemStatus,indemStatusDetails"/>
+                                     </apex:inputField -->
+                                     <apex:selectList size="1" value="{!assert.Assertion_Status__c}">
+                                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                                        <apex:selectOption itemvalue="Active" itemLabel="Active"/>
+                                        <apex:selectOption itemvalue="Resolved" itemLabel="Resolved"/>
+                                        <apex:actionSupport event="onchange" reRender="indemStatus,indemStatusDetails"/>                                        
+                                    </apex:selectList>
+                                </div>
+                                </apex:actionRegion>
+                            </div>
+                            <apex:outputPanel layout="none" id="indemStatus">
+                            <apex:outputPanel rendered="{!assert.Assertion_Status__c=='Resolved'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolved Date</div>
+                                <div><apex:inputField value="{!assert.Resolved_Date__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                           
+                            </div>
+                            <div style="clear:both;">                                                        
+                             <div class="customDivContainer">
+                                <div class="customTable">Patents Asserted (Optional)</div>
+                                <div><apex:inputField value="{!assert.Patents__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Technology Asserted</div>
+                                <div><apex:inputField value="{!assert.Technology_Asserted__c}"/></div>
+                            </div>
+                            <div class="customDivContainer" >
+                                <div class="customTable">Legal Cost Requested</div>
+                                <div><apex:inputField value="{!assert.Legal_Cost__c}"/></div>
+                            </div>
+                            
+                           <apex:outputPanel layout="none" id="indemStatusDetails">
+                           <apex:outputPanel rendered="{!assert.Assertion_Status__c=='Resolved'}">
+                           <div class="customDivContainer" style="margin-left:38px;">
+                                <div class="customTable" >Legal Cost Paid</div>
+                                <div><apex:inputField value="{!assert.License_Resolution__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Settlement Paid</div>
+                                <div><apex:inputField value="{!assert.Settlement_Details__c}"/></div>
+                            </div>     
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                                                        
+                        </div>
+                                                                   
+                        
+                    </div>
+                    <hr/>
+                </apex:repeat>  
+                <apex:commandButton action="{!addIndemnification}" value="Add Another Indemnification Request" reRender="indemList"/>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                </div>
+                </div>
+                
+            </ul>
+            <br/><br/>
+            <div style="text-align:center;padding-top:50px;">
+            <apex:commandButton value="Back" action="{!next2}"/>
+            <apex:commandButton value="Save" action="{!saveApplication}" />
+            <apex:commandButton value="Next" action="{!next4}"/>
+            </div>
+            <br/>
+             <div style="display:inline-block;width:100%;">
+               <apex:image value="{!$Resource.RPXLogo}" style="float:left; height:20px;" /> 
+            
+                <apex:outputText value="NPE Patent Infringement Expense Policy" style="margin-left: 260px;"/>
+                                   
+                <apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank" style="float:right;">Legal Notice</apex:outputLink>
+            </div>
+         </fieldset>
+    </apex:form>
+</apex:page>

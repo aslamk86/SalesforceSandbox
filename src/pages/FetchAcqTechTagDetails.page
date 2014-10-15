@@ -1,0 +1,66 @@
+<apex:page standardcontroller="Acquisition_Opportunity__c" extensions="FetchAcqTechTagDetails" showHeader="false">    
+    <script>   
+    window.onload=function(){       
+        FetchTechTagActFn();
+    }       
+    function openTechTagTab(id){                        
+        window.open('{!$Label.Instance_URL}'+id);
+    }
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >       
+        <apex:actionFunction name="FetchTechTagActFn" action="{!FetchTechTagDetails}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>       
+          
+        <apex:pageBlock id="pgblk">  
+        Total Tech Tag Records : {!acqlwPageInfo.Count}  
+            <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" />    
+            <apex:pageBlockTable value="{!FetchAcqTechTagDetailsWrapList}" var="resp" id="pgblktbl" rendered="{!FetchAcqTechTagDetailsWrapList.size > 0}">                     
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="TechTag Name" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="tech_tag_name" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'tech_tag_name',IF(isTNAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    <!--apex:commandLink value="{!resp.tech_tag_name}" target="_self" onclick="openTechTagTab('{!resp.tech_tag_salesforce_id}')" rerender="abc"/-->
+                    <apex:outputLink value="{!$Label.Instance_URL}{!resp.tech_tag_salesforce_id}" target="_self" onclick="openTechTagTab('{!resp.tech_tag_salesforce_id}');return false;">{!resp.tech_tag_name}</apex:outputLink>                                                              
+                                                  
+                    </apex:column>
+                     <apex:column value="{!resp.patent_number}" >                                                           
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Patent Number" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="patent_number" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'patent_number',IF(isPatAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column value="{!resp.patent_family_Name}" >                   
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Patent Family Name" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="patent_family_name" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'patent_family_name',IF(isPFAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>                                                                                                                     
+                    <apex:column value="{!resp.theory_of_relevance}" headerValue="Theory of Relevance"/>                
+                    <apex:column value="{!resp.free_form_tags}" headerValue="Free Form Tags"/>                
+            </apex:pageBlockTable>   <br/><br/>
+        <div style="float:right;">
+        Page : {!acqLicPageNum} of {!acqlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevLicensees}"  disabled="{!acqLicPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreLicensees}" disabled="{!acqlwPageInfo!=null && acqlwPageInfo.pages!=null && acqLicPageNum!=null && acqlwPageInfo.pages <= acqLicPageNum}" value="Next" rerender="pgblk,pgMsg"/>
+        </div>
+        <apex:outputText id="outTxt" rendered="{!noRec}">                  
+        <b>No Tech Tag Records Found</b>
+        </apex:outputText>        
+    </apex:pageBlock>        
+           <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-weight:bold;color:red" ></apex:actionStatus>
+ </apex:form>
+
+</apex:page>

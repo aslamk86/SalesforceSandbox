@@ -1,0 +1,66 @@
+<apex:page standardController="Account" extensions="CampaignManager" action="{!fetchCampaigns}" title="Insurance Application">
+<apex:pageBlock >
+<apex:form >
+<apex:inputHidden value="{!Account.Entity_ID__c}"/>
+<apex:pageBlockSection title="{!Account.Name}" columns="1" id="data">
+<apex:pageblockSectionItem >
+    <apex:outputLabel rendered="{!existingDefendantHistory.size==0}">No Campaign Litigations Added. Please select from below list to import them into Salesforce.</apex:outputLabel>
+</apex:pageblockSectionItem>
+
+<apex:pageBlockSectionItem rendered="{!existingDefendantHistory.size>0}">
+<apex:pageblockTable value="{!existingDefendantHistory}" var="exist" >
+    <apex:facet name="header">Added Campaigns</apex:facet>
+    <apex:column value="{!exist.Campaign_Id__c}"/>
+    <apex:column headerValue="Case Name">    
+        <apex:inputField value="{!exist.Case_Name__c}"/>
+    </apex:column>
+    <apex:column headerValue="File Date">    
+        <apex:inputField value="{!exist.File_date__c}"/>
+    </apex:column>
+    <apex:column headerValue="Resolve Date">    
+        <apex:inputField value="{!exist.Resolve_Date__c}"/>
+    </apex:column>
+    <apex:column headerValue="Parent Plaintiff">    
+        <apex:inputField value="{!exist.Parent_Plaintiff__c}"/>
+    </apex:column>
+    <apex:column headerValue="Defendant Names">    
+        <apex:inputField value="{!exist.Defendant_names__c}"/>
+    </apex:column>    
+
+    <apex:column headerValue="Remove From Salesforce"> 
+        <apex:inputField value="{!exist.Exists__c}"/>
+    </apex:column>
+</apex:pageblockTable>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem >
+    <apex:outputPanel >
+    <apex:commandButton action="{!removeFromSalesforce}" value="Remove" reRender="data"  status="status" oncomplete="alert('Selected Litigations Removed!');"/>
+    <apex:commandButton action="{!saveEdits}" value="Save Changes" reRender="data" status="status" oncomplete="alert('Data Saved!');"/>
+    </apex:outputPanel>
+    <apex:actionStatus startText="Please wait..." stopText="" id="status"></apex:actionStatus>
+</apex:pageBlockSectionItem>
+
+
+<apex:pageblockSectionItem >
+    <apex:outputLabel rendered="{!defHistory.size==0}">No Campaign Litigations Available.</apex:outputLabel>
+</apex:pageblockSectionItem>
+<apex:pageBlockSectionItem rendered="{!defHistory.size>0}">
+<apex:pageBlockTable value="{!defHistory}" var="def">
+    <apex:facet name="header">All Available Campaigns</apex:facet>
+    <apex:column value="{!def.Campaign_Id__c}"/>
+    <apex:column value="{!def.Case_Name__c}"/>
+    <apex:column value="{!def.File_date__c}"/>
+    <apex:column value="{!def.Resolve_Date__c}"/>
+    <apex:column value="{!def.Parent_Plaintiff__c}"/>        
+    <apex:column value="{!def.Defendant_names__c}"/>
+    <apex:column headerValue="Add To Salesforce"> 
+        <apex:inputField value="{!def.Exists__c}"/>
+    </apex:column>
+</apex:pageBlockTable>
+</apex:pageBlockSectionItem>
+<apex:pageBlockSectionItem rendered="{!defHistory.size>0}"><apex:commandButton value="Add" action="{!addCampaignToSalesforce}" reRender="data"/></apex:pageBlockSectionItem>
+</apex:pageBlockSection>
+
+</apex:form>
+</apex:pageBlock>
+</apex:page>

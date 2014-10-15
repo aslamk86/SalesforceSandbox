@@ -1,0 +1,304 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!getFinancialDetails}" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        .crumbs { margin-left:auto; margin-right:auto; position:relative; }
+.crumbs li a{
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin-left: -13px;
+    padding: 5px 17px 8px 15px;
+    position: relative;
+    text-decoration: none;
+    font-weight:bold;
+}
+.crumbs li a:hover {
+    color: white;
+}
+
+.selected{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    width:134px;
+    background-position: 100% -96px;
+}
+
+.otherSteps{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    background-position: 100% -48px;
+    width:134px;
+    cursor: pointer;
+}
+.dateFormat{
+padding-left:10px;
+}
+textarea {
+    resize: none;
+}
+    </style>
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <apex:inputHidden value="{!Application__c.Status__c}"/>    
+    <apex:inputHidden value="{!Application__c.Short_Form__c}"/>        
+    <apex:inputHidden value="{!Application__c.Company_Name__c}"/>            
+    
+     <div style="display:inline-block;width:100%;">
+
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+    </div>
+    <div>
+        <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">{!$Label.Home}</apex:outputLink>
+    </div>
+
+    </div>
+   
+         <fieldset>
+            <div style="text-align:center;">
+                <h5>RPXIS Insurance Application</h5>
+                <br/><br />
+                <!-- apex:commandLink value="General Information" action="{!back1}"/> >> <apex:outputText value="Financial Information" /> >> <apex:commandLink value="Anticipated Future" action="{!next2}"/> >> <apex:commandLink value="NPE History" action="{!next3}"/> >> <apex:commandLink value="IP Pracitices" action="{!next4}"/> >> <apex:commandLink value="Summary" action="{!next5}"/>
+                -->
+                <div>
+                <ul class="crumbs">
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:8;" action="{!back1}">General Information</apex:commandLink></li>
+                    <li><a href="" class="selected" style="z-index:7;">Financial Information</a></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:6;" action="{!next2}">Forward Looking Events</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:5;" action="{!next3}">NPE History</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:4;" action="{!next4}">IP Practices</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:3;" action="{!next5}">Summary</apex:commandLink></li>                                                        </ul>
+                </div>      
+                <div style="padding-top: 50px;text-align:center;">
+                    <apex:commandButton value="Back" action="{!back1}" />
+                    <apex:commandButton value="Save" action="{!saveApplication}" />
+                    <apex:commandButton value="Next" action="{!next2}"/>
+                </div>
+            </div>        
+                
+            <ul>
+               
+
+                <li class="form-section" style="padding-left:0px;">{!$Label.Insurance_FinancialInfo}</li>
+                <li>
+                    <apex:outputLabel value="Fiscal Year Ended:" for="one-y1" style="text-align: left;padding-left: 40px;font-weight: bold;width: inherit;" />
+                    <!-- apex:inputField value="{!Application__c.Fiscal_Year_Ended__c}" id="one-y1" / -->
+                    <apex:selectList size="1" value="{!Application__c.Fiscal_Year_Ended__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="January" itemLabel="January"/>
+                        <apex:selectOption itemvalue="February" itemLabel="February"/>
+                        <apex:selectOption itemvalue="March" itemLabel="March"/>
+                        <apex:selectOption itemvalue="April" itemLabel="April"/>
+                        <apex:selectOption itemvalue="May" itemLabel="May"/>
+                        <apex:selectOption itemvalue="June" itemLabel="June"/>
+                        <apex:selectOption itemvalue="July" itemLabel="July"/>
+                        <apex:selectOption itemvalue="August" itemLabel="August"/>                                                                                                                  
+                        <apex:selectOption itemvalue="September" itemLabel="September"/>
+                        <apex:selectOption itemvalue="October" itemLabel="October"/>                                                                                                                      
+                        <apex:selectOption itemvalue="November" itemLabel="November"/>   
+                        <apex:selectOption itemvalue="December" itemLabel="December"/>                                                
+                    </apex:selectList>
+                                        
+                </li>
+                <table style="margin:auto;">
+                <!-- caption>Please input in thousands in US Dollars with the exception of headcount.</caption -->
+                <tr>
+                    <th></th><th><b>2014 <i>(est)</i></b></th><th><b>2013</b></th><th><b>2012</b></th><th><b>2011</b></th>
+                </tr>            
+                <apex:repeat value="{!financialDetails}" var="finDetails" >
+                <tr>
+                    <td><b><apex:outputField value="{!finDetails.Detail_Type__c}"/></b><apex:outputPanel rendered="{!finDetails.Detail_Type__c!='Headcount'}"><br/><i>(in 000&#39;s)</i></apex:outputPanel></td>
+                    <td><apex:inputField value="{!finDetails.X2014__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2013__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2012__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2011__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                <tr>
+                <td style="text-align:right;"><b>Notes</b></td><td colspan="4"><apex:inputField value="{!Application__c.Key_Financial_Notes__c}" style="width:650px"/></td>
+                </tr>
+                </table>
+                <br/><br/>
+                <li style="margin-bottom:30px;">
+                    <apex:actionRegion >
+                    <apex:outputLabel value="<b>Does the Applicant have any product lines accounting for >10% of revenue?</b>" for="one-y" style="width: inherit;padding-left: 0px;" escape="false"/>
+                    <!-- apex:inputField value="{!Application__c.Any_product_line__c}" id="one-y">
+                        <apex:actionSupport event="onchange" reRender="prodRevenue"/>
+                    </apex:inputField -->
+                    
+                    <apex:selectList size="1" value="{!Application__c.Any_product_line__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="prodRevenue"/>
+                    </apex:selectList>
+                    
+                    </apex:actionRegion>
+                </li>
+                <apex:outputPanel id="prodRevenue">
+                <apex:outputPanel rendered="{!Application__c.Any_product_line__c=='Yes'}">
+                <li class="form-section" style="padding-left:0px;padding-top:0px;">{!$Label.Insurance_ProductInfo}</li>
+                <li><b> {!$Label.Insurance_ProductAccounting} </b></li>
+                <table style="margin:auto;">
+               
+                <tr>
+                    <th><b>Product Name</b></th><th><b>2014 <i>(est)</i></b></th><th><b>2013</b></th><th><b>2012</b></th><th><b>2011</b></th>
+                </tr>
+                
+                <apex:repeat value="{!productRevenue}" var="finDetails">
+                <tr>
+                    <td><apex:inputField value="{!finDetails.Product_Name__c}"/></td>
+                    <td><apex:inputField value="{!finDetails.X2014_text__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2013_Text__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2012_Text__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2011_Text__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                <tr>
+                <td style="text-align:right;"><b>Notes</b></td><td colspan="4"><apex:inputField value="{!Application__c.Product_Details_Notes__c}" style="width:650px"/></td>
+                </tr>
+                </table>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                <br/><br/>
+                <li style="margin-bottom:30px;">
+                    <apex:actionRegion >
+                    <apex:outputLabel value="<b>Does the Applicant have any customers accounting for >10% of revenue?</b>" for="one-z" style="width: inherit;padding-left: 0px;" escape="false"/>
+                    <!-- apex:inputField value="{!Application__c.Customers_accounting_for_10_of_revenue__c}" id="one-z">
+                        <apex:actionSupport event="onchange" reRender="custRevenue" />
+                    </apex:inputField -->
+                    <apex:selectList size="1" value="{!Application__c.Customers_accounting_for_10_of_revenue__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="custRevenue" />
+                    </apex:selectList>
+                    </apex:actionRegion>
+                </li>
+                <apex:outputPanel id="custRevenue">
+                <apex:outputPanel rendered="{!Application__c.Customers_accounting_for_10_of_revenue__c=='Yes'}">
+                <li class="form-section" style="padding-left:0px;padding-top:0px;">{!$Label.Insurance_CustomerInfo}</li>
+                <li><b>{!$Label.Insurance_CustomerAccounting}</b></li>
+                <table style="margin:auto;">                
+                <tr>
+                    <th><b>Customer Name</b></th><th><b>2014 <i>(est)</i></b></th><th><b>2013</b></th><th><b>2012</b></th><th><b>2011</b></th>
+                </tr>
+                <apex:repeat value="{!customerRevenue}" var="finDetails" >
+                <tr>
+                    <td><apex:inputField value="{!finDetails.Customer__c}"/></td>
+                    <td><apex:inputField value="{!finDetails.X2014_text__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2013_Text__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2012_Text__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.X2011_Text__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                <tr>
+                <td style="text-align:right;"><b>Notes</b></td><td colspan="4"><apex:inputField value="{!Application__c.Customer_Details_Notes__c}" style="width:650px"/></td>
+                </tr>
+                </table>
+                </apex:outputPanel>
+                </apex:outputPanel>                
+                <br/><br/>
+                <li style="margin-bottom:30px;">
+                    <apex:actionRegion >
+                    <apex:outputLabel value="<b>Has the Applicant completed any acquisitions or divestitures over the last 3 years?</b>" for="one-x" style="width: inherit;padding-left: 0px;" escape="false"/>
+                    <!-- apex:inputField value="{!Application__c.Any_acquisitions__c}" id="one-x" >
+                        <apex:actionSupport event="onchange" reRender="acqDives"/>
+                    </apex:inputField -->
+                    
+                    <apex:selectList size="1" value="{!Application__c.Any_acquisitions__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="acqDives"/>
+                    </apex:selectList>
+                    </apex:actionRegion>
+                </li>
+                <apex:outputPanel id="acqDives">
+                <apex:outputPanel rendered="{!Application__c.Any_acquisitions__c=='Yes'}">      
+                <li class="form-section" style="padding-left:0px;padding-top:0px;">Acquisitions and Divestitures</li>
+                <li> <b>{!$Label.Insurance_Acq_Div}</b></li>
+                <table style="margin:auto;">                
+                <tr>
+                    <th><b>Entity Name</b></th><th><b>Type</b></th><th><b>Year&nbsp;(YYYY)</b></th><th><b>Value of Deal<br/> (in 000&#39;s)</b></th><th><b>Brief Description</b></th>
+                </tr>
+                <apex:repeat value="{!acqAndDivestures}" var="finDetails" >
+                <tr>
+                    <td><apex:inputField value="{!finDetails.Entity_Name__c}"/></td>
+                    <td>                   
+                    <apex:selectList size="1" value="{!finDetails.Divestiture_or_Acquisition__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Acquisition" itemLabel="Acquisition"/>
+                        <apex:selectOption itemvalue="Divestiture" itemLabel="Divestiture"/>                            
+                    </apex:selectList> 
+                    </td>
+                    <td><apex:inputField value="{!finDetails.Year__c}" showDatePicker="false" /></td> 
+                    <td><apex:inputField value="{!finDetails.Value_of_Deal__c}" /></td>
+                    <td><apex:inputField value="{!finDetails.Brief_Description__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                </table>
+                </apex:outputPanel>
+                </apex:outputPanel>    
+                
+                <li style="margin-bottom:30px;margin-top:40px;">
+                    <apex:outputPanel rendered="{!shortForm}">
+                    <apex:actionRegion >
+                    <b><apex:outputLabel value="Has the Applicant raised any material funding?" style="width: inherit;padding-left: 0px;" /></b>
+                    <!-- apex:inputField value="{!Application__c.Applicant_raised_any_material_funding__c}" >
+                        <apex:actionSupport action="{!addFirstFunding}" event="onchange" reRender="materialFunding"/>
+                    </apex:inputField -->
+                    <apex:selectList size="1" value="{!Application__c.Applicant_raised_any_material_funding__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport action="{!addFirstFunding}" event="onchange" reRender="materialFunding"/>
+                    </apex:selectList>
+                    </apex:actionRegion>
+                    </apex:outputPanel>
+                </li>
+                <apex:outputPanel id="materialFunding">
+                <apex:outputPanel rendered="{!shortForm && Application__c.Applicant_raised_any_material_funding__c=='Yes'}">
+                    <li class="form-section" style="padding-left:0px;">Please provide all rounds of professional funding, including IPO</li>
+                    
+                    <table style="margin:auto;">
+                    <tr>
+                        <th><b>Series/Round</b></th><th><b>Date</b></th><th><b>Amount (in 000&#39;s)</b></th><th><b>Lead Investors</b></th>
+                    </tr>
+                    <apex:repeat value="{!funding}" var="fund">
+                        <tr>
+                            <td><apex:inputField value="{!fund.Series_Round__c}"/></td><td><apex:inputField value="{!fund.Funding_Date__c}"/></td><td><apex:inputField value="{!fund.Funding_Amount__c}"/></td><td><apex:inputField value="{!fund.Lead_Investors__c}"/></td>
+                        </tr>
+                    </apex:repeat>
+                    </table> 
+                    <apex:outputPanel layout="block" style="padding-left:120px;">
+                        <apex:commandButton value="Add More" action="{!addMoreFunding}" reRender="materialFunding"/>       
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                            
+            </ul>
+            <br/><br/>
+            <div style="text-align:center;">
+            <apex:commandButton value="Back" action="{!back1}" />
+            <apex:commandButton value="Save" action="{!saveApplication}" />
+            <apex:commandButton value="Next" action="{!next2}"/>
+            </div>
+            <br/>
+             <div style="display:inline-block;width:100%;">
+               <apex:image value="{!$Resource.RPXLogo}" style="float:left; height:20px;" /> 
+            
+               <apex:outputText value="NPE Patent Infringement Expense Policy" style="margin-left: 260px;"/>
+                                   
+                <apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank" style="float:right;">Legal Notice</apex:outputLink>
+            </div>
+         </fieldset>
+    </apex:form>
+</apex:page>

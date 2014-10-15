@@ -1,0 +1,65 @@
+<apex:page controller="InsuranceApplicationNewAccount" sidebar="false" showHeader="false" title="Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+
+<style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        .linkHeader {
+            text-decoration:none;
+        }              
+    </style>                
+    
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <div style="display:inline-block;">
+        <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+    </div>    
+    <apex:outputPanel rendered="{!saved}">
+    <ul style="text-align:center;padding-top:20px;font-weight:bold;">
+        <li>Thank you for submitting a request. You will shortly receive a welcome mail with the instructions.</li>    
+    </ul>
+    </apex:outputPanel>       
+    <apex:outputPanel rendered="{!!saved}">
+    
+    <ul>
+                <li class="form-section">General Information</li>
+                
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="First Name" />
+                    <apex:inputText value="{!newContact.FirstName}" required="true"/>
+                </li>
+                
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Last Name" />
+                    <apex:inputText value="{!newContact.LastName}" required="true"/>
+                </li>                
+
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Email" />
+                    <apex:inputText value="{!newContact.Email}" required="true" />
+                </li>                
+
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Phone" />
+                    <apex:inputText value="{!newContact.phone}" required="true" />
+                </li>
+
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Company Name" />
+                    <apex:inputText value="{!newAccount.Name}" required="true" />
+                </li>                
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="" />
+                    <apex:commandButton value="Submit" action="{!saveDetails}" reRender="theForm"/> 
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="" />
+                    <apex:messages style="color:red" ></apex:messages>   
+                </li>
+     </ul>
+     </apex:outputPanel>
+    </apex:form>
+</apex:page>

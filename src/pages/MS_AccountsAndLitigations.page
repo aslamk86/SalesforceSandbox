@@ -1,0 +1,691 @@
+<!--
+    Page         : MS_AccountsAndLitigations
+    Description  : Show member renewals and related acquisitions
+    Created By   : Martin Sieler
+    Created Date : October 24, 2012
+-->
+
+<apex:page controller="MS_AccountsAndLitigationsCtrl" title="{!IF(SelectedAccount != 0, 'Account (Active Litigations): ' & SelectedAccount.Name, IF(bMemberMode, 'Renewals & Acquisitions', 'Accounts & Acquisitions'))}" tabStyle="Account" sidebar="false" id="pg">
+	<apex:form id="frm">
+
+		<apex:pageMessages />
+
+		<apex:sectionHeader title="{!'Viewing as: ' & RunningUser.Name}" subtitle="{!IF(SelectedAccount != 0, SelectedAccount.Name, IF(bMemberMode, 'Renewals & Acquisitions', 'Accounts & Acquisitions'))}" />
+
+		<c:MS_LockComponent />
+
+		<apex:pageBlock id="Accounts" tabStyle="Account">
+
+			<apex:pageBlockSection title="Options" columns="2" rendered="{!AccOptions}">
+				
+				<apex:selectRadio value="{!TimeFrame}" label="{!IF(bMemberMode,'Renewal Time Frame', 'Closing Date')}" layout="pageDirection">
+					<apex:selectOptions value="{!TimeFrameItems}"/>
+					<apex:actionsupport event="onchange" action="{!UpdateAll}" oncomplete="updateCheckAll();" status="MS_LockScreen" rerender="Accounts,Acquisitions,Litigations" />
+				</apex:selectRadio>
+
+				<apex:selectCheckboxes value="{!OppyType}" label="Account Type" layout="pageDirection" rendered="{!NOT(bMemberMode)}">
+					<apex:selectOptions value="{!OppyTypeItems}"/>
+					<apex:actionsupport event="onchange" action="{!UpdateAll}" oncomplete="updateCheckAll();" status="MS_LockScreen" rerender="Accounts,Acquisitions,Litigations" />
+				</apex:selectCheckboxes>
+				
+				<apex:selectCheckboxes value="{!Users}" label="Account Owner" layout="pageDirection" rendered="{!bMemberMode}">
+					<apex:selectOptions value="{!UsersItems}"/>
+					<apex:actionsupport event="onchange" action="{!UpdateAll}" oncomplete="updateCheckAll();" status="MS_LockScreen" rerender="Accounts,Acquisitions,Litigations" />
+				</apex:selectCheckboxes>
+
+			</apex:pageBlockSection>
+			
+			<apex:pageBlockSection title="Accounts" columns="1" id="Acc">
+				<apex:pageMessage summary="No records found" severity="warning" strength="1" rendered="{!lstAccounts.Size = 0}"/>
+				<apex:pageBlockTable value="{!lstAccounts}" var="Acc" id="AccTbl" rendered="{!lstAccounts.Size > 0}">
+
+					<apex:column >
+						<apex:facet name="header">
+							<apex:inputCheckBox id="chkSelectAll">
+								<apex:actionsupport event="onchange" action="{!UpdateAcqAndLit}" onsubmit="checkAll(this.checked);" oncomplete="updateCheckAll();" status="MS_LockScreen" rerender="Acquisitions,Litigations" />
+							</apex:inputCheckbox>
+						</apex:facet>
+						<apex:inputCheckBox value="{!Acc.isSelected}" id="chkList">
+							<apex:actionsupport event="onchange" action="{!UpdateAcqAndLit}" onsubmit="updateCheckAll();" status="MS_LockScreen" rerender="Acquisitions,Litigations" />
+						</apex:inputCheckbox>
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="{!$ObjectType.Account.Fields.Name.Label}" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="Name" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'Name', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:outputLink value="/{!Acc.acc.Id}" title="View Account" target="_blank">
+							<apex:outputField value="{!Acc.acc.Name}" />
+						</apex:outputLink>
+					</apex:column>
+
+					<apex:column headerValue="RPX">
+	          <apex:facet name="header">
+  	          <apex:outputPanel >
+    	          <apex:outputText value="RPX" />
+         	      <img src="/img/s.gif" width="21" height="14" />
+      	      </apex:outputPanel>  
+       	    </apex:facet>
+						<apex:outputLink value="{!'https://portal.rpxcorp.com/entities/' & TEXT(Acc.acc.Entity_ID__c) & '?include=subsidiaries'}" title="View Account on Portal" target="_blank">
+							<apex:image value="{!URLFOR($Resource.RPXLogos, 'favicon.jpg')}" />
+						</apex:outputLink>
+					</apex:column>
+
+					<apex:column headervalue="{!$ObjectType.Account.Fields.Type.Label}">
+	          <apex:facet name="header">
+  	          <apex:outputPanel >
+    	          <apex:commandLink action="{!SortAccounts}" value="{!$ObjectType.Account.Fields.Type.Label}" rerender="AccTbl" status="MS_LockScreen">
+      	          <apex:param value="Type" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+        	      </apex:commandLink>
+         	      <img src="{!IF(Acc_CurrentSortColumn = 'Type', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+      	      </apex:outputPanel>  
+       	    </apex:facet>
+						<apex:outputField value="{!Acc.acc.Type}" />
+					</apex:column>
+
+<!--
+					<apex:column value="{!Acc.acc.SFDC_Ultimate_Parent_ID__c}"/>
+					<apex:column value="{!Acc.acc.Entity_ID__c}"/>
+					<apex:column value="{!Acc.acc.Ultimate_Parent_Entity_ID__c}"/>
+-->
+
+					<apex:column >
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="Lits?" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="XX_bHasLitigations" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'XX_bHasLitigations', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:image value="{!If(Acc.bHasLitigations, "/img/checkbox_checked.gif", "/img/checkbox_unchecked.gif")}" />
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="Active Lits?" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="XX_bHasActiveLitigations" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'XX_bHasActiveLitigations', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:image value="{!If(Acc.bHasActiveLitigations, "/img/checkbox_checked.gif", "/img/checkbox_unchecked.gif")}" />
+					</apex:column>
+
+					<apex:column value="{!Acc.acc.RPX_RCRate__c}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="{!$ObjectType.Account.Fields.RPX_RCRate__c.Label}" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="RPX_RCRate__c" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'RPX_RCRate__c', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column headervalue="Stage" rendered="{!bAccMemberView = false}">
+	          <apex:facet name="header">
+  	          <apex:outputPanel >
+    	          <apex:commandLink action="{!SortAccounts}" value="Stage" rerender="Defendants" status="MS_LockScreen">
+      	          <apex:param value="XX_MbrStage" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+        	      </apex:commandLink>
+         	      <img src="{!IF(Acc_CurrentSortColumn = 'XX_MbrStage', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+      	      </apex:outputPanel>  
+       	    </apex:facet>
+						<apex:outputText value="{!Acc.MbrStage}" />
+					</apex:column>
+
+					<apex:column headervalue="Close Date" rendered="{!bAccMemberView = false}">
+	          <apex:facet name="header">
+  	          <apex:outputPanel >
+    	          <apex:commandLink action="{!SortAccounts}" value="Close Date" rerender="Defendants" status="MS_LockScreen">
+      	          <apex:param value="XX_MbrCloseDate" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+        	      </apex:commandLink>
+         	      <img src="{!IF(Acc_CurrentSortColumn = 'XX_MbrCloseDate', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+      	      </apex:outputPanel>  
+       	    </apex:facet>
+						<apex:outputText value="{!Acc.MbrCloseDate}" />
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="Ins?" title="Insurance Opportunity?" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="XX_bInsuranceOpportunity" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'XX_bInsuranceOpportunity', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:image value="{!If(Acc.bInsuranceOpportunity, "/img/checkbox_checked.gif", "/img/checkbox_unchecked.gif")}" title="{!IF(Acc.bInsuranceOpportunity, 'Stage: ' & Acc.InsStage & ', Close Date: ' & Acc.InsCloseDate & ', Owner: ' & Acc.InsOwnerName, '')}" />
+					</apex:column>
+
+<!--
+					<apex:repeat var="f" value="{!fields}">
+						<apex:column value="{!Acc[f]}" headerValue="{!f}"/>
+					</apex:repeat>
+-->
+
+					<apex:column value="{!Acc.acc.RenewalDate__c}" rendered="{!bAccMemberView = true}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="{!$ObjectType.Account.Fields.RenewalDate__c.Label}" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="RenewalDate__c" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'RenewalDate__c', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acc.acc.HeatMapColorDisplay__c}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="{!$ObjectType.Account.Fields.HeatMapColorDisplay__c.Label}" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="HeatMapColor__c" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'HeatMapColor__c', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acc.acc.OwnerId}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAccounts}" value="{!$ObjectType.Account.Fields.OwnerId.Label}" ReRender="AccTbl" status="MS_LockScreen">
+									<apex:param value="Owner.Name" name="sort" assignTo="{!Acc_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acc_CurrentSortColumn = 'Owner.Name', IF(Acc_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+				</apex:pageBlockTable>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+
+		<apex:pageBlock id="Acquisitions" tabStyle="Acquisition_Opportunity__c" rendered="true">
+
+			<apex:pageBlockButtons location="top">				
+				<apex:commandButton action="{!QueryAcquisitions}" value="Update" status="MS_LockScreen" rerender="Acq" />
+			</apex:pageBlockButtons>
+
+			<apex:pageBlockSection title="Filter Options" columns="2" showHeader="true" id="AcqOptions">
+
+				<apex:inputText label="Minimum # of Selected Accounts" value="{!MinAllAccounts}">
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:inputText>
+
+				<apex:inputText label="Minimum # of Red Heatmap Members" value="{!MinRedHeatmap}">
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:inputText>
+
+				<apex:inputText label="Minimum # of My Accounts" value="{!MinMyAccounts}">
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:inputText>
+
+				<apex:inputCheckbox label="Only Active" value="{!AcqOnlyActive}">
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:inputCheckbox>
+
+				<apex:commandButton value="{!IF(AcqMoreOptions=true, 'Less Options', 'More Options')}" action="{!ToggleAcqMoreOptions}" status="MS_LockScreen" rerender="AcqOptions,Acq" />
+
+				<apex:selectCheckboxes value="{!NCS}" label="NCS Ranking" layout="pageDirection" rendered="{!AcqMoreOptions=true}">
+					<apex:selectOptions value="{!NCSItems}"/>
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:selectCheckboxes>
+
+				<apex:selectCheckboxes value="{!Priority}" label="Priority" layout="pageDirection" rendered="{!AcqMoreOptions=true}">
+					<apex:selectOptions value="{!PriorityItems}"/>
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:selectCheckboxes>
+
+				<apex:selectCheckboxes value="{!Stage}" label="Stage" layout="pageDirection" rendered="{!AcqMoreOptions=true}">
+					<apex:selectOptions value="{!StageItems}"/>
+					<apex:actionsupport event="onchange" action="{!QueryAcquisitions}" status="MS_LockScreen" rerender="Acq" />
+				</apex:selectCheckboxes>
+
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection title="{!'Active' & IF(AcqOnlyActive, '',' and closed') &  ' Acquisitions' & IF(AcqOnlyActive, '',' (Active Acquisitions in bold)')}" columns="1" id="Acq">
+				<apex:pageMessage summary="No records found" severity="warning" strength="1" rendered="{!lstAcquisitions.Size = 0}"/>
+				<apex:pageBlockTable value="{!lstAcquisitions}" var="Acq" id="AcqTbl" rendered="{!lstAcquisitions.Size > 0}">
+
+					<apex:column style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="Name" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'Name', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:outputLink value="/{!Acq.acq.Id}" title="View Acquisition" target="_blank">
+							<apex:outputField value="{!Acq.acq.Name}" />
+						</apex:outputLink>
+					</apex:column>
+
+<!--
+					<apex:column value="{!Acq.isActive}" headerValue="Active?" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Active?" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_isActive" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_isActive', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+-->
+
+					<apex:column value="{!Acq.acq.Suit_Ranking__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Suit_Ranking__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="Suit_Ranking__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'Suit_Ranking__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.acq.Priority__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Priority__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="Priority__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'Priority__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.acq.StageName__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="StageName__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'StageName__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+<!--
+					<apex:column value="{!Acq.acq.N_Defendants__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.N_Defendants__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="N_Defendants__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'N_Defendants__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+-->
+
+<!--
+					<apex:column value="{!Acq.acq.N_Defendants_Active__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.N_Defendants_Active__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="N_Defendants_Active__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'N_Defendants_Active__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+-->
+
+					<apex:column value="{!Acq.acq.N_Prospects_Active__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.N_Prospects_Active__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="N_Prospects_Active__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'N_Prospects_Active__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.Qualification}" headerValue="Qualification" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Qualification" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_Qualification" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_Qualification', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.RecognitionAndUp}" headerValue="Recognition And Up" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Recognition And Up" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_RecognitionAndUp" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_RecognitionAndUp', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.acq.N_Members_Active__c}" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.N_Members_Active__c.Label}" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="N_Members_Active__c" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'N_Members_Active__c', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.AllAccounts}" headerValue="Selected Accounts" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Selected Accounts" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_AllAccounts" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_AllAccounts', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.MyAccounts}" headerValue="My Accounts" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="My Accounts" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_MyAccounts" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_MyAccounts', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.Red}" headerValue="Red" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Red" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_Red" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_Red', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.Yellow}" headerValue="Yellow" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Yellow" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_Yellow" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_Yellow', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Acq.Green}" headerValue="Green" style="{!IF(!AcqOnlyActive && Acq.isActive,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortAcquisitions}" value="Green" rerender="AcqTbl" status="MS_LockScreen">
+									<apex:param value="XX_Green" name="sort" assignTo="{!Acq_CurrentSortColumn}"/>   
+								</apex:commandLink>
+								<img src="{!IF(Acq_CurrentSortColumn = 'XX_Green', IF(Acq_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+				</apex:pageBlockTable>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+
+		<apex:pageBlock id="Litigations" tabStyle="Defendant__c" rendered="true">
+
+			<apex:pageBlockSection title="Filter Options" columns="2" showHeader="true">
+
+				<apex:inputCheckbox label="Only NPE cases" value="{!OnlyNPE}">
+					<apex:actionsupport event="onchange" action="{!QueryLitigations}" status="MS_LockScreen" rerender="Lit" />
+				</apex:inputCheckbox>
+
+				<apex:inputCheckbox label="Only DJs" value="{!OnlyDJ}">
+					<apex:actionsupport event="onchange" action="{!QueryLitigations}" status="MS_LockScreen" rerender="Lit" />
+				</apex:inputCheckbox>
+
+				<apex:inputCheckbox label="Only Active" value="{!OnlyActive}">
+					<apex:actionsupport event="onchange" action="{!QueryLitigations}" status="MS_LockScreen" rerender="Lit" />
+				</apex:inputCheckbox>
+
+				<apex:inputCheckbox label="Only Without Acquisition record" value="{!OnlyWithoutAcquisition}">
+					<apex:actionsupport event="onchange" action="{!QueryLitigations}" status="MS_LockScreen" rerender="Lit" />
+				</apex:inputCheckbox>
+
+			</apex:pageBlockSection>
+
+			<apex:pageBlockSection title="{!'Active ' & IF(OnlyActive = false, 'and closed ', '') & 'Litigations' & IF(OnlyWithoutAcquisition = true , ' without Acquisition', ' (Litigations without Acquisition in bold)')}" columns="1" id="Lit">
+				<apex:pageMessage summary="No records found" severity="warning" strength="1" rendered="{!lstDefendants.Size = 0}"/>
+				<apex:pageBlockTable value="{!lstDefendants}" var="Def" id="LitTbl" rendered="{!lstDefendants.Size > 0}">
+
+					<apex:column value="{!Def.def.Account__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Defendant__c.Fields.Account__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Account__r.Name" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Account__r.Name', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Account__r.OwnerId}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Account.Fields.OwnerId.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Account__r.Owner.Name" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Account__r.Owner.Name', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Litigation_ID__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Defendant__c.Fields.Litigation_ID__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Name" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Name', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column headerValue="RPX" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+	          <apex:facet name="header">
+  	          <apex:outputPanel >
+    	          <apex:outputText value="RPX" />
+         	      <img src="/img/s.gif" width="21" height="14" />
+      	      </apex:outputPanel>  
+       	    </apex:facet>
+						<apex:outputLink value="{!'http://portal.rpxcorp.com/litigations/' & Def.def.Litigation_ID__r.Case_Key__c}" title="View Litigation on Portal" target="_blank">
+							<apex:image value="{!URLFOR($Resource.RPXLogos, 'favicon.jpg')}" />
+						</apex:outputLink>
+					</apex:column>
+
+<!--
+					<apex:column style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="Acq?" title="Associated to Acquisition?" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="XX_bHasAcquisition" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'XX_bHasAcquisition', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:image value="{!If(Def.bHasAcquisition = true, "/img/checkbox_checked.gif", "/img/checkbox_unchecked.gif")}" />
+					</apex:column>
+-->
+
+					<apex:column value="{!Def.def.Litigation_ID__r.Case_Name__c}" title="{!'Defendant as listed: ' & Def.def.Defendant_as_Listed__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Litigation__c.Fields.Case_Name__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Case_Name__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Case_Name__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Litigation_ID__r.Docket_Number__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Litigation__c.Fields.Docket_Number__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Docket_Number__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Docket_Number__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Litigation_ID__r.Filed__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Litigation__c.Fields.Filed__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Filed__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Filed__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Litigation_ID__r.Close_Date__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Litigation__c.Fields.Close_Date__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Close_Date__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Close_Date__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Date_Added__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Defendant__c.Fields.Date_Added__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Date_Added__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Date_Added__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Date_Terminated__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Defendant__c.Fields.Date_Terminated__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Date_Terminated__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Date_Terminated__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="Active?" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Defendant_Active__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Defendant_Active__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+						<apex:image value="{!If(Def.def.Defendant_Active__c = 'Yes', "/img/checkbox_checked.gif", "/img/checkbox_unchecked.gif")}" />
+					</apex:column>
+
+					<apex:column value="{!Def.def.Litigation_ID__r.Is_NPE__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Litigation__c.Fields.Is_NPE__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Is_NPE__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Is_NPE__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+					<apex:column value="{!Def.def.Litigation_ID__r.Is_DJ__c}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel >
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Litigation__c.Fields.Is_DJ__c.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="Litigation_ID__r.Is_DJ__c" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'Litigation_ID__r.Is_DJ__c', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+
+<!--
+					<apex:column value="{!Def.def.XXX}" style="{!IF(!OnlyWithoutAcquisition && !Def.bHasAcquisition,"font-weight:bold","")}">
+						<apex:facet name="header">
+							<apex:outputPanel>
+								<apex:commandLink action="{!SortLitigations}" value="{!$ObjectType.Defendant__c.Fields.XXX.Label}" rerender="LitTbl" status="MS_LockScreen">
+									<apex:param value="XXX" name="sort" assignTo="{!Lit_CurrentSortColumn}"/>
+								</apex:commandLink>
+								<img src="{!IF(Lit_CurrentSortColumn = 'XXX', IF(Lit_IsAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/img/s.gif')}" width="21" height="14" />
+							</apex:outputPanel>  
+						</apex:facet>
+					</apex:column>
+-->
+
+				</apex:pageBlockTable>
+		</apex:pageBlockSection>
+		
+		</apex:pageBlock>
+
+		<script type="text/javascript">
+        
+			function checkAll(checkAll)
+				{
+				var tableObj = document.getElementById('{!$Component.Accounts.Acc.AccTbl}');
+				var elements = tableObj.getElementsByTagName('input');
+
+				for (i=0 ; i < elements.length; i++)
+					{
+					if(elements[i].type == 'checkbox' && elements[i].disabled == false)
+						{
+						elements[i].checked = checkAll;
+						}
+					}
+				}
+        
+			function updateCheckAll()
+				{
+				var tableObj = document.getElementById('{!$Component.Accounts.Acc.AccTbl}');
+				var elements = tableObj.getElementsByTagName('input');
+
+				var isAllChecked = true;
+				for (i=0 ; i < elements.length; i++)
+					{
+					if(elements[i].type == 'checkbox' && elements[i].name.indexOf('chkList') > 0)
+						{
+						if(elements[i].checked == false)
+							{
+							isAllChecked = false;
+							break;
+							}
+						}
+					}
+        document.getElementById('{!$Component.Accounts.Acc.AccTbl.chkSelectAll}').checked = isAllChecked;
+				}
+
+			updateCheckAll();
+
+    </script>
+
+	</apex:form>
+</apex:page>

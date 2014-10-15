@@ -1,0 +1,13 @@
+<apex:page showHeader="true" sidebar="true" standardController="Claims__Claim__c" extensions="ExplanationController">
+	<apex:form >
+		<apex:pageBlock title="Explanation Letter">
+			<apex:inputTextArea richText="false" cols="100" rows="80" value="{!letterText1}" />
+			<hr/>
+			<apex:inputTextArea richText="false" cols="100" rows="80" value="{!letterText2}" />
+			<apex:pageBlockButtons >
+				<apex:commandButton value="Print" action="{!print}" />
+			</apex:pageBlockButtons>
+		</apex:pageBlock>
+	</apex:form>
+
+</apex:page>

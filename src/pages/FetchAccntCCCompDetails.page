@@ -1,0 +1,56 @@
+<apex:page standardcontroller="Account" extensions="FetchAccntCCCompDetails" showHeader="false" >
+    
+    <script>   
+    window.onload=function(){FetchCCCompActFn();}       
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >       
+        <apex:actionFunction name="FetchCCCompActFn" action="{!FetchCCCompDetails}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>           
+        <apex:pageBlock id="pgblk">  
+        Total Claim Charted Company Records : {!alwPageInfo.Count}    
+            <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+            <apex:pageBlockTable value="{!FetchAccntCCCompDetailsWrapList}" var="resp" id="pgblktbl" rendered="{!FetchAccntCCCompDetailsWrapList.size > 0}">                     
+                    <apex:column value="{!resp.patent_number}" >                                                           
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Patent Number" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="patent_number" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'patent_number',IF(isPatAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column value="{!resp.patent_family_Name}" >                   
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Patent Family Name" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="patent_family_name" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'patent_family_name',IF(isPFAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>   
+                    <apex:column value="{!resp.company_name}" >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Claim Charted Company Name" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="company_name" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'company_name',IF(isCCAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>                                                                          
+            </apex:pageBlockTable>   <br/><br/>
+            <div style="float:right;">
+            Page : {!acntLicPageNum} of {!alwPageInfo.pages}
+                <apex:commandButton action="{!loadPrevLicensees}"  disabled="{!acntLicPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+                <apex:commandButton action="{!loadMoreLicensees}" disabled="{!alwPageInfo!=null &&alwPageInfo.pages!=null && acntLicPageNum!=null && alwPageInfo.pages<=acntLicPageNum}" value="Next" rerender="pgblk,pgMsg"/>
+            </div>
+            <apex:outputText id="outTxt" rendered="{!noRec}">                  
+            <b>No Claim Charted Company Records Found</b>
+            </apex:outputText>
+            
+        </apex:pageBlock>
+     <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-weight:bold;color:red" ></apex:actionStatus>
+    </apex:form>    
+</apex:page>

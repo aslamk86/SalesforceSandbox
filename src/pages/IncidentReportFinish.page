@@ -1,0 +1,14 @@
+<apex:page showHeader="false" sidebar="false" standardController="Claims__Incident_Report__c" extensions="IncidentReportWebController" standardStylesheets="false">
+    <apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+    </div>
+    <br />
+    <div style="text-align:center; margin-top:200px;">
+    <h1>Thank You For Your Submission</h1>
+            <p> 
+            A member of our team will contact you shortly regarding your submission. You can now navigate away from this page.
+            </p>    
+    </div>
+    
+</apex:page>

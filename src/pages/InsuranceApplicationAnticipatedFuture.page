@@ -1,0 +1,205 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!checkId}" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        .crumbs { margin-left:auto; margin-right:auto; position:relative; }
+.crumbs li a{
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin-left: -13px;
+    padding: 5px 17px 8px 15px;
+    position: relative;
+    text-decoration: none;
+    font-weight:bold;
+}
+.crumbs li a:hover {
+    color: white;
+}
+
+.selected{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    width:134px;
+    background-position: 100% -96px;
+}
+
+.otherSteps{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    background-position: 100% -48px;
+    width:134px;
+    cursor: pointer;
+}
+textarea { 
+    resize: none; 
+}
+.dateFormat{
+padding-left:10px;
+}
+    </style>
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <apex:inputHidden value="{!Application__c.Company_Name__c}"/>
+    <apex:inputHidden value="{!Application__c.Status__c}"/>    
+    <apex:inputHidden value="{!Application__c.Short_Form__c}"/>        
+    
+     <div style="display:inline-block;width:100%;">
+
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+    </div>
+    <div>
+        <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">{!$Label.Home}</apex:outputLink>
+    </div>
+
+    </div>
+   
+         <fieldset>
+            <div style="text-align:center;">
+                <h5>RPXIS Insurance Application</h5>
+                <br/><br />
+                
+            <!-- apex:commandLink value="General Information" action="{!back1}" /> >> <apex:commandLink value="Financial Information" action="{!next1}"/> >> <apex:outputText value="Anticipated Events" /> >> <apex:commandLink value="NPE History" action="{!next3}"/> >> <apex:commandLink value="IP Pracitices" action="{!next4}" /> >> <apex:commandLink value="Summary" action="{!next5}"/>
+            -->
+              <div>
+                <ul class="crumbs">
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:8;" action="{!back1}">General Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:7;" action="{!next1}">Financial Information</apex:commandLink></li>
+                    <li><a href="" class="selected" style="z-index:6;" >Forward Looking Events</a></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:5;" action="{!next3}">NPE History</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:4;" action="{!next4}">IP Practices</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:3;" action="{!next5}">Summary</apex:commandLink></li>                                        
+                </ul>
+                </div> 
+                <div style="text-align:center; padding-top:50px;">
+                    <apex:commandButton value="Back" action="{!back2}" /> 
+                    <apex:commandButton value="Save" action="{!saveApplication}" reRender="nothing"/>
+                    <apex:commandButton value="Next" action="{!next3}"/>
+                </div>
+            </div>
+        
+            <ul>
+                <li class="form-section" style="padding-left:0px;">{!$Label.Insurance_Events}</li>
+                <li >
+                    <b>{!$Label.Insurance_FutureEvents}</b>
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="In the next 12 months does the Applicant intend to raise capital?"/>
+                    <!-- apex:inputField value="{!Application__c.Applicant_will_raise_capital_in_12mo__c}">
+                        <apex:actionSupport event="onchange" reRender="capital"/>
+                    </apex:inputField -->  
+                    
+                    
+                    <apex:selectList size="1" value="{!Application__c.Applicant_will_raise_capital_in_12mo__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="capital"/>
+                    </apex:selectList>
+                    
+                </li>
+                <apex:outputPanel id="capital">
+                <apex:outputPanel rendered="{!Application__c.Applicant_will_raise_capital_in_12mo__c=='Yes'}">
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="What is the target amount of capital? (in 000's)"/>
+                    <apex:inputField value="{!Application__c.Target_Amount_of_Capital__c}"/>
+                </li>
+                 <li>
+                    
+                    <apex:outputLabel value="What is the source of capital raising?"/>
+                    
+                    <div>
+                    <apex:outputPanel layout="none"><apex:inputField value="{!Application__c.Private_Capital__c}"/>&nbsp;Private Capital&nbsp;</apex:outputPanel>
+                    <apex:outputPanel layout="none"><apex:inputField value="{!Application__c.IPO__c}"><apex:actionSupport event="onchange" rerender="S1Filling"/></apex:inputField>&nbsp;IPO&nbsp;</apex:outputPanel>
+                    <apex:outputPanel layout="none"><apex:inputField value="{!Application__c.Other__c}"/>&nbsp;Other&nbsp;</apex:outputPanel>
+                    </div>
+
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="What is the anticipated S-1 filing date?"/>                    
+                    <apex:inputField value="{!Application__c.Anticipated_S_1_filling_date__c}" showDatePicker="true"/>
+                </li>  
+               
+                </apex:outputPanel>
+                </apex:outputPanel>
+  
+                <li>
+                    <apex:outputLabel style="" value="During the one year period of any Policy issued, in reliance on this Application, does the Applicant anticipate any:"/>
+                    <i>Please check all that apply.</i>
+                </li>
+                 <li>
+                
+                </li>
+                
+            </ul>
+            
+            <fieldset style="border:none;">
+             <ul>
+                    <li>
+                    <apex:outputPanel layout="block">
+                        <apex:inputField value="{!Application__c.Acquisitions_or_Divertituters__c}"><apex:actionSupport event="onchange" rerender="acqDis"/></apex:inputField>&nbsp;Acquisitions or Divestitures
+                    </apex:outputPanel>                                                      
+     
+                    <apex:outputPanel id="acqDis" layout="block">
+                        <apex:outputPanel rendered="{!Application__c.Acquisitions_or_Divertituters__c}" >
+                            <apex:outputLabel style="text-align: left;width: inherit;"><i>Please provide further details</i></apex:outputLabel><br/><br/><apex:inputField style="height: 90px;width:300px" value="{!Application__c.Notes_AcqDis__c}"  />
+                        </apex:outputPanel>                            
+                    </apex:outputPanel>
+                    <br/>  
+                    <apex:outputPanel layout="block">
+                        <apex:inputField value="{!Application__c.New_Products_or_Services__c}"><apex:actionSupport event="onchange" rerender="prodSer"/></apex:inputField>&nbsp;New Products or Services
+                    </apex:outputPanel>              
+
+                    <apex:outputPanel id="prodSer" layout="block">
+                        <apex:outputPanel rendered="{!Application__c.New_Products_or_Services__c}" >
+                            <apex:outputLabel style="text-align: left;width: inherit;"><i>Please provide further details</i></apex:outputLabel><br/><br/><apex:inputField style="height: 90px;width:300px" value="{!Application__c.Notes_newProdServices__c}" />
+                        </apex:outputPanel>                            
+                    </apex:outputPanel>
+                    <br/>
+                     <apex:outputPanel layout="block">
+                        <apex:inputField value="{!Application__c.Expansion_to_new_geographic_locations__c}"><apex:actionSupport event="onchange" rerender="geo"/></apex:inputField>&nbsp;Expansion to new geographic locations
+                    </apex:outputPanel>              
+
+                    <apex:outputPanel id="geo" layout="block">
+                        <apex:outputPanel rendered="{!Application__c.Expansion_to_new_geographic_locations__c}" >
+                            <apex:outputLabel style="text-align: left;width: inherit;"><i>Please provide further details</i></apex:outputLabel><br/><br/><apex:inputField style="height: 90px;width:300px"  value="{!Application__c.Notes_ExpToNewGeo__c}" />
+                        </apex:outputPanel>                            
+                    </apex:outputPanel>
+                    <br/>                    
+                     <apex:outputPanel layout="block">
+                        <apex:inputField value="{!Application__c.Dist_Channels_Partners_Marketing__c}"><apex:actionSupport event="onchange" rerender="partner"/></apex:inputField>&nbsp;Distribution Channels/Partners or Marketing Strategies
+                    </apex:outputPanel>              
+
+                    <apex:outputPanel id="partner" layout="block">
+                        <apex:outputPanel rendered="{!Application__c.Dist_Channels_Partners_Marketing__c}" >
+                            <apex:outputLabel style="text-align: left;width: inherit;"><i>Please provide further details</i></apex:outputLabel><br/><br/><apex:inputField style="height: 90px;width:300px" value="{!Application__c.Notes_partners__c}" />
+                        </apex:outputPanel>                            
+                    </apex:outputPanel>
+                    
+                </li>
+               </ul> 
+            </fieldset>
+            <br/><br/>
+            <div style="text-align:center;">
+            <apex:commandButton value="Back" action="{!back2}" /> 
+            <apex:commandButton value="Save" action="{!saveApplication}" reRender="nothing"/>
+            <apex:commandButton value="Next" action="{!next3}"/>
+            </div>
+            <br/>
+             <div style="display:inline-block;width:100%;">
+               <apex:image value="{!$Resource.RPXLogo}" style="float:left; height:20px;" /> 
+            
+                <apex:outputText value="NPE Patent Infringement Expense Policy" style="margin-left: 260px;"/>
+                                   
+                <apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank" style="float:right;">Legal Notice</apex:outputLink>
+            </div>
+         </fieldset>
+    </apex:form>
+</apex:page>

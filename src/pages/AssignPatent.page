@@ -1,0 +1,240 @@
+<apex:page controller="AssignPatentController" id="pg" title="New OMA Patents{!if(isblank(acquisition), '', ' - ' & acquisition.name)}" tabStyle="Acquisition_Opportunity__c">  
+    <apex:includeScript value="{!URLFOR($Resource.jquery, 'jquery-1.10.0.min.js')}"/>
+    
+    <script type="text/javascript">
+        
+        
+        function selectAll() {
+            // selects all of the patents (regardless of family)
+            var newValue = $("input#grandSelectAll").prop("checked");
+            $("tr.patentRow input[type=checkbox]").each(function(){
+                if (!$(this).is(":disabled"))
+                    $(this).prop("checked", newValue); //check or un-check all patent rows
+            });
+            updateRowHighlights();
+        }
+        
+        function togglePatentFamilyChildren(element) {
+            //Selects all of the child rows of this patent family
+            
+            var newValue; var checkedCount = 0; var enabledCount = 0;
+            var childRows = $(element).closest("tr").nextUntil("tr.patentFamilyRow");
+            var checkboxes = $(childRows).find("input[type=checkbox]");
+            
+            // first figure out if we select all or select none
+            $(checkboxes).each(function(){
+                if ($(this).prop("checked")) checkedCount++;
+                if (!$(this).is(":disabled")) enabledCount++;
+            });
+            newValue = (checkedCount < enabledCount);
+            
+            // then set the checkboxes and change the button text
+            $(checkboxes).each(function(){
+                if (!$(this).is(":disabled"))
+                    $(this).prop("checked", newValue);
+            });
+            if (newValue) $(element).prop("value", "Select None");
+            else $(element).prop("value", "Select All");
+            
+            // then update the highlighting
+            updateRowHighlights();
+        }
+        
+        function hideLastSeperators() {
+            // Hides the final comma in the related acquisitions list
+            $("td.omapCell").each(function() {
+                $(this).children("span.omapSeperator").last().hide();
+            });
+        }
+        
+        function rowClick(element) {
+            // Adds or removes the row highlight
+            if ($(element).prop("checked") && !$(element).prop("disabled"))
+                $(element).closest("tr").addClass("selectedRow");
+            else
+                $(element).closest("tr").removeClass("selectedRow"); 
+        }
+        
+        function updateRowHighlights() {
+            // Runs after a search and highlights the pre-selected rows
+            
+            $("tr.patentRow input[type=checkbox]").each(function (){
+                if ($(this).prop("checked") && !$(this).prop("disabled"))
+                    $(this).closest("tr").addClass("selectedRow");
+                else
+                    $(this).closest("tr").removeClass("selectedRow"); 
+            });
+        }
+        
+    </script>
+    
+    <style>
+        
+        input#grandSelectAll {
+            position: relative;
+            top: -2px;
+        }
+        span#grandSelectAll_Label {
+            position: relative;
+            top: -5px;
+            margin-right: 8px;
+        }
+        
+        tr.patentFamilyRow td {
+            font-weight: bold;
+        }
+        tr.patentFamilyRow td input {
+            font-size: 80%;
+            font-weight: normal;
+            margin: 4px;
+        }
+        
+        tr.disabledRow td,tr.disabledRow td a,tr.disabledRow td a:visited {
+            color: #b1b1b1 !important;
+        }
+        tr.selectedRow td {
+            background-color: #FFFDD4;
+        }
+        
+    </style>
+    
+    <apex:form id="frm">
+    
+        <apex:pagemessages id="pageMessages"/>
+    
+
+        <apex:pageBlock title="New OMA Patents" id="thePageBlock">
+            <apex:pageBlockButtons location="Bottom">
+                <apex:outputPanel id="pbbutton">
+                    <apex:CommandButton value="Associate" action="{!createMappingRecords}" rendered = "{!IF(resultRows.size > 0 , true,false)}"/>
+                    <apex:commandButton action="{!cancel}" value="Cancel"/> 
+                    <input type="button" class="btn" value="Load Patents" title="Load Patents (new tab)" onclick ="window.open('mailto:sfdcrequest@rpxcorp.com?subject=Load Patents', '_blank');"/>
+                </apex:outputPanel>
+            </apex:pageBlockButtons>
+            
+            <!-- Filter Section -->
+            
+            <span style="font-size:10pt"><h2>{!if(isblank(acquisition), '', 'Acquisition:')} <a href="/{!acquisition.id}" title="Return to acquisition">{!acquisition.name}</a></h2></span><br/> <br/>
+            
+            <span style="font-size:10pt">{!$Label.OMAPatentsSearchHelpText}</span><br/> <br/>
+            
+            <apex:pageBlockSection columns="1">
+            
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="patentNum" value="{!$ObjectType.Patent__c.Fields.Patent_No__c.Label} "/>
+                    <apex:inputTextArea id="patentNum" value="{!srchPatentNum}" style="height:50px; width:350px;" title="You can enter up to 100 Patent numbers separated by a semi-colon."/>
+                </apex:pageBlockSectionItem>
+                    
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="pubNum" value="{!$ObjectType.Patent__c.Fields.Publication_Number__c.Label} "/>
+                    <apex:inputText id="pubNum" value="{!srchPubNum}"/>
+                </apex:pageBlockSectionItem>
+                    
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="appNum" value="{!$ObjectType.Patent__c.Fields.Application_Number__c.Label} "/>
+                    <apex:inputText id="appNum" value="{!srchAppNum}"/>
+                </apex:pageBlockSectionItem>
+            
+                <apex:pageBlockSectionItem >
+                    <apex:outputPanel />
+                    <apex:outputPanel >
+                        <apex:commandButton value="Search" action="{!searchPatents}"  rerender="thePageBlock,pageMessages" status="statusLoading" oncomplete="updateRowHighlights(); hideLastSeperators();"/> &nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:actionRegion >
+                            <apex:inputCheckbox value="{!includeNonUSPatents}" /> Include Non-US Patents 
+                        </apex:actionRegion>
+                        <apex:actionStatus id="statusLoading"><br/><br/>
+                            <apex:facet name="start">
+                                <span style = "color: red;">Searching...</span>
+                                <img src = "/img/loading.gif" />
+                            </apex:facet>
+                            <apex:facet name="stop">
+                                <apex:outputPanel rendered="{!(resultRows.size > 0)}"><br/><br/>
+                                    {!resultRowCount} results found.<br/>
+                                    <b>Matched Search Parameters:</b> {!if(matchedNumbers.size>0, matchedNumberString, '<None>')}<br/>
+                                    <b>Unmatched Search Parameters:</b> {!if(unmatchedNumbers.size>0, unmatchedNumberString, '<None>')}
+                                     <apex:pageMessage summary="{!msg}" severity="warning" strength="3" rendered="{!msg<>null}">                                                                                  
+                                         <!-- apex:commandButton value="See More" action="{!searchPatents}"  rerender="thePageBlock,pageMessages" status="statusLoading" oncomplete="updateRowHighlights(); hideLastSeperators();" / -->
+                                     </apex:pageMessage>              
+                                </apex:outputPanel>
+                            </apex:facet>
+                        </apex:actionStatus>
+                    </apex:outputPanel>
+               </apex:pageBlockSectionItem>
+               
+            </apex:pageBlockSection>
+            
+            
+            <!-- Search Result Section -->
+            <apex:pageblockSection id="searchResult" columns="1">
+                <apex:pageblockSectionItem >
+                    <apex:outputPanel rendered = "{!IF(resultRows.size > 0 , true,false)}">
+                        <table id="resultsTable" class="list" border="0" cellpadding="0" cellspacing="0">
+                            <thead>
+                                <tr class="headerRow">
+                                    <th>
+                                       <input type="checkbox" id="grandSelectAll" onclick="selectAll();"/>
+                                       <span id="grandSelectAll_Label">Select All</span>
+                                    </th>
+                                    <th>Patent #</th>
+                                    <apex:repeat value="{!$ObjectType.Patent__c.FieldSets.Patent_Search_Results}" var="field">
+                                        <th>{!field.Label}</th>
+                                    </apex:repeat>
+                                    <th>Related Acquisitions</th>
+                                    <th>Related Litigations</th>                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <apex:repeat value="{!resultRows}" var="patentFamilyRow">
+                                    <tr class="dataRow patentFamilyRow" onblur="if (window.hiOff){hiOff(this);}" onfocus="if (window.hiOn){hiOn(this);}" onmouseout="if (window.hiOff){hiOff(this);}" onmouseover="if (window.hiOn){hiOn(this);}">
+                                        <td colspan="99">
+                                            <apex:outputPanel rendered="{!patentFamilyRow.isBlankPatentFamily}">
+                                                [Blank Patent Family]
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!!patentFamilyRow.isBlankPatentFamily}">
+                                                <a href="{!patentFamilyRow.detailURL}" target="_blank" title="View patent family detail (new tab)">{!patentFamilyRow.patentFamily.Name}</a>{!if(patentFamilyRow.isInSalesforce, '', '*')} 
+                                                - {!round(patentFamilyRow.patentFamily.Number_of_US_Patents__c+patentFamilyRow.patentFamily.No_of_Non_US_Patents__c, 0)} Total Patents - {!round(patentFamilyRow.patentFamily.Number_of_US_Applications__c+patentFamilyRow.patentFamily.No_of_Non_U_S_Applications__c, 0)} Applications
+                                            </apex:outputPanel>  
+                                            <input type="button" class="btn" onclick="togglePatentFamilyChildren(this)" value="Select All"/>
+                                        </td>
+                                    </tr>
+                                    <apex:repeat value="{!patentFamilyRow.children}" var="patentRow">
+                                        <tr class="dataRow patentRow {!if(patentRow.isDisabled, 'disabledRow', '')}" onblur="if (window.hiOff){hiOff(this);}" onfocus="if (window.hiOn){hiOn(this);}" onmouseout="if (window.hiOff){hiOff(this);}" onmouseover="if (window.hiOn){hiOn(this);}">
+                                            <td><apex:inputCheckbox value="{!patentRow.isSelected}" disabled="{!patentRow.isDisabled}" onclick="rowClick(this);"/></td>
+                                            <td>
+                                                <a href="{!patentRow.detailURL}" target="_blank" title="View patent detail (new tab)">{!patentRow.patent.Name}</a>{!if(patentRow.isInSalesforce, '', '*')}
+                                            </td>
+                                            
+                                            <!-- We insert the rest of the fields specified from the field sets in the middle columns of the table. -->
+                                            <apex:repeat value="{!$ObjectType.Patent__c.FieldSets.Patent_Search_Results}" var="field">
+                                                <td><apex:outputField value="{!patentRow.patent[field]}" /></td>
+                                            </apex:repeat>
+                                            
+                                            <td class="omapCell">
+                                                <apex:repeat value="{!patentRow.relatedAcquisitions}" var="acquisition">
+                                                    <a target="_blank" title="View acquisition detail (new tab)" href="/{!acquisition.Id}">{!acquisition.Name}</a><span class="omapSeperator">, </span> 
+                                                </apex:repeat>
+                                            </td>
+                                             <td class="omapCell">
+                                                <apex:repeat value="{!patentRow.relatedLitigations}" var="lit">
+                                                    <a target="_blank" title="View Litigation detail (new tab)" href="/{!lit.id}">{!lit.Name}</a><span class="omapSeperator">, </span> 
+                                                </apex:repeat>
+                                            </td>
+                                        </tr>
+                                    </apex:repeat>
+                                </apex:repeat>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                </apex:pageblockSectionItem>
+                <apex:pageblockSectionItem >
+                    <apex:outputPanel rendered = "{!IF(resultRows.size > 0 , true,false)}">
+                        <i><strong>* Note:</strong> Starred items in the above table indicate patents and patent families which have not yet been imported into Salesforce.</i>
+                    </apex:outputPanel>
+                </apex:pageblockSectionItem>
+                
+            </apex:pageblockSection>
+            
+                    
+        </apex:pageBlock>
+    </apex:form>  
+</apex:page>

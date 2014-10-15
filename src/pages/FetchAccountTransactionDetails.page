@@ -1,0 +1,74 @@
+<apex:page standardcontroller="Account" extensions="FetchAccountTransactionDetails" showHeader="false">    
+    <script>   
+    window.onload=function(){       
+        FetchData();
+    }
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >       
+        <apex:actionFunction name="FetchData" action="{!FetchTransactions}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>       
+          
+        <apex:pageBlock id="pgblk">  
+        Total Transaction Records : {!accListWrapPageInfo.Count}      
+            <apex:pageBlockTable value="{!FetchAccViewWrapList}" var="resp" id="pgblktbl" rendered="{!FetchAccViewWrapList.size > 0}">                                        
+                    <apex:column headerValue="Transaction Id">
+                    <apex:outputLink value="/apex/TransactionDetails?TransactionId={!resp.transaction_id}" target="_blank">{!resp.transaction_id}</apex:outputLink>                                                              
+                    </apex:column>
+                    <apex:column value="{!resp.transaction_date}" headerValue="Transaction Date"/>
+                    <apex:column headerValue="Seller Entity" >
+                        <!-- FOR OUT-PUT LINK --->
+                        <apex:outputPanel rendered="{!IF(resp.seller_account_id != '' && resp.seller_entity != '' ,true,false)}">  
+                            <apex:outputLink value="/{!resp.seller_account_id}" target="_blank" >{!resp.seller_entity}</apex:outputLink> 
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!IF(resp.seller_account_id != '' && resp.seller_entity == '' ,true,false)}">  
+                            <apex:outputLink value="/{!resp.seller_account_id}" target="_blank" >{!resp.seller_alias}</apex:outputLink> 
+                        </apex:outputPanel>
+                        <!-- FOR OUT-PUT LINK --->                      
+                        <!-- FOR OUT-PUT TEXT --->
+                        <apex:outputPanel rendered="{!IF(resp.seller_account_id == '' && resp.seller_entity != '' ,true,false)}">  
+                            <apex:outputText value="{!resp.seller_entity}"/> 
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!IF(resp.seller_account_id == '' && resp.seller_entity == '' ,true,false)}">  
+                            <apex:outputText value="{!resp.seller_alias}"/> 
+                        </apex:outputPanel> 
+                        <!-- FOR OUT-PUT TEXT --->                      
+                    </apex:column>                  
+                    <apex:column value="{!resp.seller_type}" headerValue="Seller Type"/>                    
+                    <apex:column headerValue="Buyer Entity" >
+                        <!-- FOR OUT-PUT LINK --->
+                        <apex:outputPanel rendered="{!IF(resp.buyer_account_id != '' && resp.buyer_entity != '' ,true,false)}">  
+                            <apex:outputLink value="/{!resp.buyer_account_id}" target="_blank" >{!resp.buyer_entity}</apex:outputLink> 
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!IF(resp.buyer_account_id != '' && resp.buyer_entity == '' ,true,false)}">  
+                            <apex:outputLink value="/{!resp.buyer_account_id}" target="_blank" >{!resp.buyer_alias}</apex:outputLink> 
+                        </apex:outputPanel>
+                        <!-- FOR OUT-PUT LINK --->                      
+                        <!-- FOR OUT-PUT TEXT --->
+                        <apex:outputPanel rendered="{!IF(resp.buyer_account_id == '' && resp.buyer_entity != '' ,true,false)}">  
+                            <apex:outputText value="{!resp.buyer_entity}"/> 
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!IF(resp.buyer_account_id == '' && resp.buyer_entity == '' ,true,false)}">  
+                            <apex:outputText value="{!resp.buyer_alias}"/> 
+                        </apex:outputPanel> 
+                        <!-- FOR OUT-PUT TEXT --->                      
+                    </apex:column>                                                                                                  
+                    <apex:column value="{!resp.buyer_type}" headerValue="Buyer Type"/>                                    
+                    <apex:column value="{!resp.purchase_price}" headerValue="Purchase Price"/>  
+                    <apex:column value="{!resp.assets_count}" headerValue="Asset Count"/> 
+                   <!-- <apex:column value="{!resp.overlap}" headerValue="Overlap"/> 
+                    <apex:column value="{!resp.similarity}" headerValue="Similarity"/> 
+                    <apex:column value="{!resp.deal_match}" headerValue="Deal Match"/> -->
+            </apex:pageBlockTable>   <br/><br/>
+        <div style="float:right;">
+        Page : {!accViewPageNum} of {!accListWrapPageInfo.pages}
+            <apex:commandButton action="{!loadPrevLicensees}"  disabled="{!accViewPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreLicensees}" disabled="{!(accListWrapPageInfo=='' && accViewPageNum==1)||(accListWrapPageInfo!=null && accListWrapPageInfo.pages!=null && accViewPageNum!=null && accListWrapPageInfo.pages <= accViewPageNum)}" value="Next" rerender="pgblk,pgMsg"/>
+        </div>
+        <apex:outputText id="outTxt" rendered="{!noRec}">                  
+        <b>No Transaction Records Found</b>
+        </apex:outputText>        
+    </apex:pageBlock>        
+           <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-weight:bold;color:red" ></apex:actionStatus>
+ </apex:form>
+
+</apex:page>

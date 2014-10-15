@@ -1,0 +1,155 @@
+<apex:page controller="NewOpportunityLitigationCtrl" tabStyle="Acquisition_Opportunity__c" id="pg">
+	<apex:form id="frm">
+
+		<script type="text/javascript">
+        
+      function checkAll(checkAll) {
+        var tableObj = document.getElementById('pg:frm:pb:resultpbSection');
+        var elements = tableObj.getElementsByTagName('input');
+    
+        for(i=0 ; i < elements.length; i++) {
+          if(elements[i].type == 'checkbox' && elements[i].disabled == false) {
+            elements[i].checked = checkAll;
+          }
+        }
+      }
+        
+      function updateCheckAll() {
+        var tableObj = document.getElementById('pg:frm:pb:resultpbSection');
+        var elements = tableObj.getElementsByTagName('input');
+          
+        var isAllChecked = true;
+        for(i=0 ; i < elements.length; i++) {
+          if(elements[i].type == 'checkbox' && elements[i].name.indexOf('chkList') > 0) {
+            if(elements[i].checked == false) {
+              isAllChecked = false;
+              break;
+            }
+          }
+        }
+        document.getElementById('pg:frm:pb:resultpbSection:resultTable:chkSelectAll').checked = isAllChecked;
+      }
+        
+    </script>
+
+		<style>
+.headerSelectAll {
+	vertical-align: top;
+	padding: 0px;
+	margin: 0px;
+	position: relative;
+	top: 0;
+	valign: top;
+}
+		</style>
+
+		<apex:sectionHeader title="Acquisition" subtitle="{!acqOpp.Name}" />
+
+		<span style="font-size: 10pt">{!$Label.LitigationOpportunitySearchHelpText}</span>
+		<br />
+		<br />
+		<c:LockComponent />
+
+		<apex:pageMessages id="pgmsg" />
+
+		<apex:pageBlock >
+			<apex:pageBlockButtons location="bottom">
+				<apex:commandButton value="Search" action="{!search}" onclick="lockScreen(true);" oncomplete="lockScreen(false);checkAll(false);" rerender="pgmsg,resultPanel" />
+				<apex:commandButton value="Cancel" action="{!cancel}" immediate="true" />
+			</apex:pageBlockButtons>
+
+			<apex:pageBlockSection title="Search Litigation">
+				<apex:inputText value="{!CaseNameToSrch}"
+					label="{!$ObjectType.Litigation__c.Fields.Case_Name__c.Label}"
+					title="{!$ObjectType.Litigation__c.Fields.Case_Name__c.InlineHelpText}" />
+				<apex:inputText value="{!plainTiffToSrch}"
+					label="{!$ObjectType.Litigation__c.Fields.Plaintiff__c.Label}"
+					title="{!$ObjectType.Litigation__c.Fields.Plaintiff__c.InlineHelpText}" />
+				<apex:inputText value="{!docketNumberToSrch}"
+					label="{!$ObjectType.Litigation__c.Fields.Docket_Number__c.Label}"
+					title="{!$ObjectType.Litigation__c.Fields.Docket_Number__c.InlineHelpText}" />
+				<apex:inputText value="{!caseKeyToSrch}"
+					label="{!$ObjectType.Litigation__c.Fields.Case_Key__c.Label}"
+					title="{!$ObjectType.Litigation__c.Fields.Case_Key__c.InlineHelpText}" />
+				<apex:inputText value="{!LitigationIdToSrch}"
+					label="{!$ObjectType.Litigation__c.Fields.Name.Label}"
+					title="{!$ObjectType.Litigation__c.Fields.Name.InlineHelpText}" />
+				<apex:inputTextArea value="{!patentNumToSearch}"
+					label="Patent Numbers" style="height:50px; width:350px;"
+					title="You can enter up to 100 Patent numbers separated by a semi-colon." />
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+
+		<apex:outputPanel id="resultPanel">
+
+			<apex:pageBlock id="pb" rendered="{!IF(lstLitWrapper.size > 0 , true,false)}">
+
+				<apex:pageBlockButtons >
+					<apex:commandButton value="Done"
+						action="{!createOpportunityLitigations}" />
+					<apex:commandButton value="Cancel" action="{!cancel}"
+						immediate="true" />
+				</apex:pageBlockButtons>
+
+				<apex:outputPanel >
+					<apex:inputCheckBox value="{!ShowExisting}" id="theCheckbox">  
+						<apex:outputLabel value="Show existing Opportunity Litigations" for="theCheckbox" />
+						<apex:actionsupport event="onchange" action="{!search}" onsubmit="lockScreen(true);" oncomplete="lockScreen(false);checkAll(false);" rerender="pgmsg,resultPanel" />
+					</apex:inputCheckbox>
+				</apex:outputPanel>
+
+				<apex:pageBlockSection title="Search Results" id="resultpbSection" columns="1">
+					<apex:outputPanel rendered="{!IF(lstLitWrapper.size > 0 , true,false)}" id="op">
+						<apex:pageBlockTable value="{!lstLitWrapper}" var="litWrap" id="resultTable">
+
+							<apex:column style="width:10px;">
+								<apex:facet name="header">
+									<apex:outputPanel >
+										<span><apex:inputCheckBox id="chkSelectAll" onclick="checkAll(this.checked);" rendered="{!IF(lstLitWrapper.size > 0 , true,false)}" /></span>
+										<span style="vertical-align: top; padding-top: 0px; margin: 0px; position: relative; top: 0px;">Select All</span>
+									</apex:outputPanel>
+								</apex:facet>
+								<apex:inputCheckBox value="{!litWrap.isSelected}" id="chkList" onclick="updateCheckAll();" disabled="{!litWrap.isDisabled}" />
+							</apex:column>
+
+							<apex:column headervalue="{!$ObjectType.Litigation__c.Fields.Name.Label}">
+								<apex:outputLink value="/{!litWrap.litigation.Id}" title="View Litigation">
+									<apex:outputField value="{!litWrap.litigation.Name}" />
+								</apex:outputLink>
+							</apex:column>
+
+							<apex:column headervalue="{!$ObjectType.Litigation__c.Fields.Case_Name__c.Label}">
+								<apex:outputField value="{!litWrap.litigation.Case_Name__c}" />
+							</apex:column>
+
+							<apex:column headervalue="{!$ObjectType.Litigation__c.Fields.Filed__c.Label}">
+								<apex:outputField value="{!litWrap.litigation.Filed__c}" />
+							</apex:column>
+
+							<apex:column headervalue="Patent Numbers">
+								<apex:outputText value="{!litWrap.PatentNumbers}" />
+							</apex:column>
+
+							<apex:column headervalue="{!$ObjectType.Litigation__c.Fields.Docket_Number__c.Label}">
+								<apex:outputField value="{!litWrap.litigation.Docket_Number__c}" />
+							</apex:column>
+
+							<apex:column headervalue="{!$ObjectType.Litigation__c.Fields.Case_Key__c.Label}">
+								<apex:outputField value="{!litWrap.litigation.Case_Key__c}" />
+							</apex:column>
+
+							<apex:column headervalue="Associated?">
+								<apex:inputCheckbox value="{!litWrap.isAssociatedToOpp}"
+									disabled="true" />
+							</apex:column>
+
+						</apex:pageBlockTable>
+					</apex:outputPanel>
+
+				</apex:pageBlockSection>
+
+			</apex:pageBlock>
+		</apex:outputPanel>
+
+	</apex:form>
+</apex:page>

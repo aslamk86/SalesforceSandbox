@@ -1,0 +1,16 @@
+<apex:page StandardController="Acquisition_Opportunity__c" extensions="RelatedAcquisitionProductServicesExt" contenttype="application/vnd.ms-excel">
+    {!Acquisition_Opportunity__c.Name}    Product/Service Tags    <c:PSTTime /> <br/>
+    <apex:pageBlock rendered="{!(listPortfolio2Product.size > 0)}">
+      <apex:outputPanel >
+      <apex:pageBlockTable value="{!listPortfolio2Product}" var="Portfolio2Product">
+        
+        <apex:column headerValue="{!$ObjectType.Product_or_Service__c.Fields.Name.Label}">
+          
+          <apex:outputLink value="/{!Portfolio2Product.Product_or_Service__c}" title="View Account" target="_blank">
+            <apex:outputField value="{!Portfolio2Product.Product_or_Service__r.Name}"/>
+          </apex:outputLink>           
+        </apex:column> 
+      </apex:pageBlockTable>
+     </apex:outputPanel>
+    </apex:pageBlock>
+</apex:page>

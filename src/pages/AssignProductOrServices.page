@@ -1,0 +1,167 @@
+<apex:page Controller="AssignProductOrServicesController" tabStyle="Product_or_Service__c" id="pg">
+	<apex:sectionHeader title="Create Mapping Records" subtitle="{!recordName}" />
+	<apex:form id="frm">
+		<script type="text/javascript">
+			TypeAheadSearch = {
+				interval : 500,
+				lastKeypress : null,
+				interceptKeypress : function() {
+		      this.lastKeypress = new Date().getTime();
+		      var that = this;
+		      setTimeout(function() {
+		         var currentTime = new Date().getTime();
+		         if(currentTime - that.lastKeypress > that.interval) {
+		            that.sendRequest();
+		         }
+		      }, that.interval + 100);
+			  },
+			  sendRequest : function() {
+			    searchProdOrServ();
+		    }
+		  }
+			  
+      //------------------------------------------------------------------------
+      //Check if "Enter Key" is pressed in Search Text
+      //------------------------------------------------------------------------
+      function handleKeyPress(e) {
+		    if (e.keyCode == 13) {
+		        searchProdOrServ();
+		        return false;
+		    }
+			}
+      
+      //------------------------------------------------------------------------
+      //CheckAll Check Boxes
+      //------------------------------------------------------------------------
+      function checkAll(checkAll) {
+        var tableObj = document.getElementById('pg:frm:pb:resultpbSection');
+        var elements = tableObj.getElementsByTagName('input');
+  
+        for(i=0 ; i < elements.length; i++) {
+          if(elements[i].type == 'checkbox' && elements[i].disabled == false) {
+            elements[i].checked = checkAll;
+          }
+        }
+      }
+      
+      //------------------------------------------------------------------------
+      //Select "Select All" checkbox if all checkboxes are checked
+      //------------------------------------------------------------------------
+      function updateCheckAll() {
+        var tableObj = document.getElementById('pg:frm:pb:resultpbSection');
+        var elements = tableObj.getElementsByTagName('input');
+        
+        var isAllChecked = true;
+        for(i=0 ; i < elements.length; i++) {
+          if(elements[i].type == 'checkbox' && elements[i].name.indexOf('chkSelectAll') < 0) {
+            if(elements[i].checked == false) {
+             isAllChecked = false;
+             break;
+            }
+          }
+        }
+        document.getElementById('pg:frm:pb:resultpbSection:resultTable:chkSelectAll').checked = isAllChecked;
+      }
+  	</script>
+
+		<style>
+			.headerSelectAll {
+				vertical-align: top;
+				padding: 0px;
+				margin: 0px;
+				position: relative;
+				top: 0;
+				valign: top;
+			}
+		</style>
+
+		<apex:pageMessages id="pgmsg" />
+		<apex:actionFunction name="searchProdOrServ" action="{!searchProdOrServ}" rerender="pbbutton,resultpbSection,pgmsg" status="statusLoading" oncomplete="checkAll(false);"/>
+
+		<apex:pageBlock title="Search Product or Services" id="pb">
+			
+			<apex:pageBlockButtons location="both">
+				<apex:outputPanel id="pbbutton">
+					<apex:CommandButton value="Tag {!IF(relatedObjectName == 'PatentFamily','Patent Family',relatedObjectName)}" action="{!createMappingRecords}" rendered="{!IF(lstProdWrapper.size > 0 , true,false)}" />
+					<apex:commandButton action="{!back}" value="Back" />
+				</apex:outputPanel>
+			</apex:pageBlockButtons>
+
+			<!--  Search Section -->
+			<apex:pageBlockSection >
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel for="prodName" value="{!$ObjectType.Product_or_Service__c.Fields.Name.Label}: " />
+					<apex:outputPanel style="white-space:nowrap;">
+						<apex:selectList value="{!selectedView}" size="1" onchange="searchProdOrServ();">
+							<apex:selectOptions value="{!FilterPicklist}" />
+						</apex:selectList>
+	
+						<!--For Type ahead search -->
+						<apex:outputLabel for="prodName" value="Search Text : " />
+						<apex:inputText id="prodName" value="{!srchProduct}" onkeypress="return handleKeyPress(event);" onkeyup="return TypeAheadSearch.interceptKeypress();" />
+						<apex:actionStatus id="statusLoading">
+							<apex:facet name="start">
+								<span style="color: red;">Loading...</span>
+								<img src="/img/loading.gif" />
+							</apex:facet>
+						</apex:actionStatus>
+					</apex:outputPanel>
+	
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+			
+			<!-- Result Section -->
+			<apex:pageblockSection id="resultpbSection" columns="1" >
+				<br />
+				<apex:outputPanel rendered="{!IF(lstProdWrapper.size > 0 , true,false)}">
+					
+					<apex:pageBlockTable value="{!lstProdWrapper}" var="prodWrap" id="resultTable">
+						
+						<apex:column style="width:5%;">
+							<apex:facet name="header">
+								<apex:outputPanel >
+									<span> <apex:inputCheckBox id="chkSelectAll" onclick="checkAll(this.checked);" /> </span>
+									<span style="vertical-align: top; padding-top: 0px; margin: 0px; position: relative; top: 0px;"> Select All </span>
+								</apex:outputPanel>
+							</apex:facet>
+							<apex:inputCheckBox value="{!prodWrap.isSelected}" onclick="updateCheckAll();" disabled="{!prodWrap.isDisabled}" />
+						</apex:column>
+
+						<apex:column headervalue="{!$ObjectType.Product_or_Service__c.Fields.Name.Label}" style="word-wrap:break-word;width:40%;">
+							<apex:outputField value="{!prodWrap.ProductOrService.Name}" style="word-wrap:break-word;" />
+						</apex:column>
+
+						<apex:column style="word-wrap:break-word;width:10%;" rendered="{!isAccount}" headervalue="{!$ObjectType.account2product__c.Fields.Tier__c.Label}">
+                     <apex:outputField value="{!prodWrap.acct2Prod.Tier__c}" rendered="{!prodWrap.isDisabled}" />
+                     <apex:inputField value="{!prodWrap.acct2Prod.Tier__c}" rendered="{!NOT(prodWrap.isDisabled)}" />
+                  </apex:column>
+						
+						<apex:column style="word-wrap:break-word;width:50%;" rendered="{!isAccount}" headervalue="{!$ObjectType.account2product__c.Fields.RelevantProducts__c.Label}">
+							<apex:outputField value="{!prodWrap.acct2Prod.RelevantProducts__c}" rendered="{!prodWrap.isDisabled}" />
+							<apex:inputField value="{!prodWrap.acct2Prod.RelevantProducts__c}" style="height:20px; width:500px;" rendered="{!NOT(prodWrap.isDisabled)}" />
+						</apex:column>
+
+						<apex:column style="word-wrap:break-word;width:25%;" rendered="{!OR(isPortfolio, isPatent)}" headervalue="{!$ObjectType.portfolio2product__c.Fields.Tier__c.Label}">
+                     <apex:outputField value="{!prodWrap.portfolio2Prod.Tier__c}" rendered="{!prodWrap.isDisabled}" />
+                     <apex:inputField value="{!prodWrap.portfolio2Prod.Tier__c}" rendered="{!NOT(prodWrap.isDisabled)}" />
+                  </apex:column>
+                  
+						<apex:column style="word-wrap:break-word;width:25%;" rendered="{!OR(isPortfolio, isPatent)}" headervalue="{!$ObjectType.portfolio2product__c.Fields.TheoriesOfRelevance__c.Label}">
+							<apex:outputField value="{!prodWrap.portfolio2Prod.TheoriesOfRelevance__c}" rendered="{!prodWrap.isDisabled}" />
+							<apex:inputField value="{!prodWrap.portfolio2Prod.TheoriesOfRelevance__c}" style="height:20px; width:300px;" rendered="{!NOT(prodWrap.isDisabled)}" />
+						</apex:column>
+
+						<apex:column style="word-wrap:break-word;width:25%;" rendered="{!OR(isPortfolio, isPatent)}" headerValue="{!$ObjectType.portfolio2product__c.Fields.Freeform_Tags__c.Label}">
+							<apex:outputField value="{!prodWrap.portfolio2Prod.Freeform_Tags__c}" rendered="{!prodWrap.isDisabled}" />
+							<apex:inputField value="{!prodWrap.portfolio2Prod.Freeform_Tags__c}" style="height:20px; width:300px;" rendered="{!Not(prodWrap.isDisabled)}" />
+						</apex:column>
+
+					</apex:pageBlockTable>
+				</apex:outputPanel>
+				
+			</apex:pageblockSection>
+
+		</apex:pageBlock>
+
+	</apex:form>
+</apex:page>

@@ -1,0 +1,212 @@
+<!---------------------------------------------------
+  
+    MANAGE CONTENT PAGE
+   
+    Built by Hank Ryan Thompson.
+    Created 11/13/2013.
+    Last updated 01/07/2014 by Sharmila.
+   
+    This page allows the user to manage the
+    portal visibility of content items related to
+    various Salesforce objects.
+    
+    HOW TO USE:
+    To link this page from an existing Salesforce
+    object detail page, create a button that
+    redirects to the following relative URL:
+    "/apex/ManageContent?id=abc123&field=Field__c"
+     > "abc123" = The record id
+     > "Field__c" = The api name of the lookup custom
+       field on the Content record
+   
+---------------------------------------------------->
+
+<apex:page id="thePage" controller="ManageContentController" title="Manage Related Content" tabStyle="ContentDocument">    
+    <apex:includeScript value="{!URLFOR($Resource.jquery, 'jquery-1.10.0.min.js')}"/>
+    
+    <apex:form id="theOtherForm">
+        <apex:actionFunction name="refreshManageContent" action="{!checkForNewDocuments}" rerender="thePageBlock,pageMessages"  status="refreshingManageContent" />      
+        <!--  <apex:actionFunction name="refreshIncremental" action="{!refreshIncremental}" rerender="thePageBlock" status="refreshingManageContent" /> -->  
+        <!--  <apex:actionFunction name="refresh" action="{!refresh}" rerender="thePageBlock" status="refreshingManageContent" /> -->  
+    </apex:form>
+       
+    <script type="text/javascript">
+    $j = jQuery.noConflict();
+    var changes = false;
+    
+      function setAllDropDownsTo(name,newValue) {
+            $j('[id$='+ name + '] option[value="' + newValue + '"]').prop('selected', true);
+            changes=true;
+        }
+    
+    window.onbeforeunload = function (e) 
+        {
+            if (changes)
+                {
+                     e = e || window.event;
+                    var message = 'By leaving the page, you will lose any data just entered or modified.';
+                    // For IE6-8 and Firefox prior to version 4
+                    if (e) 
+                    {
+                        e.returnValue = message;
+                    }
+                    // For Chrome, Safari, IE8+ and Opera 12+
+                    return message;
+                 }
+        }
+
+    </script>
+   
+    <style>
+       
+        /* Manage Content Body and Overlay */
+        #manageContentBody {
+            position: relative;
+        }
+        #manageContentBodyOverlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            height: 100%;
+            position: absolute; top: 0; left: 0;
+        }
+        #manageContentBodyOverlay span {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 70px;
+            width: 330px;
+            padding: 15px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 1);
+            border-radius: 3px;
+        }
+        #manageContentBodyOverlay span h3 {
+            font-size: 16px;
+            position: relative;
+            top: -9px;
+        }
+        #manageContentBodyOverlay span img {
+            margin-right: 5px;
+        }
+       .customError { color: red; }
+    </style>
+    <apex:stylesheet value="/sCSS/21.0/sprites/1297816277000/Theme3/default/gc/versioning.css" />
+     
+    <apex:sectionHeader title="Attach & Manage Related Content"/>
+   
+    <apex:pagemessages id="pageMessages"/>
+    
+    <apex:tabPanel id="theTabPanel" switchType="client" selectedTab="{!tabselected}" >
+    
+        <apex:tab label="Attach Content" id="attachContentTab" name="attachContent" ontableave="setTimeout(function() { refreshManageContent(); }, 500);"> 
+        <div id="attachContentBody">
+                <apex:iframe width="100%" height="550px" scrolling="true" id="attachContentIFrame" src="/apex/DragDropContent__AttachContent?parentid={!objectId}&apiname={!relatedFieldName}&isdtp=vw" />
+            </div>
+        </apex:tab>
+        
+        <apex:tab label="Manage Content Visibility" id="manageContentTab" name="manageContent" ontabenter="refreshManageContent();">
+            <div id="manageContentBody">
+                 
+                <apex:actionStatus id="refreshingManageContent">
+                    <apex:facet name="start">
+                        <div id="manageContentBodyOverlay">
+                            <span>
+                                <img src="/img/loading32.gif"/> 
+                                <h3>Refreshing related content items...</h3>
+                            </span>
+                        </div>
+                    </apex:facet>
+                </apex:actionStatus>
+                
+                <apex:form id="theForm">
+                <apex:pageMessages />                   
+                    <apex:pageBlock title="Related Content Items" rendered="{! $User.Alias != $Label.PrimaryApporverAlias && ConfidentialityApprover.Id!=$User.Id && $User.Alias!=$Label.EditorialApproverAlias && !contains($Profile.Name,'System Administrator')}" >
+                        <apex:outputLabel >You are not authorized to manage Portal Visibility of documents uploaded to this Acquisition. If you think you've reached this message in error, please contact the System Administrator.</apex:outputLabel><br/><br/>
+                        <!--  apex:outputLabel >Primary Approver: Reza</apex:outputLabel> <br/ -->                        
+                        <!--  apex:outputLabel >Editorial Approver: Evonne</apex:outputLabel><br/ -->
+                    </apex:pageBlock>                
+                    <apex:pageBlock title="Related Content Items" id="thePageBlock" rendered="{!IF(($User.Alias == $Label.PrimaryApporverAlias || ConfidentialityApprover.Id==$User.Id || $User.Alias==$Label.EditorialApproverAlias || contains($Profile.Name,'System Administrator')) ,true,false)}" >                        
+                        <apex:pageBlockButtons >
+                             <!--Reza's View for buttons-->
+                            <apex:outputPanel rendered = "{!IF(ReviewDocuments.size > 0 && ($User.Alias == $Label.PrimaryApporverAlias || contains($Profile.Name,'System Administrator')), true,false)}">
+                             <input type="button" class="btn" value="All NDA Yes" onclick="setAllDropDownsTo('NDA','Yes')" />
+                                <input type="button" class="btn" value="All NDA No" onclick="setAllDropDownsTo('NDA','No')"/>
+                                <input type="button" class="btn" value="All Portal Visible Yes" onclick="setAllDropDownsTo('PortalVisible1','Yes')" /> 
+                                <input type="button" class="btn" value="All Portal Visible No" onclick="setAllDropDownsTo('PortalVisible1','No')" />
+                                <apex:CommandButton value="Edit All" action="{!MakeAllEligibleEditable}" rerender="thePageBlock" rendered="{!IF(contains($Profile.Name,'System Administrator'),false,true)}" status="refreshingManageContent"/>
+                                <apex:CommandButton value="Save Changes" onclick="changes=false,tabselected='manageContent'" action="{!Reviewed}" rerender="thePageBlock" status="refreshingManageContent"/>
+                                <apex:commandButton action="{!cancel}" value="Back"/>
+                               <!--<input type="button" class="btn" onclick="refresh();" value="Refresh" status="refreshingManageContent"/>-->
+                            </apex:outputPanel>
+                            <!--Ryan's View for buttons-->
+                            <apex:outputPanel rendered = "{!IF(ReviewDocuments.size > 0 && (ConfidentialityApprover.Id==$User.Id || $User.Alias==$Label.EditorialApproverAlias), true,false)}">
+                                <input type="button" class="btn" value="All Portal Visible Yes" onclick="setAllDropDownsTo('{!IF(ConfidentialityApprover.Id==$User.Id,'PortalVisible2','PortalVisible3')}','Yes')" /> 
+                                <input type="button" class="btn" value="All Portal Visible No" onclick="setAllDropDownsTo('{!IF(ConfidentialityApprover.Id==$User.Id,'PortalVisible2','PortalVisible3')}','No')" />
+                                 <apex:CommandButton value="Edit All" action="{!MakeAllEligibleEditable}" rerender="thePageBlock" status="refreshingManageContent"/>
+                                <apex:CommandButton value="Save Changes" onclick="changes=false,tabselected='manageContent'" action="{!Reviewed}" rerender="thePageBlock" status="refreshingManageContent"/>
+                                <apex:commandButton action="{!cancel}" value="Back"/>
+                            </apex:outputPanel>
+                            <!---->
+                            <apex:commandButton action="{!cancel}" value="Back" rendered = "{!IF(ReviewDocuments.size > 0 ,false,true)}"/>
+                            <!--<input type="button" class="btn" onclick="refresh();" value="Refresh" style = "{!IF(ReviewDocuments.size > 0 ,'display:none','')}"/>-->
+                            
+                        </apex:pageBlockButtons>
+                        
+                        <apex:pageBlockSection columns="1" id="theSection" >
+                        
+                            <apex:pageBlockTable value="{!ReviewDocuments}" var="item" id="theTable">
+                                <!-- NDA for Reza's profile only-->
+                                                                                
+                                <apex:column headerValue="NDA" rendered="{!IF(($User.Alias == $Label.PrimaryApporverAlias || contains($Profile.Name,'System Administrator')), true,false)}"><!--rendered="{!IF(item.Approver=='Primary Approver'),true,false)}">-->
+                                    <apex:inputField id="NDA" value="{!item.doc.NDA__c}"  onchange="changes=true"/>
+                                    <!-- apex:outputText value="{!item.doc.NDA__c}" rendered="{!IF(item.RecordEditable==True,False,True)}"/ -->
+                                </apex:column>
+                                <apex:column headerValue="Primary Review Portal Visible?" rendered="{!IF(($User.Alias == $Label.PrimaryApporverAlias || contains($Profile.Name,'System Administrator')), true,false)}">
+                                    <apex:inputField id="PortalVisible1" value="{!item.doc.Portal_Visible__c}" rendered="{!item.portalVisibilityEditable || contains($Profile.Name,'System Administrator')}"  onchange="changes=true"/>
+                                    <apex:outputText value="{!item.doc.Portal_Visible__c}" rendered="{!IF(item.portalVisibilityEditable==True || contains($Profile.Name,'System Administrator'),False,True)}"/>
+                                </apex:column>
+                                <apex:column headerValue="Type" rendered="{!IF((ConfidentialityApprover.Id==$User.Id || contains($Profile.Name,'System Administrator')), true,false)}">
+                                    <apex:inputField id="PortalVisible2" value="{!item.doc.Type__c}" rendered="{!item.RecordEditable }" onchange="changes=true"/>
+                                    <apex:outputText value="{!item.doc.Type__c}" rendered="{!IF(item.RecordEditable==True,False,True)}"/>
+                                </apex:column>
+                                 <apex:column headerValue="Type" rendered="{!IF($User.Alias == $Label.EditorialApproverAlias, true,false)}">
+                                    <apex:outputText value="{!item.doc.Type__c}"/>
+                                </apex:column>
+
+                                 <!-- apex:column headerValue="Confidentiality Review Portal Visible?" rendered="{!IF((ConfidentialityApprover.Id==$User.Id || contains($Profile.Name,'System Administrator')), true,false)}">
+                                    <apex:inputField id="PortalVisible2" value="{!item.doc.Portal_Visible_Review__c}" rendered="{!item.RecordEditable }"  onchange="changes=true"/>
+                                    <apex:outputText value="{!item.doc.Portal_Visible_Review__c}" rendered="{!IF(item.RecordEditable==True,False,True)}"/>
+                                </apex:column -->
+                                <apex:column headerValue="Editorial Review Portal Visible?" rendered="{!IF(($User.Alias == $Label.EditorialApproverAlias || contains($Profile.Name,'System Administrator')), true,false)}">
+                                    <apex:inputField id="PortalVisible3" value="{!item.doc.Portal_Visible_Final__c}" rendered="{!item.RecordEditable}"  onchange="changes=true"/>
+                                    <apex:outputText value="{!item.doc.Portal_Visible_Final__c}" rendered="{!IF(item.RecordEditable==True,False,True)}"/>
+                                </apex:column>
+                                <apex:column headerValue="Review Status">
+                                    <apex:inputField id="ReviewStatus" value="{!item.doc.Review_Status__c}" rendered="{!IF(contains($Profile.Name,'System Administrator'), true,false)}"/>
+                                    <apex:outputText value="{!item.doc.Review_Status__c}" rendered="{!IF(contains($Profile.Name,'System Administrator'), false,true)}"/>
+                                </apex:column>
+                                <apex:column headerValue="Title">
+                                    <a href="/{!item.doc.id}" target="_blank" title="Open content item in new tab">
+                                        {!item.doc.Title}
+                                    </a>
+                                </apex:column>
+                                <apex:column value="{!item.doc.CreatedDate}"/>
+                                <apex:column headerValue="Created By">
+                                    <a href="/{!item.doc.CreatedById}" target="_blank" title="Open user profile in new tab">
+                                        {!item.doc.CreatedBy.Name}
+                                    </a>
+                                </apex:column>
+                                <apex:column breakBefore="{!if(len(item.ReviewErrorMessage)==0,false,true)}"  colspan="{!IF(($User.Alias == $Label.PrimaryApporverAlias || contains($Profile.Name,'System Administrator')),6,5)}" rendered="{!if(len(item.ReviewErrorMessage)==0,false,true)}">
+                                    <apex:outputText value="{!item.ReviewErrorMessage}" styleClass="customError" escape="false" />
+                                </apex:column>
+                            </apex:pageBlockTable>
+                        </apex:pageBlockSection>
+                    </apex:pageBlock>
+                    
+                </apex:form>
+            </div> 
+        </apex:tab>
+    
+    </apex:tabPanel>
+        
+</apex:page>

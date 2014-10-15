@@ -1,0 +1,56 @@
+<apex:page controller="CustomSharingController">
+    <apex:form >
+    <apex:pageBlock title="Search Sharing Access">     
+    <apex:pageMessages id="error2"/>
+    <apex:outputText value="Search for Existing Sharing Rules"> </apex:outputText>
+    <apex:pageblockSection columns="2" >
+         <apex:inputField value="{!cs2.User__c}" />
+         <apex:inputField value="{!cs2.Account__c}" />
+         <apex:commandButton value="Search" action="{!filterCustShare}" reRender="error2,searchResults"/>
+          </apex:pageblockSection>
+          <apex:pageBlockSection columns="1" title="Search Results" id="searchResults">
+             <apex:outputText value="No Matching Records Found" rendered="{!noResult}"></apex:outputText>                       
+            <apex:pageBlockSectionItem id="results2">
+            
+            <apex:pageBlockTable value="{!csSearchList}" var="csvar">
+                <apex:column value="{!csvar.User__c}"/>
+                <apex:column value="{!csvar.Account__c}"/>
+            </apex:pageBlockTable>        
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    
+    </apex:pageBlock>
+    </apex:form>
+    <apex:pageblock title="User Sharing Rules">
+    <apex:pageMessages id="error"/>
+    <apex:form >
+    <apex:outputText value="Please enter the User and Account to give Access"> </apex:outputText>
+        <apex:pageblockSection columns="2" >
+            <apex:inputField value="{!cs.User__c}" required="true"/>
+            <apex:inputField value="{!cs.Account__c}" required="true"/>
+            <apex:commandButton value="Give Access" action="{!assignPermission}" reRender="csList,error"/>
+            <!-- <apex:commandButton value="Search" action="{!filterCustShare}" reRender="error,searchResults"/> -->
+        </apex:pageblockSection>
+        
+        
+        <apex:pageBlockSection id="csList" columns="1" title="Existing Sharing">
+            <!-- apex:pageBlockSectionItem >
+                <apex:outputLabel >Filter List</apex:outputLabel>
+                <apex:outputPanel >
+                <apex:inputText value="{!searchString}" />                    
+                <apex:commandButton value="Go" action="{!queryRecords}" reRender="results" status="status"/>
+                <apex:actionStatus startText="Filtering..." stopText="" id="status"></apex:actionStatus>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem -->
+            
+            <apex:pageBlockSectionItem id="results">
+            <apex:pageBlockTable value="{!csList}" var="csvar">
+                <apex:column value="{!csvar.User__c}"/>
+                <apex:column value="{!csvar.Account__c}"/>
+            </apex:pageBlockTable>        
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        
+    </apex:form>
+    </apex:pageblock>
+</apex:page>

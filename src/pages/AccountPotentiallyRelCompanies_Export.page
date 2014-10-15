@@ -1,0 +1,16 @@
+<apex:page standardController="Account" tabstyle="Account" extensions="AccountPotentiallyReleventCompaniesExt" contenttype="application/vnd.ms-excel" action="{!sortData}">
+  {!Account.Name}    Account Potentially Relevant Companies    <c:PSTTime /> <br/>
+   <apex:pageBlock rendered="{!(acquisitionOpportunities.size > 0)}">
+       <apex:pageBlockTable value="{!acquisitionOpportunities}" var="this">
+         <apex:column headerValue="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}">
+           <apex:outputLink value="{!URLFOR($Action.Acquisition_Opportunity__c.View, this.Id)}" target="_blank">{!this.name}</apex:outputLink>
+         </apex:column>
+         <apex:column headerValue="Type">{!this.recordType.name}</apex:column>
+         <apex:column value="{!this.createdDate}"/>
+         <apex:column value="{!this.StageName__c}"/>
+         <apex:column value="{!this.Analysis_Assigned_to__c}"/>
+         <apex:column value="{!this.Analysis_Stage__c}"/>
+       </apex:pageBlockTable>
+    </apex:pageBlock>
+  
+</apex:page>

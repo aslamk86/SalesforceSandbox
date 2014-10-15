@@ -1,0 +1,5 @@
+<apex:page standardController="Acquisition_Opportunity__c" >
+  <apex:form >
+    <apex:detail relatedList="true" title="true"/> 
+  </apex:form>
+</apex:page>

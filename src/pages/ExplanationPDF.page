@@ -1,0 +1,8 @@
+<apex:page showHeader="true" sidebar="true" standardController="Claims__Claim__c" extensions="ExplanationController">
+	<img src="{!ImageURL}" />
+	<br />
+	<apex:outputText escape="false" value="{!letterText1}" />
+	<hr/>
+	<apex:outputText escape="false" value="{!letterText2}" />
+
+</apex:page>

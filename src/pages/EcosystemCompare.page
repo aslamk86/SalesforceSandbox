@@ -1,0 +1,122 @@
+<apex:page standardcontroller="Account" extensions="EcosSystemController" sidebar="false" action="{!comparePageLoad}">
+<style>
+.bulletAdd {list-style-type: none;}
+
+</style>
+
+<apex:pageBlock >
+<apex:form >
+    <c:LockComponent />
+    <h1 style="font-size:25px;">Compare EcoSystems</h1><br/><br/>
+    <b>Compare </b>
+    
+    <apex:selectRadio value="{!selectedEcoSys}">
+        <apex:actionSupport event="onchange" reRender="options" />    
+        <apex:selectOptions value="{!compareWrapperListSelOptions}"/>
+    </apex:selectRadio>
+    
+    <br/><b>with</b><br /><br />
+    
+    <apex:outputPanel id="options" layout="block" style="padding-bottom:15px;padding-left: 15px;">
+   
+    <apex:repeat value="{!compareWrapperList}" var="eco">
+
+                <apex:inputCheckbox value="{!eco.selectedEco}" disabled="{!eco.ecoSystem.id==selectedEcoSys}" title="{!eco.ecoSystem.Version_Name__c}"/>
+                <apex:outputLabel rendered="{!eco.ecoSystem.Status__c=='Final'}" title="{!eco.ecoSystem.Version_Name__c}">Version</apex:outputLabel><apex:outputLabel rendered="{!eco.ecoSystem.Status__c=='Draft'}">Draft</apex:outputLabel><apex:outputLabel title="{!eco.ecoSystem.Version_Name__c}">{!eco.ecoSystem.Version__c}</apex:outputLabel>
+
+    </apex:repeat>
+
+    </apex:outputPanel>
+    <apex:messages />
+    <apex:commandButton value="Compare" rerender="comparePanel" action="{!firstCompareFlag}" onclick="lockScreen(true);" oncomplete="lockScreen(false);"/>
+    <hr/>
+    <apex:outputPanel id="comparePanel" layout="block" style="padding-top:20px;">
+
+    <div style="display: table-row;white-space: nowrap;">
+         <apex:outputPanel id="primary" layout="none" rendered="{!primaryCompare.id!=null && selectedCompareWrapperList.size>0}">
+         <div style="display: table-cell; border-right:1px solid black; padding-right:15px;">
+                <b><apex:outputLabel style="padding-left: 25px;" rendered="{!primaryCompare.Status__c=='Final'}">Version&nbsp;</apex:outputLabel><apex:outputLabel style="padding-left: 25px;" rendered="{!primaryCompare.Status__c=='Draft'}">Draft</apex:outputLabel>{!primaryCompare.Version__c}</b><br/><br/>
+                <b><apex:outputLabel style="padding-left: 25px;">All Accounts :</apex:outputLabel></b><br/><br/>
+                <apex:repeat value="{!primaryCompare.EcoSystem_Details__r}" var="ecoDet">
+                    <li class='bulletAdd'><apex:image height="15px" width="15px" value="{!$Resource.AddIconDisabled}" style="margin-bottom: -3px;" />{!ecoDet.Ecosystem_Entity__r.name} </li>
+                </apex:repeat>
+         </div>
+         </apex:outputPanel>
+         
+         <apex:outputPanel rendered="{!firstCompareFlag && (selectedEcoSys==null)}">
+             <apex:pageMessage severity="warning" strength="1" summary="Please select the primary record to compare."></apex:pageMessage>
+         </apex:outputPanel>
+
+         <apex:outputPanel rendered="{!firstCompareFlag && (selectedCompareWrapperList.size==0)}">
+             <apex:pageMessage severity="warning" strength="1" summary="Please select at least one draft or version to compare with."></apex:pageMessage>
+         </apex:outputPanel>
+
+         
+         <div style="display: table-row; white-space: nowrap;overflow:auto;">
+         <apex:outputPanel id="otherEcos" layout="none">
+         <apex:repeat value="{!selectedCompareWrapperList}" var="eco" >
+         <div style="display: table-cell;">
+             <b><apex:outputLabel style="padding-left: 25px;" rendered="{!eco.ecoSystem.Status__c=='Final'}">Version&nbsp;</apex:outputLabel><apex:outputLabel style="padding-left: 25px;" rendered="{!eco.ecoSystem.Status__c=='Draft'}">Draft</apex:outputLabel>{!eco.ecoSystem.Version__c}</b><br/><br/>
+             <b><apex:outputLabel style="padding-left: 25px;">Accounts Unique to <apex:outputLabel rendered="{!eco.ecoSystem.Status__c=='Final'}">&nbsp;Version&nbsp;</apex:outputLabel><apex:outputLabel rendered="{!eco.ecoSystem.Status__c=='Draft'}">&nbsp;Draft</apex:outputLabel>{!eco.ecoSystem.Version__c}</apex:outputLabel></b>   
+             <br/>
+             <apex:outputPanel rendered="{!eco.uniqueAccnts.size==0}">
+             <ul>
+                <li><i><apex:outputLabel value="None"/></i></li>
+             </ul>
+             </apex:outputPanel>
+             <ul>                
+                <apex:repeat value="{!eco.uniqueAccnts}" var="unique">
+                  <li class='bulletAdd'><div>
+                           <span>
+                              <apex:commandLink action="{!addToEcosystem}" reRender="comparePanel" onclick="lockScreen(true);" oncomplete="lockScreen(false);">
+                                  <apex:param assignTo="{!selectedEcoSystem}" value="{!selectedEcoSys}" name="selectedEcoSystem"/>
+                                  <apex:param assignTo="{!typeOfRecord}" value="Manual" name="type"/>     
+                                  <apex:param assignTo="{!accountIdToAdd}" value="{!unique.id}" name="acctoAdd"/>
+                                  <apex:image height="15px" width="15px" value="{!$Resource.AddIcon}" rendered="{!primaryCompare.Status__c=='Draft'}" style="margin-bottom: -3px;" />
+                              </apex:commandLink>
+                           </span>
+                           <span><apex:image height="15px" width="15px" value="{!$Resource.AddIconDisabled}" rendered="{!primaryCompare.Status__c!='Draft'}" style="margin-bottom: -3px;" /></span>
+                           <span>{!unique.name}</span>
+                      </div>
+                  </li>
+                </apex:repeat>
+             </ul>
+         </div>
+        </apex:repeat>
+        </apex:outputPanel>
+        </div>
+        
+         <div style="display: table-row; white-space: nowrap;overflow:auto;">
+         <apex:repeat value="{!selectedCompareWrapperList}" var="eco" rendered="{!selectedEcoSys!=null}">
+         <div style="display: table-cell;">
+             <b><apex:outputLabel style="padding-left: 25px;">Additional Accounts in <apex:outputLabel rendered="{!primaryCompare.Status__c=='Final'}">&nbsp;Version&nbsp;</apex:outputLabel><apex:outputLabel rendered="{!primaryCompare.Status__c=='Draft'}">&nbsp;Draft</apex:outputLabel>{!primaryCompare.Version__c}</apex:outputLabel></b><br/>
+             <ul>
+                <apex:repeat value="{!eco.missingAccnts}" var="unique">
+                   <li class='bulletAdd'><div>
+                           <span>
+                              <apex:commandLink action="{!removeAccountFromSelection}" reRender="comparePanel" onclick="lockScreen(true);" oncomplete="lockScreen(false);">
+                                  <apex:param assignTo="{!selectedEcoSystem}" value="{!selectedEcoSys}" name="selectedEcoSystem"/>
+                                  <apex:param assignTo="{!tobeRemoved}" value="{!JSINHTMLENCODE(eco.ecoDetailAccountMap[unique.id])}" name="tobeRemoved" />
+                                  <apex:image height="15px" width="15px" value="{!$Resource.RemoveIcon}" rendered="{!primaryCompare.Status__c=='Draft'}" style="margin-bottom: -3px;" />
+                              </apex:commandLink>
+                           </span>
+                           <span><apex:image height="15px" width="15px" value="{!$Resource.AddIconDisabled}" rendered="{!primaryCompare.Status__c!='Draft'}" style="margin-bottom: -3px;" /></span>
+                           <span>{!unique.name}</span>
+                      </div>
+                  </li>
+                </apex:repeat>
+                </ul>
+                <apex:outputPanel rendered="{!eco.missingAccnts.size==0}">
+                <ul>
+                    <li><i><apex:outputLabel value="None"/></i></li>
+                </ul>
+                </apex:outputPanel>
+         </div>
+        </apex:repeat>
+        </div>
+    </div>
+    </apex:outputPanel>
+    </apex:form>
+    
+</apex:pageBlock>
+</apex:page>

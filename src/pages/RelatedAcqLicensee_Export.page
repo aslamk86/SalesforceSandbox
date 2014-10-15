@@ -1,0 +1,16 @@
+<apex:page standardController="Acquisition_Opportunity__c" tabstyle="Account" extensions="RelatedAcquisitionOpportunityLicenseeExt" contenttype="application/vnd.ms-excel">
+  {!Acquisition_Opportunity__c.Name}    Licensees   <c:PSTTime /> <br/>
+   <apex:pageBlock rendered="{!(licensees.size > 0)}">
+       <apex:pageBlockTable value="{!licensees}" var="licensee">
+         <apex:column headerValue="{!$ObjectType.Licensees__c.Fields.Account__c.Label}">
+           <apex:outputLink value="/{!licensee.Account__c}" title="View Account" target="_blank">
+            <apex:outputField value="{!licensee.Account__r.Name}"/>
+          </apex:outputLink>   
+         </apex:column>
+         <apex:column headerValue="# of Patent Families">
+            {!mapCounts[licensee.Account__c]}
+         </apex:column>
+       </apex:pageBlockTable>
+    </apex:pageBlock>
+  
+</apex:page>

@@ -1,0 +1,55 @@
+<apex:page showHeader="true" sidebar="true" standardController="Claims__Claim__c" extensions="ClosureControllerExtension" renderas="pdf">
+	<img src="{!ImageURL}" />
+	<br />
+	<apex:outputText escape="false" value="{!letterText1}" />
+		<table>
+			<tr>
+				<td style="width:100px"><b>Provider</b></td>
+				<td style="width:100px"><b>Role</b></td>
+				<td style="width:100px"><b>Date</b></td>
+				<td style="width:100px"><b>Invoice #</b></td>
+				<td style="width:100px"><b>Amount</b></td>
+			</tr>
+			<apex:repeat value="{!payments}" var="payment" >
+				<tr>
+					<td><apex:outputText value="{!payment.Provider__c}"/></td>
+					<td><apex:outputText value="{!payment.Role__c}"/></td>
+					<td>
+						<apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+    						<apex:param value="{!payment.Claims__Date_Paid__c}" /> 
+						</apex:outputText>
+					</td>
+					<td>
+						<apex:outputText value="{!payment.Invoice_Number__c}"/>
+					</td>
+					<td>
+						$<apex:outputText value="{!payment.Claims__Amount__c}"/>
+					</td>
+				</tr>
+			</apex:repeat>
+			<tr><td colspan="4"/><td style="border-top: 1px solid #000;">${!claim.Total_Paid__c}</td></tr>
+		</table>
+
+
+		<apex:outputText escape="false" value="{!letterText2}" />
+
+			<apex:outputPanel rendered="{!claim.Remaining_Per_Claim_SIR_T__c != 'Satisfied'}">
+				<table>
+					<tr><td>Aggregate Retention</td><td>$ {!coverType.Aggregate_SIR__c}</td></tr>
+					<tr><td>Litigation Expenses</td><td>$ {!claim.Total_Amount_Approved__c}</td></tr>
+					<tr><td>Resolution Payment</td><td style="border-bottom: 1px solid #000;">$ {!claim.Resolution_Payment_Amount__c}</td></tr>
+					<tr><td>Remaining Retention</td><td>$ {!coverType.Remaining_Aggregate_SIR__c}</td></tr>
+				</table>
+			</apex:outputPanel>
+		
+			<apex:outputPanel rendered="{!claim.Remaining_Per_Claim_SIR_T__c == 'Satisfied'}">
+				<table>
+					<tr><td>Aggregate Limit of Liability</td><td>$ {!coverType.Aggregate_Limit_of_Liability__c}</td></tr>
+					<tr><td>Litigation Expenses</td><td>$ {!claim.Total_Amount_Approved__c}</td></tr>
+					<tr><td>Resolution Payment</td><td style="border-bottom: 1px solid #000;">$ {!claim.Resolution_Payment_Amount__c}</td></tr>
+					<tr><td>Remaining Limit of Liability</td><td>$ {!coverType.Remaining_Aggregate_Limit_of_Liability__c}</td></tr>
+				</table>
+			</apex:outputPanel>
+		<apex:outputText escape="false" value="{!letterText3}" />
+	
+</apex:page>

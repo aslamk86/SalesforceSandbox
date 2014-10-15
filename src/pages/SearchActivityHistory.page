@@ -1,0 +1,169 @@
+<apex:page controller="SearchActivityHistoryController" tabStyle="Task">
+    <apex:form >
+        <apex:sectionHeader title="Activity History"
+            subtitle="Activity History {!IF(OR(NOT(ISNULL(parentRecordName)), NOT(ISBLANK(parentRecordName))), 'for ' + parentRecordName, '') }" />
+        
+        <apex:commandLink action="{!goBack}"
+            value="Back {!IF(OR(NOT(ISNULL(parentRecordName)), NOT(ISBLANK(parentRecordName))), 'to ' + parentRecordName, '') }" />
+        <br/><br/>
+        
+        <apex:pageMessages />
+        <c:LockComponent />
+
+        <apex:actionFunction action="{!DoSort}" name="sortData"
+            rerender="resultPnl" oncomplete="lockScreen(false);">
+            <apex:param name="sortField" assignTo="{!sortField}" value="" />
+        </apex:actionFunction>
+        
+        <apex:pageBlock id="pb">
+            <apex:outputLabel value="Search for :" for="srchTxt" />
+            <apex:inputText id="srchTxt" value="{!searchText}" label="Search : " />
+            <apex:commandButton value="Search" action="{!searchActivities}" />
+            <br />
+            <br />
+            <apex:outputPanel id="resultPnl">
+                <apex:PageBlockTable id="pbtable" value="{!lstTask}" var="task"
+                    rendered="{!IF(lstTask.size > 0, 'true','false')}">
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('Subject');">
+                                    <apex:outputLabel value="{!$ObjectType.Task.Fields.Subject.Label}" />
+                                    <img
+                                        src="{!IF(sortField = 'Subject', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+
+                        <apex:outputLink value="/{!task.Id}" target="_blank">
+                            <apex:outputText value="{!task.Subject}"
+                                title="{!IF(ISNULL(task.Description), 'Comment is blank.',task.Description)}" />
+                        </apex:outputLink>
+
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('WHO.Name');">
+                                    <!--                 <apex:outputLabel value="{!$ObjectType.Task.Fields.WHOID.Label}" />-->
+                                    <apex:outputLabel value="Name" />
+                                    <img
+                                        src="{!IF(sortField = 'WHO.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.WHOID}" />
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('WHAT.Name');">
+                                    <!--                 <apex:outputLabel value="{!$ObjectType.Task.Fields.WHATID.Label}" /> -->
+                                    <apex:outputLabel value="Related To" />
+                                    <img
+                                        src="{!IF(sortField = 'WHAT.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.WHATID}" />
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('Contact_Type__c');">
+                                    <apex:outputLabel value="{!$ObjectType.Task.Fields.Contact_Type__c.Label}" />
+                                    <img
+                                        src="{!IF(sortField = 'Contact_Type__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.Contact_Type__c}" />
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('OwnerId');">
+                                    <!--                 <apex:outputLabel value="{!$ObjectType.Task.Fields.OwnerId.Label}" />-->
+                                    <apex:outputLabel value="Assigned To" />
+                                    <img
+                                        src="{!IF(sortField = 'OwnerId', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.OwnerId}" />
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('Quality_of_Conversation__c');">
+                                    <apex:outputLabel value="{!$ObjectType.Task.Fields.Quality_of_Conversation__c.Label}" />
+                                    <img
+                                        src="{!IF(sortField = 'Quality_of_Conversation__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.Quality_of_Conversation__c}" />
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('ImportanceHelpfulnessOfMeeting__c');">
+                                    <apex:outputLabel value="{!$ObjectType.Task.Fields.ImportanceHelpfulnessOfMeeting__c.Label}" />
+                                    <img
+                                        src="{!IF(sortField = 'ImportanceHelpfulnessOfMeeting__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.ImportanceHelpfulnessOfMeeting__c}" />
+                    </apex:column>
+
+<!-- Kala - Added to show the Activity Date -->
+                   <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('Activity_Date__c');">
+                                    <apex:outputLabel value="{!$ObjectType.Task.Fields.Activity_Date__c.Label}" />
+                                    <img
+                                        src="{!IF(sortField = 'Activity_Date__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.Activity_Date__c}" />
+                    </apex:column>
+<!-- Kala - End of Adding Activity Date -->
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:outputLink value="javascript:void(0);"
+                                    onclick="lockScreen(true); sortData('CreatedDate');">
+                                    <apex:outputLabel value="{!$ObjectType.Task.Fields.CreatedDate.Label}" />
+                                    <img
+                                        src="{!IF(sortField = 'CreatedDate', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                            </apex:outputPanel>
+                        </apex:facet>
+                        <apex:outputField value="{!task.CreatedDate}" />
+                    </apex:column>
+                </apex:PageBlockTable>
+            </apex:outputPanel>
+
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>

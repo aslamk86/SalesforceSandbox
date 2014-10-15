@@ -1,0 +1,410 @@
+<apex:page standardcontroller="Account" extensions="EcosSystemController" title="EcoSystem for {!Account.Name}" sidebar="false">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery_DataTables, '/media/js/jquery.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jQuery_DataTables, '/media/js/jquery.dataTables.js')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.jQuery_DataTables, '/media/css/demo_page.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.jQuery_DataTables, '/media/css/demo_table.css')}"/>
+    
+    <script type="text/javascript">
+
+        j$ = jQuery.noConflict();
+        j$(document).ready(function() {
+          initializeVersionList();
+          initializeEcosystemDetails();
+        });
+         
+        function initializeVersionList(){
+              j$('#versionDetails').dataTable({
+               "bAutoWidth": false,
+                "bPaginate": false,
+                "oLanguage": {
+                  "sSearch": "Filter records:"
+                 }            
+           }).fnSort( [ [3,'desc'] ] );
+        }
+        
+        function initializeEcosystemDetails(){
+           j$('#ecosystemDetails').dataTable({
+               "bAutoWidth": false,
+               "sScrollY": "250", 
+               "bPaginate": false,               
+               "oLanguage": {
+                  "sSearch": "Filter records:",
+                  "sEmptyTable": "No Companies have been selected for inclusion."
+                } ,
+                "aoColumns": [
+                         null,                          
+                         null,
+                         null,
+                         null,
+                         null,
+                         null,
+                         {"bSortable": false}
+                      ]
+           });
+        }
+
+        function initializepastCodefendants(){
+          j$('#pastCodefendants').dataTable({
+               "bAutoWidth": false,
+               "sScrollY": "320",
+                "bPaginate": false,
+                "oLanguage": {
+                  "sSearch": "Filter records:"
+                 },
+                 "aoColumns": [
+                         null,                          
+                         null,
+                         null,
+                         null,
+                         {"bSortable": false},
+                         {"bSortable": false},
+                         {"bSortable": false}
+                      ]            
+           });        
+
+        }
+        
+        function initializeSuggestedRelevantCompanies(){
+            j$('#suggestedRelevantCompanies').dataTable({
+               "bAutoWidth": false,
+               "sScrollY": "320",
+                "bPaginate": false,
+                "oLanguage": {
+                  "sSearch": "Filter records:"
+                 },
+                "aoColumns": [
+                         null,                          
+                         null,
+                         {"bSortable": false},
+                         null,                        
+                         null,
+                         {"bSortable": false}
+                      ]             
+           });
+        }
+        
+        function initializeSearchTable(){
+            j$('#searchTable').dataTable({
+               "bAutoWidth": false,
+               "sScrollY": "200",
+                "bPaginate": false,
+                "bFilter": false,
+                "ordering":  false,
+                "aoColumns": [
+                         null,                          
+                         {"bSortable": false},
+                         {"bSortable": false},
+                         {"bSortable": false},
+                         {"bSortable": false}
+                      ]           
+           });
+        }
+    </script>
+    <style>
+        .tableHeader{
+            font-size:20px;            
+        }
+        .tableHeader2{
+            font-size:15px;
+        }
+         .custPopup{
+            background-color: white;
+            border-width: 2px;
+            border-style: solid;
+            z-index: 2;
+            left: 50%;
+            padding:10px;
+            position:relative;
+            width: 280px;
+            margin-left: -120px;
+            margin-top: -100px;
+            
+        }
+        .popupBackground{
+            background-color:black;
+            opacity: 0.20;
+            filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }           
+        .dataTables_info {
+            width: 40%;  
+        } 
+    </style>
+    <c:LockComponent />
+    <input type="hidden" />
+    <apex:form >    
+    <apex:outputLink value="/{!Account.id}"><h1 style="font-size:25px; padding-right:20px;">{!Account.Name}</h1></apex:outputLink><apex:commandButton value="View Entitree" onclick="window.open('http://dma.rpxcorp.local/labs/entities?ent_id={!Account.Entity_ID__c}')" rerender="nothing"/>   
+        
+            
+    <apex:outputPanel id="versionTablePanel" layout="block" style="padding-top:10px;">
+        <apex:outputPanel layout="block">
+        <h2 class="tableHeader">Ecosystem Details</h2>
+        </apex:outputPanel>        
+        
+        <apex:commandButton value="Compare" onclick="window.open('/apex/EcosystemCompare?id={!thisAccount.id}');" rerender="nothing"/>        
+        <apex:commandButton value="View Accounts" rendered="{!!hasDraft}" onclick="window.open('/apex/EcosystemAccountView?id={!thisAccount.id}');" rerender="nothing" />
+        
+        <apex:outputPanel layout="block" id="versionList" style="padding-bottom:40px;">
+
+        <table cellpadding="0" cellspacing="0" border="0" class="display" id="versionDetails" width="100%">
+        <thead>
+        <tr>
+            <th>Version Name</th>
+            <th>Version Number</th>
+            <th>Last Modified By</th>
+            <th>Created Date</th>            
+            <th>Last Modified Date</th>
+        </tr>
+        </thead>     
+        <tbody>
+        <apex:repeat value="{!ecoSystems}" var="eco" >
+             <tr>
+                  <td><apex:commandLink action="{!fetchAccountsForThisEco}" onclick="lockScreen(true);" rerender="selectedAccounts,selectionListsPanel,editButtons,searchOther" oncomplete="initializeEcosystemDetails();initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeSearchTable();lockScreen(false);">
+                     <apex:param name="ecoIdAssign" assignTo="{!selectedEcoSystem}" value="{!eco.id}"/>
+                     {!eco.Version_Name__c}
+                     </apex:commandLink>
+                     
+                     <apex:commandLink action="{!deleteDraft}" value="X" rendered="{!(eco.CreatedById == $User.Id && eco.Version__c==null) || $Profile.Name == 'Non-SSO - System Administrator' || $Profile.Name == 'System Administrator' }" style="float:right;text-decoration:none;" title="Delete" onclick="return confirm('Do you really want to delete the record?');lockScreen(true);"> 
+                         <apex:param assignTo="{!deleteDraftId}" name="deleteId" value="{!eco.id}"/>
+                     </apex:commandLink>
+                 </td>
+                 <td><apex:outputlabel rendered="{!eco.Version__c==null}">Draft</apex:outputlabel>{!eco.Version__c}</td>
+                 <td>{!eco.LastModifiedBy.Name}</td>
+                 <td><apex:outputField value="{!eco.CreatedDate}" /></td>
+                 <td><apex:outputField value="{!eco.LastModifiedDate}"/></td>
+             </tr>
+         </apex:repeat>         
+     </tbody>
+    </table>
+    </apex:outputPanel>
+    
+    <apex:outputPanel id="selectedAccounts" layout="block"> 
+    <apex:outputPanel id="ecoName"><h3 class="tableHeader2">{!selectedEcosystemName}</h3></apex:outputPanel>
+    
+    <apex:outputPanel style="padding-left:10px;" id="editButtons">
+        <apex:commandButton value="Create New Blank Version" rendered="{!!hasDraft}" onclick="lockScreen(true);" action="{!showPopUp}" rerender="editButtons,ecoName,versionList,selectionListsPanel,view,selectedAccounts,searchOther" oncomplete="initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeVersionList();initializeEcosystemDetails();initializeSearchTable();lockScreen(false);" />
+        <apex:commandButton value="Clone this Version" rendered="{!!hasDraft && selectedEcoSystem != draftEcosystemId && selectedEcoSystem!=null}" onclick="lockScreen(true);" action="{!showPopUp}" rerender="editButtons,ecoName,versionList,selectionListsPanel,view,selectedAccounts,searchOther" oncomplete="initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeVersionList();initializeEcosystemDetails();initializeSearchTable();lockScreen(false);">        
+            <apex:param assignTo="{!clone}" name="cloneFlag" value="true"/>
+        </apex:commandButton>
+        <apex:commandButton value="Clone another company's version" rendered="{!!hasDraft}" action="/apex/EcoSystemCloneOtherCompany"/>
+        <apex:commandButton value="Edit Draft" onclick="lockScreen(true);" rendered="{!hasDraft && selectedEcoSystem == draftEcosystemId}" action="{!loadDraftForEditing}" rerender="selectionListsPanel,searchOther" oncomplete="initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeSearchTable();lockScreen(false);"/>
+        <apex:commandButton value="Finalize" rendered="{!hasDraft && selectedEcoSystem == draftEcosystemId}" action="{!showPopUp}" reRender="tstpopup"/>
+        <apex:outputPanel id="tstpopup">
+        <apex:outputPanel id="backPanel" styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+            <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+            <table id="innertable">
+                <tr>
+                    <td>Enter a name for this version</td>
+                </tr>
+                <tr>
+                    <td>                        
+                        <apex:inputText value="{!versionName}" style="width:200px;" required="true" id="versionName" label="-"/>
+                        <br/><apex:message for="versionName" style="color:red;" /> 
+                        
+                    </td>
+                </tr>
+                <tr>                        
+                    <td style="text-align:center;">
+                        <apex:commandButton value="Save" rendered="{!!hasDraft}" onclick="lockScreen(true);" action="{!createNewDraftVersion}" rerender="tstpopup,versionTablePanel,selectionListsPanel,searchOther,selectedAccounts" oncomplete="initializeVersionList();initializeEcosystemDetails();initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeSearchTable();lockScreen(false);" />
+                        <apex:commandButton value="Save" rendered="{!hasDraft}" onclick="lockScreen(true);" action="{!finalizeVersion}" rerender="tstpopup,versionTablePanel,selectionListsPanel,searchOther,selectedAccounts" oncomplete="initializeVersionList();initializeEcosystemDetails();initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeSearchTable();lockScreen(false);" />
+                        &nbsp;&nbsp;<apex:commandButton value="Cancel" action="{!closePopup}" rerender="tstpopup" immediate="true" />
+                    </td>
+                </tr>                    
+                </table>
+            </apex:outputPanel>
+        </apex:outputPanel>        
+    </apex:outputPanel>
+    
+    <table cellpadding="0" cellspacing="0" border="0" class="display" id="ecosystemDetails" width="100%">
+     <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>% Similarity</th>
+            <th>Sources</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+            <th>First Added Date</th>
+            <apex:outputPanel rendered="{!selectedEcoSystem == draftEcosystemId}" layout="none"><th>Remove</th></apex:outputPanel>
+        </tr>
+    </thead>
+    <tbody>       
+        <apex:repeat value="{!accountsToShowInList}" var="acc">     
+        <tr>
+            <td>{!acc.Ecosystem_Entity__r.Name}</td>
+            <td>{!acc.Similarity__c}</td>
+            <td>{!acc.Source__c}</td>
+            <td>{!acc.CreatedBy.Name}</td>
+            <td><apex:outputField value="{!acc.CreatedDate}"/></td>
+            <td><apex:outputField value="{!acc.First_Added__c}"/></td>
+            <td>
+            <apex:outputPanel rendered="{!selectedEcoSystem == draftEcosystemId}" layout="none"><apex:commandLink value="Remove" onclick="lockScreen(true);" action="{!removeAccountFromSelection}" rerender="selectedAccounts,searchOther,selectionListsPanel" oncomplete="lockScreen(false);initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeEcosystemDetails();initializeSearchTable();" title="Remove {!acc.Ecosystem_Entity__r.Name} from this EcoSystem">
+                <apex:param name="param1" assignTo="{!tobeRemoved}" value="{!acc.id}"/>
+            </apex:commandLink></apex:outputPanel>
+            </td>
+        </tr>
+       </apex:repeat>                      
+       
+    </tbody>
+    </table>
+    </apex:outputPanel>
+    </apex:outputPanel>
+    
+    <apex:outputPanel id="selectionListsPanel" layout="block" style="padding-top:40px;">
+        <apex:outputPanel rendered="{!draftEditMode}" style="display: table-row">
+            
+            <apex:outputPanel id="defendants" layout="block" style="display: table-cell; width:50%">
+            <h2 class="tableHeader">Past Codefendants</h2>
+            <table cellpadding="0" cellspacing="0" border="0" class="display" id="pastCodefendants" width="100%">
+            <thead>
+                <tr>
+                    <th>Company Name</th>
+                    <th>Primary<br/> Market<br/> Share</th>
+                    <th>Number<br/> of<br/> Overlapping</th>
+                    <th>% Overlap</th>
+                    <th>Include in<br/> Ecosystem</th>
+                    <th>Display<br/> Litigations</th>
+                    <th>Has<br/>Ecosystem?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!coDefendantObj}" var="cod">
+                <tr>
+                    <td>{!cod.co_defendant_name}</td>
+                    <td>{!cod.primary_market_sector}</td>
+                    <td style="text-align:center">{!cod.num_overlapping_camps}</td>
+                    <td style="text-align:center">{!cod.percent_sim}</td>
+                    <td style="text-align:center">
+                        <apex:commandLink action="{!addToEcosystem}" rerender="selectedAccounts,selectionListsPanel" rendered="{!!cod.InThisDraft}" onclick="lockScreen(true);" oncomplete="initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeSearchTable();initializeEcosystemDetails();lockScreen(false);">
+                            <apex:param assignTo="{!accountIdToAdd}" value="{!cod.salesforce_id_codef}" name="ecosystemId"/>
+                            <apex:param assignTo="{!percentToAssign}" value="{!cod.percent_sim}" name="ecoPercentSim"/>
+                            <apex:param assignTo="{!typeOfRecord}" value="Codefendants" name="type"/>                              
+                            <apex:image value="{!$Resource.AddIcon}" height="20px" width="20px" />                          
+                        </apex:commandLink>
+                        <apex:image value="{!$Resource.AddIconDisabled}" height="20px" width="20px" rendered="{!cod.InThisDraft}" style="opacity: 0.3; filter: alpha(opacity=40);"/> 
+                    </td>
+                    <!-- td style="text-align:center"><apex:inputCheckBox value="{!cod.IncludeInThisEcoSystem}"/></td -->
+                    <td style="text-align:center"><apex:outputLink target="_blank" value="{!cod.portal_search}"><apex:image value="/img/setup/search.png" width="20px" height="20px"/></apex:outputLink></td>
+                    <td>
+                         <apex:image value="/img/checkbox_unchecked.gif" rendered="{!!cod.PastEcoSystem}"/>
+
+                         <apex:outputLink value="/apex/EcoSystemPage2?id={!cod.salesforce_id_codef}" rendered="{!cod.PastEcoSystem}" target="_blank">
+                            <apex:image value="/img/checkbox_checked.gif" rendered="{!cod.PastEcoSystem}"/>
+                         </apex:outputLink>
+                    </td>
+                </tr>
+                </apex:repeat>                   
+            </tbody>
+        </table>
+        <div style="float:right;">
+            Page : {!coDefPageNum} of {!cdwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevCoDefRecords}" onclick="lockScreen(true);" disabled="{!coDefPageNum==1}" value="Prev" oncomplete="initializepastCodefendants();lockScreen(false);" rerender="defendants"/>
+            <apex:commandButton action="{!loadMoreCoDefRecords}" onclick="lockScreen(true);" disabled="{!cdwPageInfo!=null && cdwPageInfo.pages<=coDefPageNum}" value="Next" oncomplete="initializepastCodefendants();lockScreen(false);" rerender="defendants"/>
+        </div>
+        <!-- div style="float:right;">            
+            <apex:commandButton action="{!addAccountToEco}" onclick="lockScreen(true);" value="Add Selected" rerender="selectedAccounts" oncomplete="initializeEcosystemDetails();lockScreen(false);"/>
+            <apex:commandButton action="{!clearSelection}" onclick="lockScreen(true);" value="Clear Selection" oncomplete="initializepastCodefendants();lockScreen(false);" rerender="defendants"/>
+        </div -->
+    </apex:outputPanel>
+    
+    <apex:outputPanel id="suggestedRelevantCompanies" style="display: table-cell;padding-left:10px;width:50%" layout="block">
+    <h2 class="tableHeader">Suggested Relevant Companies</h2>
+   
+    <table cellpadding="0" cellspacing="0" border="0" class="display" id="suggestedRelevantCompanies" width="100%">
+     <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>% Similarity</th>
+            <th>Include in<br/> Ecosystem</th>
+            <th>Portfolio<br/> Similarity</th>
+            <th>Litigated<br/> Patent<br/> Similarity</th>
+            <th>Has<br/>Ecosystem?</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        
+        <apex:repeat value="{!relatedCompanyObj}" var="rel">              
+        <tr>
+            <td>{!rel.relevant_company_name}</td>
+            <td>{!rel.overall_similarity}</td>
+            <td style="text-align:center">
+                <apex:commandLink action="{!addToEcosystem}" rendered="{!!rel.InThisDraft}" rerender="selectedAccounts,selectionListsPanel" onclick="lockScreen(true);" oncomplete="initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeEcosystemDetails();initializeSearchTable();lockScreen(false);">
+                     <apex:param assignTo="{!accountIdToAdd}" value="{!rel.relevant_company}" name="ecosystemId"/>
+                     <apex:param assignTo="{!percentToAssign}" value="{!rel.overall_similarity}" name="ecoPercentSim"/>
+                     <apex:param assignTo="{!typeOfRecord}" value="Relevance" name="type"/>  
+                     <apex:image value="{!$Resource.AddIcon}" height="20px" width="20px" /> 
+                </apex:commandLink>
+                <apex:image value="{!$Resource.AddIconDisabled}" height="20px" width="20px" rendered="{!rel.InThisDraft}" style="opacity: 0.3; filter: alpha(opacity=40);"/> 
+            </td>
+            <td>{!rel.portfolio_similarity}</td>
+            <td>{!rel.litigation_similarity}</td>
+            <td><apex:image value="/img/checkbox_unchecked.gif" rendered="{!!rel.PastEcoSystem}"/>
+
+            <apex:outputLink value="/apex/EcoSystemPage2?id={!rel.relevant_company}" rendered="{!rel.PastEcoSystem}" target="_blank">
+                <apex:image value="/img/checkbox_checked.gif" rendered="{!rel.PastEcoSystem}"/>
+            </apex:outputLink>            
+            </td>
+        </tr>
+        </apex:repeat>
+    </tbody>
+    </table>
+    <!-- div style="float:right;">
+            <apex:commandButton action="{!addAccountToEcoRelComp}" onclick="lockScreen(true);" value="Add Selected" rerender="selectedAccounts" oncomplete="initializeEcosystemDetails();lockScreen(false);"/>
+            <apex:commandButton action="{!clearSelectionRelComp}" onclick="lockScreen(true);" oncomplete="initializeSuggestedRelevantCompanies();lockScreen(false);" value="Clear Selection" rerender="suggestedRelevantCompanies"/>
+    </div -->
+    </apex:outputPanel>
+    
+    </apex:outputPanel>
+    <apex:outputPanel id="searchOther" layout="block" style="display: table-cell;padding-top:10px" rendered="{!draftEditMode}">
+    <h2 class="tableHeader" >Search Other Companies</h2>
+        <apex:inputText value="{!searchString}" style="margin-left: 10px;"></apex:inputText>            
+        <apex:commandButton action="{!queryAccounts}" value="Search" onclick="lockScreen(true);" rerender="searchResult" oncomplete="initializeSearchTable();lockScreen(false);" />
+        <apex:outputPanel id="searchResult">
+        <table id="searchTable">
+        <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Ultimate Parent</th>
+            <th>Already in<br/> Ecosystem</th>
+            <th>Has<br/>Ecosystem?</th>
+            <th>Add to<br/> Current<br/> Ecosystem</th>
+        </tr>
+        </thead>
+        <tbody>
+        <apex:repeat value="{!searchAccountWrapperList}" var="acc">
+            <tr>
+                <td>{!acc.searchedAccount.name}<apex:commandButton value="View Entitree" style="float:right" rerender="nothing" onclick="window.open('http://dma.rpxcorp.local/labs/entities?ent_id={!acc.searchedAccount.Entity_ID__c}')" /></td>             
+                <td>{!acc.searchedAccount.Ultimate_Parent__c}</td>
+                <td><apex:image value="/img/checkbox_unchecked.gif" rendered="{!!acc.alreadInEcosystem}"/><apex:image value="/img/checkbox_checked.gif" rendered="{!acc.alreadInEcosystem}"/></td>
+                <td><apex:image value="/img/checkbox_unchecked.gif" rendered="{!acc.searchedAccount.Has_Ecosystem__c==0}"/>
+                    <apex:outputLink rendered="{!acc.searchedAccount.Has_Ecosystem__c>0}" value="/apex/EcoSystemPage2?id={!acc.searchedAccount.id}" target="_blank">
+                        <apex:image value="/img/checkbox_checked.gif" rendered="{!acc.searchedAccount.Has_Ecosystem__c>0}"/>
+                    </apex:outputLink>
+                </td>               
+                <td style="text-align:center">
+                <apex:commandLink action="{!addToEcosystem}" rendered="{!!acc.alreadInEcosystem}" rerender="selectedAccounts,selectionListsPanel" onclick="lockScreen(true);" oncomplete="initializepastCodefendants();initializeSuggestedRelevantCompanies();initializeEcosystemDetails();initializeSearchTable();lockScreen(false);">
+                     <apex:param assignTo="{!accountIdToAdd}" value="{!acc.searchedAccount.id}" name="ecosystemId"/>
+                     <apex:param assignTo="{!percentToAssign}" value="0.0" name="ecoPercentSim"/>
+                     <apex:param assignTo="{!typeOfRecord}" value="Manual" name="type"/>                                 
+                     <apex:image value="{!$Resource.AddIcon}" height="20px" width="20px" />                     
+                </apex:commandLink>
+                <apex:image value="{!$Resource.AddIconDisabled}" height="20px" width="20px" rendered="{!acc.alreadInEcosystem}" style="opacity: 0.3; filter: alpha(opacity=40);"/> 
+                </td>
+                
+            </tr>
+        </apex:repeat>
+        </tbody>
+        </table>
+            <!-- apex:commandButton action="{!clearSFSelection}" onclick="lockScreen(true);" value="Clear Selection" style="float:right;" rerender="searchOther" oncomplete="initializeSearchTable();lockScreen(false);" />
+            <apex:commandButton action="{!addSFAccountToEco}" onclick="lockScreen(true);" value="Add Selected" style="float:right;" rerender="selectedAccounts,searchOther" oncomplete="initializeEcosystemDetails();initializeSearchTable();lockScreen(false);"/ -->
+
+        </apex:outputPanel>
+    </apex:outputPanel>
+    </apex:outputPanel>
+    </apex:form>
+</apex:page>

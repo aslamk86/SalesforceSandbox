@@ -1,0 +1,179 @@
+<apex:page controller="ProductServiceAcquisitionsController" sidebar="true" showHeader="true" tabStyle="Acquisition_Opportunity__c">
+    
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"/>
+    
+    <script>
+        function selectAll(){
+            if($('input[id$=all]').is(':checked')){
+                $('#psTable input[type=checkbox]').attr('checked', true);
+            }else{
+                $('#psTable input[type=checkbox]').attr('checked', false);
+            }
+        }
+    </script>
+    
+    <apex:sectionHeader title="Acquisitions"/>
+    <c:LockComponent />
+    <apex:form >
+        <apex:pageBlock id="pb">
+            
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Search" action="{!searchProduct}"/> 
+                <apex:commandButton value="Reset" action="{!reset}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pb,resultPanel"/> 
+            </apex:pageBlockButtons>
+            
+            <apex:pageBlockSection columns="1">
+                
+                <apex:outputPanel ><b>Name</b> : <apex:inputText value="{!psFilter}"/> <apex:commandButton value="Filter" action="{!filterPS}" onclick="lockScreen(true);" oncomplete="lockScreen(false);selectAll();" rerender="ps"/> </apex:outputPanel>
+                <apex:outputPanel id="ps">
+                    <div style="height:200px;overflow:auto;" id="psTable">
+                        <apex:pageBlockTable value="{!psWrappers}" var="wrapper" columnsWidth="3%,97%">
+                                 
+                            <apex:column >
+                                <apex:facet name="header"> 
+                                    <apex:inputCheckbox value="{!isSelectAll}" id="all" onclick="selectAll();"/>
+                                </apex:facet>
+                                <apex:inputCheckbox value="{!wrapper.include}"/>
+                            </apex:column>
+                            
+                            <apex:column >
+                                <apex:facet name="header"> 
+                                    <apex:commandLink action="{!sortProduct}" value="Product or Service{!IF(sortExpression='ASC','▲','▼')}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="ps"/>
+                                </apex:facet>
+                                <apex:outputText >{!wrapper.ps.Name}</apex:outputText>
+                            </apex:column>
+                        
+                        </apex:pageBlockTable>  
+                        <apex:pageMessage severity="info" strength="2" summary="No Product or Service found." rendered="{!(psWrappers.size == 0)}"/>
+                    </div>
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection columns="2" id="filterBySection" title="Filter By :"> 
+                
+                <apex:pageBlockSectionItem >
+                <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}" />
+                    <apex:inputField value="{!filterCriteria.Name}"/>
+                </apex:pageBlockSectionItem>
+                
+                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Created between: " for="startDate"/>
+                    
+                    <apex:outputPanel >
+                        <apex:inputField value="{!startDateFilter.Date_Filter__c}" id="startDate"/>
+                        &nbsp; and &nbsp;
+                        <apex:inputField value="{!endDateFilter.Date_Filter__c}" id="endDate"/>
+                    </apex:outputPanel>
+                    
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" />
+                <c:MultiSelectComponent AvailableList="{!lstAllStages}" ChosenList="{!lstSelectedStages}"/>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Primary_Market_Sector__c.Label}" />
+                <c:MultiSelectComponent AvailableList="{!lstMarketSectors}" ChosenList="{!lstSelectedMarketSectors}"/>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Seller_claims_charts__c.Label}" />
+                    <apex:inputField value="{!filterCriteria.Seller_claims_charts__c}"/>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Show</apex:outputLabel>
+                    <apex:selectList value="{!noOfRecords}" size="1" style="width : 100px;">
+                        <apex:selectOptions value="{!lstNoOfRecords}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        
+        <apex:outputPanel id="resultPanel">
+        <apex:pageBlock title="Relevant Acquisitions">  
+            
+            <apex:pageMessages id="pgmsg" rendered="{!(acquisitionList.size == 0)}"/>
+            <apex:pageMessage severity="info" strength="2" summary="Total {!totalRecords} Records." rendered="{!(acquisitionList.size > 0)}"/>
+            
+            <apex:pageBlockButtons location="top" rendered="{!(acquisitionList.size > 0)}">
+              <apex:commandButton value="Export" action="{!exportExcel}" rerender="pb1"/> 
+            </apex:pageBlockButtons>
+       
+              <apex:pageBlockTable value="{!acquisitionList}" var="acquisition" id="table" columnsWidth="10%,5%,10%,10%,5%,10%,15%,35%,10%" rendered="{!(acquisitionList.size > 0)}">
+                             
+                  <apex:column >
+                      <apex:facet name="header"> 
+                        {!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}
+                      </apex:facet>
+                      <apex:outputLink value="{!URLFOR($Action.Acquisition_Opportunity__c.View, acquisition.id)}">{!acquisition.name}</apex:outputLink>
+                  </apex:column>
+                  
+                  <apex:column headerValue="Type">
+                      <apex:outputField value="{!acquisition.RecordType.Name}"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                        {!$ObjectType.Acquisition_Opportunity__c.Fields.Primary_Market_Sector__c.Label}
+                      </apex:facet>
+                      <apex:outputField value="{!acquisition.Primary_Market_Sector__c}"/>
+                  </apex:column>
+                  
+                  <apex:column style="text-align:center;">
+                      <apex:facet name="header">
+                        {!$ObjectType.Acquisition_Opportunity__c.FIelds.Seller_claims_charts__c.Label}
+                      </apex:facet>
+                      <apex:outputField value="{!acquisition.Seller_claims_charts__c}"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                        {!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}
+                      </apex:facet>
+                      <apex:outputField value="{!acquisition.StageName__c}"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                        {!$ObjectType.Acquisition_Opportunity__c.Fields.Account__c.Label}
+                      </apex:facet>
+                      <apex:outputField value="{!acquisition.Account__c}"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                        {!$ObjectType.Acquisition_Opportunity__c.Fields.Theories_of_Relevance__c.Label}
+                      </apex:facet>
+                      <apex:outputText value="{!acquisition.Theories_of_Relevance__c}"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                        {!$ObjectType.Acquisition_Opportunity__c.Fields.Patent_Portfolio_Summary__c.Label}
+                      </apex:facet>
+                      <apex:outputText value="{!acquisition.Patent_Portfolio_Summary__c}" style="width:200px;height:100px;" escape="false"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                      {!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}
+                      </apex:facet>
+                      <apex:outputField value="{!acquisition.CreatedDate}"/>
+                  </apex:column>  
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+                      {!$ObjectType.Acquisition_Opportunity__c.Fields.Last_Significant_Update_by_Acq__c.Label}
+                      </apex:facet>
+                      <apex:outputField value="{!acquisition.Last_Significant_Update_by_Acq__c}"/>
+                  </apex:column> 
+                                    
+              </apex:pageBlockTable>
+          
+        </apex:pageBlock>
+       </apex:outputPanel>
+    </apex:form>
+</apex:page>

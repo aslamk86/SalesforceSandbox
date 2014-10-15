@@ -1,0 +1,199 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!checkId}" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        
+.crumbs { margin-left:auto; margin-right:auto; position:relative; }
+.crumbs li a{
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin-left: -13px;
+    padding: 5px 17px 8px 15px;
+    position: relative;
+    text-decoration: none;
+    font-weight:bold;
+}
+.crumbs li a:hover {
+    color: white;
+}
+
+.selected{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    width:134px;
+    background-position: 100% -96px;
+}
+
+.otherSteps{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    background-position: 100% -48px;
+    width:134px;
+    cursor: pointer;
+}
+.dateFormat{
+padding-left:10px;
+}
+    </style>
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <apex:inputHidden value="{!Application__c.Status__c}"/>
+    <apex:inputHidden value="{!Application__c.Short_Form__c}"/>       
+    <apex:inputHidden value="{!Application__c.Company_Name__c}"/>        
+    <div style="display:inline-block;width:100%;">
+
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+    </div>
+    <div>
+        <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">{!$Label.Home}</apex:outputLink>
+    </div>
+
+    </div>
+   
+         <fieldset>
+            <div style="text-align:center;">
+                <h5>RPXIS Insurance Application</h5>
+                <br/><br />
+                <!-- apex:commandLink value="General Information" action="{!back1}" /> >> <apex:commandLink value="Financial Information" action="{!next1}"/> >> <apex:commandLink value="Anticipated Future" action="{!next2}" /> >> <apex:commandLink value="NPE History" action="{!next3}"/> >> <apex:outputText value="IP Pracitices"/> >> <apex:commandLink value="Summary" action="{!next5}" />
+                -->
+                <div>
+                <ul class="crumbs">
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:8;" action="{!back1}">General Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:7;" action="{!next1}">Financial Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:6;" action="{!next2}">Forward Looking Events</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:5;" action="{!next3}">NPE History</apex:commandLink></li>
+                    <li><a href="" class="selected" style="z-index:4;">IP Practices</a></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:3;" action="{!next5}">Summary</apex:commandLink></li>                                                        </ul>
+                </div>   
+                <div style="text-align:center;padding-top:50px">
+                    <apex:commandButton value="Back" action="{!next3}"/>
+                    <apex:commandButton value="Save" action="{!saveApplication}"/>
+                    <apex:commandButton value="Next" action="{!next5}"/>
+                </div>                   
+            </div>         
+ 
+            <ul>
+                <li class="form-section" style="padding-left:0px">IP Practices</li>
+                <li> <b>Please answer the following questions regarding Applicant’s general IP practices</b></li>
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Does the Applicant currently have any insurance covering patent litigation?" for="one-a" />
+                    <!-- apex:inputField value="{!Application__c.Any_insurance_covering_patent_lits__c}" id="one-a">
+                        <apex:actionSupport event="onchange" reRender="existingPolicy"/>
+                    </apex:inputField -->
+                     <apex:selectList size="1" value="{!Application__c.Any_insurance_covering_patent_lits__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="existingPolicy"/>
+                    </apex:selectList>
+                </li>
+                <apex:outputPanel layout="none" id="existingPolicy">
+                <apex:outputPanel rendered="{!Application__c.Any_insurance_covering_patent_lits__c=='Yes'}">
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Insurer" for="one-b" />
+                    <apex:inputField value="{!Application__c.Insurer_Name__c}" id="one-b" />                
+                </li>
+                <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Expiration date of policy" for="one-b" />
+                    <apex:inputField value="{!Application__c.Expiration_date_of_policy__c}" />                
+                </li>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!!shortForm}">
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Has the Applicant ever obtained patent related insurance in the past?" for="one-c" />
+                    <!-- apex:inputField value="{!Application__c.Patent_related_insurance_in_the_past__c}" id="one-c" >
+                        <apex:actionSupport event="onchange" reRender="relatedIns"/>
+                    </apex:inputField -->
+                     <apex:selectList size="1" value="{!Application__c.Patent_related_insurance_in_the_past__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="relatedIns"/>
+                    </apex:selectList>
+                </li>
+                
+                <apex:outputPanel layout="none" id="relatedIns">
+                <apex:outputPanel rendered="{!Application__c.Patent_related_insurance_in_the_past__c=='Yes'}">                
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Insurer" for="one-d" />
+                    <apex:inputField value="{!Application__c.Past_insurer_name__c}" id="one-d" />                
+                </li>           
+                <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Expiration dates of coverage:" for="one-d" />
+                    <apex:inputField value="{!Application__c.Expiration_dates_of_coverage__c}" />                
+                </li> 
+                </apex:outputPanel>
+                </apex:outputPanel>               
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="How many patent re-examinations or reviews has the Applicant initiated over the past 5 years?" for="one-f" />
+                    <apex:inputField value="{!Application__c.Patent_re_examinations_or_reviews_5_yrs__c}" id="one-f" />                
+                </li>
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Is the Applicant a member of any defensive buying organization(s)?" for="one-g" />
+                    <!-- apex:inputField value="{!Application__c.Member_of_any_defensive_buying_orgs__c}" id="one-g">
+                        <apex:actionSupport reRender="orgs" event="onchange"/>
+                    </apex:inputField -->                 
+                     <apex:selectList size="1" value="{!Application__c.Member_of_any_defensive_buying_orgs__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport reRender="orgs" event="onchange"/>                        
+                    </apex:selectList>
+                </li>
+               <apex:outputPanel id="orgs">
+               <apex:outputPanel rendered="{!Application__c.Member_of_any_defensive_buying_orgs__c=='Yes'}">
+               <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Please indicate which organizations:" for="one-h" />
+                    <!-- apex:inputField value="{!Application__c.Indicate_which_orgs__c}" id="one-h" / -->
+                    <div style="display: inline-block;">
+                    <!-- apex:inputField value="{!Application__c.RPX__c }"/>&nbsp;RPX<br/ -->
+                    <apex:inputField value="{!Application__c.AST__c}"/>&nbsp;Allied Security Trust<br/>
+                    <apex:inputField value="{!Application__c.OIN__c}"/>&nbsp;Open Invention Network<br/>
+                    <apex:inputField value="{!Application__c.Unified_Patents__c}"/>&nbsp;Unified Patents<br/>
+                    
+                    <apex:outputPanel layout="block">
+                        <apex:inputField value="{!Application__c.Other__c}"><apex:actionSupport event="onchange" rerender="otherOrg"/></apex:inputField>&nbsp;Other
+                    </apex:outputPanel>              
+
+                    <apex:outputPanel id="otherOrg" layout="block">
+                        <apex:outputPanel rendered="{!Application__c.Other__c}" >
+                            <apex:outputLabel style="text-align: left;width: inherit;"><i>Please provide Organization Name</i></apex:outputLabel><br/><br/><apex:inputTextarea style="height: 90px;" cols="50" rows="5" value="{!Application__c.Other_Defensive_Buying_Organization__c}" />
+                        </apex:outputPanel>                            
+                    </apex:outputPanel>
+                    <br/>
+                    </div>
+                </li>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                <li style="margin-bottom: 30px; margin-left: 80px;">
+                    <apex:outputLabel value="Please briefly describe any other actions the Applicant has taken to mitigate NPE patent infringement risk (including any inbound patent licenses):" for="one-i" />
+                    <apex:inputTextArea rows="4" value="{!Application__c.Please_describe_any_other_actions_taken__c}" id="one-i" style="height:70px;"/>                
+                </li>                                                
+            </ul>
+            <br/><br/>
+            <div style="text-align:center;">
+            <apex:commandButton value="Back" action="{!next3}"/>
+            <apex:commandButton value="Save" action="{!saveApplication}"/>
+            <apex:commandButton value="Next" action="{!next5}"/>
+           </div>
+            <br/>
+             <div style="display:inline-block;width:100%;">
+               <apex:image value="{!$Resource.RPXLogo}" style="float:left; height:20px;" /> 
+            
+                <apex:outputText value="NPE Patent Infringement Expense Policy" style="margin-left: 260px;"/>
+                                   
+                <apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank" style="float:right;">Legal Notice</apex:outputLink>
+            </div>
+         </fieldset>
+    </apex:form>
+</apex:page>

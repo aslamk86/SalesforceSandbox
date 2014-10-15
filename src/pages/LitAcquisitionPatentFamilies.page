@@ -1,0 +1,48 @@
+<apex:page StandardController="Acquisition_Opportunity__c" extensions="LitAcquisitionPatentFamiliesController">
+	<apex:form >
+		<apex:pageMessages />
+		<apex:pageBlock id="pblock" rendered="{!lstPatentFamilies.size > 0}">
+		    <apex:pageBlockButtons location="top">
+	   	   	  <apex:commandButton value="Export" onclick="window.open('/apex/LitAcqPatentFamilies_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;"/> 
+	   	    </apex:pageBlockButtons>
+	   	    <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+			<apex:pageBlockTable value="{!lstPatentFamilies}" var="patentFamily">
+				<apex:column headerValue="{!$ObjectType.Assets__c.Fields.Name.Label}">
+				    <apex:facet name="header">
+		           	 <apex:outputPanel >
+		             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Assets__c.Fields.Name.Label}" rerender="pblock" status="waitStatus">
+		             	<apex:param value="Name" name="sort" assignTo="{!currentSortColumn}"/>   
+		             </apex:commandLink>
+		             <img src="{!IF(currentSortColumn = 'Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+		             </apex:outputPanel>  
+		           </apex:facet>
+					<apex:outputLink value="/{!patentFamily.Id}" target="_blank">
+						{!patentFamily.Name}
+					</apex:outputLink>
+				</apex:column>
+				<apex:column >
+					<apex:facet name="header">
+		           	 <apex:outputPanel >
+		             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Assets__c.Fields.Number_of_US_Patents__c.Label}" rerender="pblock" status="waitStatus">
+		             	<apex:param value="Number_of_US_Patents__c" name="sort" assignTo="{!currentSortColumn}"/>   
+		             </apex:commandLink>
+		             <img src="{!IF(currentSortColumn = 'Number_of_US_Patents__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+		             </apex:outputPanel>  
+		           </apex:facet>
+					<apex:outputField value="{!patentFamily.Number_of_US_Patents__c}" />
+				</apex:column>
+				<apex:column >
+					<apex:facet name="header">
+		           	 <apex:outputPanel >
+		             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Assets__c.Fields.Number_of_US_Applications__c.Label}" rerender="pblock" status="waitStatus">
+		             	<apex:param value="Number_of_US_Applications__c" name="sort" assignTo="{!currentSortColumn}"/>   
+		             </apex:commandLink>
+		             <img src="{!IF(currentSortColumn = 'Number_of_US_Applications__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+		             </apex:outputPanel>  
+		           </apex:facet>
+					<apex:outputField value="{!patentFamily.Number_of_US_Applications__c}" />
+				</apex:column>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

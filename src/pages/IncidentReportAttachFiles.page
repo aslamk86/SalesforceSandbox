@@ -1,0 +1,31 @@
+<apex:page showHeader="false" sidebar="false" standardController="Claims__Incident_Report__c" extensions="IncidentReportWebController" standardStylesheets="false">
+    <apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+    </style>
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto">
+        <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+        <div style="display:inline-block;">
+            <h1 style="text-align:center;">Attach Relevant Documentation</h1>
+        </div>
+        <fieldset>
+            <ul>
+                <li>
+                    <apex:outputLabel value="Please Select File:" for="file" />
+                    <apex:inputFile value="{!file.Body}" fileName="{!file.Name}"  id="file"/>
+                </li>
+            </ul>
+            <b>Attached Documents</b>
+            <apex:repeat value="{!fileNames}" var="fName">
+                <br/><apex:outputText value="{!fName}" />
+            </apex:repeat>
+        </fieldset>
+        <apex:commandButton action="{!addAttachment}" value="Save Attachment" />
+        <apex:commandButton action="{!finish}" value="Finish" />
+    </apex:form>
+</apex:page>

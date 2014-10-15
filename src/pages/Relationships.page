@@ -1,0 +1,162 @@
+<!-- 
+Visualforce page Name: Relationships
+Description : Widget to be placed on Acquisition detail page to show the releavant accounts, lincencees,
+              and Account with claims in three columns and the Product / Service tags right below that.
+Created date: 16-Jan-2014
+Author : Aslam             
+-->
+<apex:page standardController="Acquisition_Opportunity__c" extensions="PotentiallyReleventCompaniesExt,RelatedAcquisitionOpportunityLicenseeExt,RelatedAcquisitionProductServicesExt,AccountWithClaimChartsExt" readOnly="true">
+
+<apex:form id="theForm">
+
+<apex:pageBlock >
+
+<!-- Product/Service tags section begins -->
+
+<apex:pageBlockSection columns="1">
+<apex:outputPanel >
+<apex:outputLabel value="Product / Service Tags: " />
+
+<!-- counter to know whether a comma is required to be added or not to the list of tags. -->
+<apex:variable var="count" value="{!0}" /> 
+
+<apex:repeat value="{!listPortfolio2Product}" var="Portfolio2Product">
+    <apex:outputLink value="/{!Portfolio2Product.Product_or_Service__c}" title="View Account" target="_blank">
+            <apex:outputField value="{!Portfolio2Product.Product_or_Service__r.Name}"/>
+    </apex:outputLink>
+    
+    <!-- in case it is the the last element dont put the comma -->
+    <apex:outputLabel rendered="{!count<listPortfolio2Product.size-1}" value=" , "></apex:outputLabel>    
+    <apex:variable var="count" value="{!count+1}"/>
+    
+</apex:repeat>
+</apex:outputPanel>
+</apex:pageBlockSection>
+
+<!-- end of product/Service tags section -->
+<br />
+<apex:pageBlockSection columns="3">
+
+<!-- Column 1 begins - Potentially Relevant Companies -->
+
+    <apex:outputPanel layout="block">
+    <!-- Calls the sorting method in the controller -->
+    <apex:actionFunction action="{!doSort}" name="sortData" rerender="companies" >
+            <apex:param name="sortField" assignTo="{!sortField}" value="" />
+    </apex:actionFunction>
+    
+    <apex:outputLabel >Potentially Relevant Companies</apex:outputLabel>
+    <apex:commandButton value="Export" onclick="window.open('/apex/PotentiallyRelCompanies_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;" style="float:right;" />
+    <apex:pageBlockTable value="{!lstCompaniesWhoCare}" var="this" id="companies"> 
+              <apex:column >
+                    <apex:facet name="header">
+                        <apex:outputPanel > 
+                            <apex:outputLink value="javascript:void(0);" onclick="sortData('Account__r.Name')">
+                              {!$ObjectType.Account.Fields.Name.Label}
+                              <img src="{!IF(sortField = 'Account__r.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputLink>
+                        </apex:outputPanel>
+                    </apex:facet>
+                <apex:outputLink value="{!URLFOR($Action.Account.View, this.Account__c)}" target="_blank">{!this.Account__r.Name}</apex:outputLink>
+              </apex:column>
+              <apex:column >
+                <apex:facet name="header">
+                        <apex:outputPanel > 
+                            <apex:outputLink value="javascript:void(0);" onclick="sortData('Account__r.Type')">
+                                <apex:outputText value="Type"/>
+                              <img src="{!IF(sortField = 'Account__r.Type', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputLink>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    {!this.Account__r.Type}
+              </apex:column>
+    </apex:pageBlockTable>
+ 	<!-- 
+    <apex:pageBlockSection rendered="{!lstCompaniesWhoCare.size==0}" columns="1">
+    	<apex:outputLabel value="No Records" />
+    </apex:pageBlockSection>
+    -->            
+    </apex:outputPanel>
+
+<!-- Column 1 Ends -->
+
+<!-- Column 2 begins - Licencees -->
+    
+    <apex:outputPanel layout="block">
+    <apex:outputLabel >Licencees</apex:outputLabel>
+    <apex:commandButton value="Export" onclick="window.open('/apex/RelatedAcqLicensee_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;" style="float:right;"/>
+    <apex:pageBlockTable value="{!licensees}" var="licensee" id="pblock">
+        
+        <apex:column headerValue="{!$ObjectType.Licensees__c.Fields.Account__c.Label}">
+          <apex:facet name="header">
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Licensees__c.Fields.Account__c.Label}" rerender="pblock" status="waitStatus">
+                <apex:param value="Account__r.Name" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Account__r.Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+           
+          <apex:outputLink value="/{!licensee.Account__c}" title="View Account" target="_blank">
+            <apex:outputField value="{!licensee.Account__r.Name}"/>
+          </apex:outputLink>           
+        </apex:column> 
+        <apex:column headerValue="# of Patent Families">
+            {!mapCounts[licensee.Account__c]}
+        </apex:column>
+    </apex:pageBlockTable>
+    <!-- 
+    <apex:pageBlockSection rendered="{!licensees.size==0}" columns="1">
+    	<apex:outputLabel value="No Records" />
+    </apex:pageBlockSection>
+     -->
+    </apex:outputPanel>
+
+<!-- Column 2 ends -->
+
+<!-- Column 3 begins - Accounts with Claim Charts -->    
+    <apex:outputPanel >
+
+    <apex:outputPanel layout="block" style="padding-bottom: 10px;">
+        <apex:outputLabel >Accounts with Claim Charts</apex:outputLabel>
+        <apex:commandButton value="Export" onclick="window.open('/apex/AccountsWithClaimCharts_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;" style="float:right;"/>
+    </apex:outputPanel>
+
+    <!-- apex:outputLabel value="{!thisPatentList.size}" / -->
+    
+    <!-- apex:pageBlockTable value="{!thisPatentList}" var="pat">
+        <apex:column value="{!pat.Patent__r.Name}" />
+        <apex:column value="{!pat.Patent__c}" />
+    </apex:pageBlockTable>
+
+    <!-- apex:pageBlockTable value="{!accountWithClaimChartsList}" var="pat">
+        <apex:column value="{!pat.Account__c}" />
+        <apex:column value="{!pat.Patent__c}" />
+        <apex:column>
+            <apex:facet name="header"># of Patents</apex:facet>
+            {!countOfPatentFamilies[pat.Account__c]}
+        </apex:column>
+    </apex:pageBlockTable -->
+    
+    <apex:pageBlockTable value="{!accountIds}" var="acc" >
+        <apex:column >
+            <apex:facet name="header">Account</apex:facet>
+            <apex:outputLink value="/{!acc.Id}" target="_blank">{!acc.Name}</apex:outputLink>
+        </apex:column>
+        <!-- apex:column>
+        <apex:facet name="header"># of Patents</apex:facet>
+        {!countOfPatentFamilies[acc.id]}
+        </apex:column -->
+    </apex:pageBlockTable>
+
+    </apex:outputPanel>
+ 
+    
+</apex:pageBlockSection>
+
+<!-- Column 3 ends -->
+
+
+</apex:pageBlock>
+</apex:form>
+</apex:page>

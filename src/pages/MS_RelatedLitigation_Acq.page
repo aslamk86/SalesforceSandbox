@@ -1,0 +1,10 @@
+<!--
+    Page         : MS_RelatedLitigation_Acq
+    Description  : Different view on Acquisitions
+    Created By   : Martin Sieler
+    Created Date : October 10, 2012
+-->
+
+<apex:page controller="MS_RelatedLitigationCtrl" title="{!'Acquisition (Overview): ' & Acq.Name}" tabStyle="Acquisition_Opportunity__c" sidebar="false" id="pg">
+<c:MS_RelatedLitigation />
+</apex:page>

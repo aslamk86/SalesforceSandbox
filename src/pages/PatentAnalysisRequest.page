@@ -1,0 +1,252 @@
+<apex:page id="Page" standardController="Patent_Analysis_Request__c" extensions="PatentAnalysisRequestController">   
+    <style>
+    .dateFormat{
+       display:none;
+     }
+    </style>
+    
+    <style type="text/css">
+    .custPopup{
+           background-color: white;           
+            border-width: 2px;
+            border-style: solid;
+            border-color: black;
+            z-index: 2;
+            left: 50%;
+            padding:10px;
+            position: fixed;
+            left:70%;
+            width: 500px;
+            margin-left: -500px;
+            top: 30%;
+            opacity:1;
+            
+            //margin: 4px 7px;
+            overflow-y:scroll;
+            height:200px
+            
+            border: 10px solid #ccc;
+            border-radius: 3px 3px 3px 3px;
+            color: #333333;
+            font-size: 14px;
+            
+
+        }
+        .popupBackground{
+            background-color: grey;
+            opacity: 0.96;
+            //filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+    </style>
+    
+    <apex:sectionheader title="" subtitle="{!IF(PageType == 'PatentAnalysis','Patent Analysis Requests','Prior Art Requests')}"/>     
+        
+    <apex:form id="form">    
+        
+        <apex:actionFunction name="applyFilter" action="{!applyFilter}" rerender="pb1" status="myStatus"/>
+        
+        <apex:outputlabel style="font-weight:bold;padding-right:5px;">Filter:</apex:outputlabel>    
+        <apex:selectList value="{!selectedFilter}" size="1" onchange="applyFilter();return false;">
+        <apex:selectOptions value="{!filterOptions}"/>
+        </apex:selectList>      
+        <apex:actionStatus startText="Refreshing..." id="myStatus" startStyle="padding-left:5px;color:red"/>
+        <apex:actionStatus startText="Saving..." id="myStatus2" startStyle="padding-left:5px;color:red"/>
+        <br/><br/>        
+        
+        <apex:pageBlock id="pb1" title="{!IF(PageType == 'PatentAnalysis','Patent Analysis Requests','Prior Art Requests')}">
+            <apex:pageMessages />
+            <apex:pageBlockTable id="requestList" value="{!analysisRequests}" var="analysisRequest"  rendered="{!analysisRequests.size > 0}">
+            
+                <apex:column headerValue="Rank" rendered="{!PageType=='PatentAnalysis'}">
+                    <apex:inputText value="{!analysisRequest.rowNumber}" rendered="{!isAdminView && analysisRequest.request.Status__c != 'Completed'}" style="width:30px;text-align:center;"/>
+                    <apex:outputText value="{!analysisRequest.rowNumber}" rendered="{!analysisRequest.request.Status__c == 'Completed' || !isAdminView}" style="width:30px;text-align:center;"/>                    
+                </apex:column>
+                
+                <apex:column headerValue="Request ID">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Request ID" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="Name" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName = 'Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                     
+                    <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Request Id</apex:outputLabel>
+                    </apex:outputpanel>
+                    </apex:facet>                
+                    <apex:outputLink value="{!recordURL}{!analysisRequest.request.Id}" id="theLink">{!analysisRequest.request.Name}</apex:outputLink> 
+                </apex:column>
+                
+                <apex:column headerValue="Status">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Status" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="status__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='status__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                     
+                    <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Status</apex:outputLabel>
+                    </apex:outputpanel>
+                    </apex:facet>
+                    <apex:inputField value="{!analysisRequest.request.Analysis_Type__c}" style="display:none" />    
+                    <apex:inputField rendered="{!isAdminView}" value="{!analysisRequest.request.Status__c}"/>
+                    <apex:outputField rendered="{!!isAdminView}" value="{!analysisRequest.request.Status__c}"/>
+                </apex:column>
+                
+                <apex:column headerValue="Assigned To">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                        <apex:commandLink action="{!sortData}" value="Assigned To" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                            <apex:param value="Assigned_To__c" name="sort" assignTo="{!columnName}" />
+                            <img src="{!IF(columnName='Assigned_To__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                        </apex:commandLink>                                     
+                        <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Assigned To</apex:outputLabel>
+                    </apex:outputpanel>
+                    </apex:facet>          
+                    <apex:inputField rendered="{!isAdminView}" value="{!analysisRequest.request.Assigned_To__c}"/>
+                    <apex:outputField rendered="{!!isAdminView}" value="{!analysisRequest.request.Assigned_To__c}"/>
+                </apex:column>
+                
+                           
+                <apex:column HeaderValue="Request">                
+                <div style="width:200px">{!analysisRequest.request.Request__c}</div>
+                </apex:column>
+                
+                
+                <apex:column headerValue="Priority">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Priority" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="Priority__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Priority__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                     
+                    <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Priority</apex:outputLabel>
+                    </apex:outputpanel>
+                </apex:facet>                                               
+                <apex:outputField value="{!analysisRequest.request.Priority__c}"/>
+                </apex:column>
+                
+                
+                
+                <apex:column Headervalue="Due Date">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Due Date" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="Due_Date__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Due_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                     
+                    <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Due Date</apex:outputLabel>
+                    </apex:outputpanel>
+                </apex:facet>
+                <apex:outputField value="{!analysisRequest.request.Due_Date__c}" />
+                </apex:column>
+                
+                <apex:column headerValue="Vendor Search Due Date"  rendered="{!PageType=='PriorArt'}">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                        <apex:commandLink action="{!sortData}" value="Vendor Search Due Date" rerender="pb1">
+                            <apex:param value="Vendor_Search_Due_Date__c" name="sort" assignTo="{!columnName}" />
+                            <img src="{!IF(columnName='Vendor_Search_Due_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                        </apex:commandLink>                                                             
+                    </apex:outputpanel>
+                    </apex:facet>          
+                    <apex:inputField rendered="{!isAdminView}" value="{!analysisRequest.request.Vendor_Search_Due_Date__c}"/>
+                    <apex:outputField rendered="{!!isAdminView}" value="{!analysisRequest.request.Vendor_Search_Due_Date__c}"/>
+                </apex:column>
+                
+                <apex:column headerValue="Hours">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Hours" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="Hours__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Hours__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                     
+                    <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Hours</apex:outputLabel>
+                    </apex:outputpanel>
+                </apex:facet>
+                <apex:outputField value="{!analysisRequest.request.Hours__c}" />                
+                </apex:column>
+                
+                <apex:column headerValue="Acquisition Opp">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Acquisition Opp" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="Acquisition_Opportunity__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Acquisition_Opportunity__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                     
+                    <apex:outputLabel rendered="{!PageType=='PatentAnalysis'}">Acquisition Opp</apex:outputLabel>
+                    </apex:outputpanel>
+                </apex:facet>     
+                
+                     <apex:outputField value="{!analysisRequest.request.Acquisition_Opportunity__c }" />
+                </apex:column>
+                
+                
+                <apex:column headerValue="Member Opp" rendered="{!(PageType == 'PatentAnalysis')}">
+                    <div style="width:100px;word-wrap: break-word;"> <apex:outputField value="{!analysisRequest.request.Opportunity__c}" /></div>
+                </apex:column>
+               <div style="width:100px;word-wrap: break-word;"> <apex:column rendered="{!(PageType == 'PatentAnalysis')}" value="{!analysisRequest.request.Requested_By__c}"/></div>
+                
+                <apex:column headerValue="Assigned Searcher" rendered="{!!(PageType == 'PatentAnalysis')}">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Assigned Searcher" rerender="pb1">
+                        <apex:param value="Assigned_Searcher__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Assigned_Searcher__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                                         
+                    </apex:outputpanel>
+                </apex:facet>                              
+                    <div style="width:100px;word-wrap: break-word;"> <apex:outputField value="{!analysisRequest.request.Assigned_Searcher__c}" /></div>
+                </apex:column>
+               
+               <apex:column rendered="{!!(PageType == 'PatentAnalysis')}" headerValue="Patent Id">               
+               <apex:facet name="header">                   
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Patent ID" rerender="pb1">
+                        <apex:param value="Patent__r.Name" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Patent__r.Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink>                                                         
+                    </apex:outputpanel>
+                </apex:facet>
+                            
+               <apex:outputLink value="/{!analysisRequest.request.Patent__c}" target="_blank">{!analysisRequest.request.Patent__r.Name}</apex:outputLink>
+               </apex:column>
+               
+               <apex:column HeaderValue="Other Notes" rendered="{!!(PageType == 'PatentAnalysis')}">                
+                <div style="width:200px">{!analysisRequest.request.Other_Notes__c}</div>
+                </apex:column>
+                
+                <apex:column Headervalue="Completed Date" rendered="{!PageType=='PriorArt'}">
+                <apex:facet name="header">                  
+                    <apex:outputpanel >
+                    <apex:commandLink action="{!sortData}" value="Completed Date" rerender="pb1" rendered="{!PageType=='PriorArt'}">
+                        <apex:param value="Completed_Date__c" name="sort" assignTo="{!columnName}" />
+                        <img src="{!IF(columnName='Completed_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                    </apex:commandLink> 
+                    </apex:outputpanel>
+                </apex:facet>
+                <apex:outputField value="{!analysisRequest.request.Completed_Date__c}" />
+                </apex:column>
+                
+                 <apex:column rendered="{!PageType=='PriorArt'}">                                             
+                   <apex:facet name="header">Related Content</apex:facet>   
+                     <apex:repeat value="{!analysisRequest.listContentRecords}" var="contentItem" id="theRepeat">
+                        <apex:outputLink target="_blank" value="/{!contentItem.Id}" id="theValue">{!contentItem.Title}</apex:outputLink><br/>
+                    </apex:repeat>                  
+                </apex:column>
+                
+            </apex:pageBlockTable>
+            
+            <apex:pageblockButtons rendered="{!isAdminView && analysisRequests.size > 0}">
+<!--                <apex:commandButton action="{!evaluateRequestRankings}" value="Evaluate Rankings"/>-->
+                <apex:commandButton action="{!saveRequests}" value="Save the Queue" rerender="pb1" status="myStatus2"/>
+            </apex:pageblockButtons>            
+            <apex:outputPanel rendered="{!analysisRequests.size == 0}">No Record To display</apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    
+</apex:page>

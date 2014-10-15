@@ -1,0 +1,49 @@
+<apex:page standardcontroller="Product_or_Service__c" extensions="FetchTechTagAcqDetails" showHeader="false">    
+    <script>   
+    window.onload=function(){       
+        FetchTechTagActFn();
+    }       
+    function openAcqTab(id){                
+        //window.open('https://cs15.salesforce.com/'+id);
+        window.open('{!$Label.Instance_URL}'+id);
+    }
+    
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >       
+        <apex:actionFunction name="FetchTechTagActFn" action="{!FetchTechTagDetails}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>       
+          
+        <apex:pageBlock id="pgblk">  
+        Total Relevant Acquisition Records : {!acqlwPageInfo.Count}      
+            <apex:pageBlockTable value="{!FetchTechTagAcqDetailsWrapList}" var="resp" id="pgblktbl" rendered="{!FetchTechTagAcqDetailsWrapList.size > 0}">                                         
+                    <apex:column headerValue="Acquisition Name">
+                    <!--apex:commandLink value="{!resp.acquisition_name}" target="_self" onclick="openAcqTab('{!resp.acquisition_id}')" rerender="abc"/-->
+                    <apex:outputLink value="{!$Label.Instance_URL}{!resp.acquisition_id}" target="_self" onclick="openAcqTab('{!resp.acquisition_id}');return false;">{!resp.acquisition_name}</apex:outputLink>                                                              
+                                                  
+                    </apex:column>
+                    <apex:column value="{!resp.stage}" headerValue="Stage"/>
+                    <apex:column value="{!resp.seller_broker_name}" headerValue="Seller / Broker"/> 
+                    <apex:column >
+                  <apex:facet name="header">
+                  {!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}
+                  </apex:facet>
+                  <!-- <apex:outputText value="{0,date,MM/dd/yyyy HH:mm:ss}">
+                  <apex:param value="{!resp.createddateValFormat}"/>                  
+                  </apex:outputText> -->
+                  <apex:outputText value="{!resp.createddateValFormat}"/> 
+                  
+              </apex:column>                                   
+            </apex:pageBlockTable>   <br/><br/>
+        <div style="float:right;">
+        Page : {!acqLicPageNum} of {!acqlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevLicensees}"  disabled="{!acqLicPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreLicensees}" disabled="{!acqlwPageInfo!=null && acqlwPageInfo.pages!=null && acqLicPageNum!=null && acqlwPageInfo.pages <= acqLicPageNum}" value="Next" rerender="pgblk,pgMsg"/>
+        </div>
+        <apex:outputText id="outTxt" rendered="{!noRec}">                  
+        <b>No Relevant Acquisition Records Found</b>
+        </apex:outputText>        
+    </apex:pageBlock>        
+           <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-weight:bold;color:red" ></apex:actionStatus>
+ </apex:form>
+
+</apex:page>

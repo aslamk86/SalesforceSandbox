@@ -1,0 +1,98 @@
+<apex:page StandardController="Acquisition_Opportunity__c" extensions="PatentsInSuitController">
+  <apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock id="pblock" rendered="{!(lstPatentsInSuit.size > 0)}">
+      <apex:pageBlockButtons location="top">
+   	   	<apex:commandButton value="Export" onclick="window.open('/apex/PatentsInSuit_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;"/> 
+   	   </apex:pageBlockButtons>
+   	   <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+      <apex:pageBlockTable value="{!lstPatentsInSuit}" var="ptInSuit">
+        
+       <!--  <apex:column headerValue="{!$ObjectType.Patent__c.Fields.Name.Label}">
+          <apex:outputLink value="/{!ptInSuit.Patent__r.Id}" title="View Patent" target="_blank">
+            <apex:outputField value="{!ptInSuit.Patent__r.Name}"/>
+          </apex:outputLink> 
+          
+        </apex:column>  -->
+        
+<!--        style="width:15%;"-->
+        <apex:column headerValue="{!$ObjectType.Patent__c.Fields.Patent_No__c.Label}" >
+        	<apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Patent__c.Fields.Patent_No__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Patent__r.Patent_No__c" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Patent__r.Patent_No__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+          <apex:outputLink value="/{!ptInSuit.Patent__r.Id}" title="View Patent" target="_blank">
+          <apex:outputField value="{!ptInSuit.Patent__r.Patent_No__c}"/>
+          </apex:outputLink>
+        </apex:column>
+<!--        style="width:70%;"-->
+        <apex:column headerValue="{!$ObjectType.Patent__c.Fields.Title__c.Label}" >
+          <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Patent__c.Fields.Title__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Patent__r.Title__c" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Patent__r.Title__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+          <apex:outputField value="{!ptInSuit.Patent__r.Title__c}"/>
+        </apex:column>
+        
+        <apex:column headerValue="{!$ObjectType.Patent__c.Fields.File_Date__c.Label}" >
+           <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Patent__c.Fields.File_Date__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Patent__r.File_Date__c" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Patent__r.File_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+          <apex:outputField value="{!ptInSuit.Patent__r.File_Date__c}"/>
+        </apex:column>
+        
+        <apex:column headerValue="{!$ObjectType.Patent__c.Fields.Issue_Date__c.Label}" >
+           <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Patent__c.Fields.Issue_Date__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Patent__r.Issue_Date__c" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Patent__r.Issue_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+          <apex:outputField value="{!ptInSuit.Patent__r.Issue_Date__c}"/>
+        </apex:column>
+        
+<!--        style="width:15%;"-->
+        <apex:column headerValue="{!$ObjectType.Patent__c.Fields.Priority_Date__c.Label}" >
+           <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Patent__c.Fields.Priority_Date__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Patent__r.Priority_Date__c" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Patent__r.Priority_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+           
+          <apex:outputField value="{!ptInSuit.Patent__r.Priority_Date__c}"/>
+        </apex:column>
+
+        <apex:column headerValue="{!$ObjectType.Patent__c.Fields.Estimated_Expiration_Date__c.Label}" >
+          <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Patent__c.Fields.Estimated_Expiration_Date__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Patent__r.Estimated_Expiration_Date__c" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Patent__r.Estimated_Expiration_Date__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+          <apex:outputField value="{!ptInSuit.Patent__r.Estimated_Expiration_Date__c}"/>
+        </apex:column>
+        
+      </apex:pageBlockTable>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

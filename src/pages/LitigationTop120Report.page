@@ -1,0 +1,124 @@
+<apex:page id="pg" controller="LitigationReportController" contentType="application/vnd.ms-excel#Litigationtop120report.xls">
+{!xmlheader}
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" 
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author></Author>
+  <LastAuthor></LastAuthor>
+  <Company></Company>
+  <Version>11.6360</Version>
+  </DocumentProperties>
+  
+  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+    <WindowHeight>8535</WindowHeight>
+    <WindowWidth>12345</WindowWidth>
+    <WindowTopX>480</WindowTopX>
+    <WindowTopY>90</WindowTopY>
+    <ProtectStructure>False</ProtectStructure>
+    <ProtectWindows>False</ProtectWindows>
+  </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+  <Alignment ss:Vertical="Bottom"/>
+  <Borders/>
+  <Font/>
+  <Interior/>
+  <NumberFormat/>
+  <Protection/>
+  </Style>
+  <Style ss:ID="s23">
+  <Font x:Family="Swiss" ss:Bold="1"/>
+  </Style>
+  </Styles>
+<!--  -->
+
+  <Worksheet ss:Name="LitigationTop120report">
+    <Table ss:ExpandedColumnCount="25">
+    
+        <Column ss:Width="140"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="60"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="110"/>
+        <Column ss:Width="140"/>
+        <Column ss:Width="120"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="120"/>
+        <Column ss:Width="100"/>
+        <Column ss:Width="120"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="140"/>
+        <Column ss:Width="140"/>
+        <Column ss:Width="120"/>
+        <Column ss:Width="120"/>
+        <Column ss:Width="140"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="80"/>
+        <Column ss:Width="140"/>
+          
+    <Row ss:StyleID="s23">
+        <Cell><Data ss:Type="String">Acquisition Opportunity Id</Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Name.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Priority__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Deal_Probability__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Degree_of_Dialogue__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Primary_Market_Sector__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Docket_Number__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Filed__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Active_or_Closed__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Account__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.SellersExplicitExpectation__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Current_Status__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Last_Action__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.NextStep__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Action_Item_Assigned_To__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String">Defendant/NonParty Account Name</Data></Cell>
+        <Cell><Data ss:Type="String">Type</Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Account.Fields.Top_Prospect_List__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Defendant__c.Fields.Date_Terminated__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Defendant__c.Fields.RPX_Rate_del__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String">1 or 99</Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Suit_Ranking__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String">Prospect Stage</Data></Cell>
+        <Cell><Data ss:Type="String">Prioritization Type</Data></Cell>
+    </Row>
+    <apex:repeat value="{!LitigationReportList}" var="record">
+      <Row>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.acqOppId)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.acqOppName)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.Priority)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DealProbability)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DegreeofDialogue)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.PrimaryMarketSector)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DocketNumber)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.Filed)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.ActiveOrClosed)}"/></Data></Cell>  
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.AccountName)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.SellersExplicitExpectation)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.CurrentStatus)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.LastAction)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.NextStep)}"/></Data></Cell>       
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.ActionItemAssignedTo)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DefendantOrNonPartyAccount)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DefendantOrNonPartyAccountRecordType)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DefendantAccount_TopProspectList)}"/></Data></Cell>     
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.DefendantDateTerminated)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.RPX_Rate)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.indicator)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.SuitRanking)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.oppStage)}"/></Data></Cell>      
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(record.NPEorDefendantFrom)}"/></Data></Cell>
+      </Row>
+    </apex:repeat>
+    </Table>
+  </Worksheet> 
+</Workbook>
+<apex:outputText value="{!endfile}" escape="false"/>
+</apex:page>

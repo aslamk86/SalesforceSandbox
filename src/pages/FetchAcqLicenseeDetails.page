@@ -1,0 +1,70 @@
+<apex:page standardcontroller="Acquisition_Opportunity__c" extensions="FetchAcquisitionLicenseeDetails" >    
+    <script>   
+    window.onload=function(){       
+        FetchLicenseeActFn();
+    }       
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >       
+        <apex:actionFunction name="FetchLicenseeActFn" action="{!FetchLicenseeDetails}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>       
+     
+     <apex:pageBlock id="pgblk">   
+     Total Licensee Records : {!acqlwPageInfo.Count}      
+     <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" />
+        <apex:pageBlockTable value="{!FetchLicenseeDetailsWrapList}" var="resp" id="pgblktbl" rendered="{!FetchLicenseeDetailsWrapList.size > 0}">
+                <!-- <apex:column value="{!resp.patent_family_id}" headerValue="Patent Family Id"/> -->
+                    <apex:column value="{!resp.patent_family_Name}" >                   
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Patent Family Name" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="patent_family_name" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'patent_family_name',IF(isPFAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                    <apex:column value="{!resp.patent_number}" >                                                           
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Patent Number" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="patent_number" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'patent_number',IF(isPatAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>
+                     <apex:column value="{!resp.company_name}" >                                                           
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Company Name" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="company_name" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'company_name',IF(isCNAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>                                       
+                    <apex:column value="{!resp.expiry_date}" >
+                        <apex:facet name="header">
+                            <apex:outputPanel >
+                                <apex:commandLink action="{!sortData}" value="Expiry Date" rerender="pgblk" status="waitStatus">
+                                    <apex:param value="expiry_date" name="sort" assignTo="{!currentSortColumn}"/>   
+                                </apex:commandLink>
+                                <img src="{!IF(currentSortColumn = 'expiry_date',IF(isEDAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputPanel>
+                        </apex:facet>
+                    </apex:column>        
+                <apex:column value="{!resp.analyst_notes}" headerValue="Analyst Notes"/>                
+        </apex:pageBlockTable>   <br/><br/>
+        <div style="float:right;">
+        Page : {!acqLicPageNum} of {!acqlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevLicensees}"  disabled="{!acqLicPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreLicensees}" disabled="{!acqlwPageInfo!=null && acqlwPageInfo.pages!=null && acqLicPageNum!=null && acqlwPageInfo.pages <= acqLicPageNum}" value="Next" rerender="pgblk,pgMsg"/>
+        </div>
+        <apex:outputText id="outTxt" rendered="{!noRec}">                  
+        <b>No Licensee Records Found</b>
+        </apex:outputText>        
+    </apex:pageBlock>        
+           <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-weight:bold;color:red" ></apex:actionStatus>
+ </apex:form>
+
+</apex:page>

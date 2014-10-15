@@ -1,0 +1,392 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!getContactAndRelatedCompanies}" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        
+.crumbs { margin-left:auto; margin-right:auto; position:relative; }
+.crumbs li a{
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin-left: -13px;
+    padding: 5px 17px 8px 15px;
+    position: relative;
+    text-decoration: none;
+    font-weight:bold;
+}
+.crumbs li a:hover {
+    color: white;
+}
+
+.selected{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    width:133px;
+    background-position: 100% -96px;
+}
+
+.otherSteps{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    background-position: 100% -48px;
+    width:134px;
+    cursor: pointer;
+}
+
+li.form-section{
+    padding-left:0px;
+}
+    </style>         
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <apex:inputHidden value="{!Application__c.Status__c}"/>
+    <apex:inputHidden value="{!Application__c.Primary_Contact__c}"/>
+    <apex:inputHidden value="{!Application__c.Short_Form__c}"/>    
+
+    <div style="display:inline-block;width:100%;">
+
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+    </div>
+    <div>
+        <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">{!$Label.Home}</apex:outputLink>
+    </div>
+
+    </div>
+   
+         <fieldset>
+            <div style="text-align:center;">
+                <h5>RPXIS Insurance Application</h5>
+                <br/><br />
+                <!-- apex:outputText value="General Information"/> >> <apex:commandLink value="Financial Information" action="{!next1}"/> >> <apex:commandLink value="Anticipated Future" action="{!next2}"/> >> <apex:commandLink value="NPE History" action="{!next3}"/> >> <apex:commandLink value="IP Practices" action="{!next4}"/> >> <apex:commandLink value="Summary" action="{!next5}"/>
+                --> 
+                <div>
+                <ul class="crumbs">
+                    <li><a href="" class="selected" style="z-index:8;">General Information</a></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:7;" action="{!next1}">Financial Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:6;" action="{!next2}">Forward Looking Events</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:5;" action="{!next3}">NPE History</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:4;" action="{!next4}">IP Practices</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:3;" action="{!next5}">Summary</apex:commandLink></li>                                        
+                </ul>
+                </div>
+                <div style="text-align:center; padding-top:50px;">
+                    <apex:commandButton value="Save" action="{!saveApplication}"/>
+                    <apex:commandButton value="Next" action="{!next1}"/>
+                </div>   
+            </div>           
+            <ul>
+                <li class="form-section" style="padding-left: 0;">General Information</li>
+                <li  style="margin-bottom:30px;">
+               <b> Please provide basic information about the Applicant</b>
+                </li>
+                                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Applicant Company Name" for="one-b" />
+                    <apex:outputText value="{!Application__c.Company_Name__r.Name}" id="one-b"  />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Parent Company Name" for="one-a" />
+                    <apex:inputField value="{!Application__c.Parent_Company__c}" id="one-a">
+                        <apex:actionSupport event="onchange" reRender="parentSymbol"/>
+                    </apex:inputField>
+                    <div><apex:outputLabel >(if different than Applicant Name)</apex:outputLabel></div>
+                </li>
+
+                <li class="form-section" style="padding-left: 0;">Contact Information</li>
+                <li><b>{!$Label.Insurance_ContactInfo}</b></li>
+                <apex:outputPanel id="contactSection">
+                <table style="width:80%;margin:auto;">
+                <tr>
+                    <th><b>First Name</b></th><th><b>Last Name</b></th><th><b>Email</b></th><th><b>Phone</b></th><th><b>Primary Contact?</b></th><!--<th><b>Invite Collaborator</b></th> -->
+                </tr>
+
+                <apex:repeat value="{!contactWrapperList}" var="cont">                    
+                    <tr>
+                    <td><apex:outputField value="{!cont.con.firstName}" rendered="{!cont.con.id!=null}"/><apex:inputField value="{!cont.con.firstName}" rendered="{!cont.con.id==null}"/></td>
+                    <td><apex:outputField value="{!cont.con.LastName}" rendered="{!cont.con.id!=null}"/><apex:inputField value="{!cont.con.LastName}" rendered="{!cont.con.id==null}"/></td>
+                    <td><apex:outputField value="{!cont.con.Email}" rendered="{!cont.con.id!=null}" /><apex:inputField required="true" value="{!cont.con.Email}" rendered="{!cont.con.id==null}" /></td>
+                    <td><apex:outputField value="{!cont.con.Phone}" rendered="{!cont.con.id!=null}" /><apex:inputField value="{!cont.con.Phone}" rendered="{!cont.con.id==null}" /></td>
+                    <td><apex:outputPanel rendered="{!cont.con.id!=null}">
+                            <INPUT TYPE="radio" NAME="chosen" id="{!cont.con.id}" VALUE="{!cont.con.id}" onclick="changeValue(this,'{!$Component.RadioButtonValue}');"/>
+                        </apex:outputPanel>    
+                        <apex:commandButton value="Save Contact" action="{!saveContact}" rendered="{!cont.con.id==null}" reRender="contactSection" />
+                        <apex:commandButton value="Cancel" action="{!cancelNewContact}" rendered="{!cont.con.id==null}" reRender="contactSection" immediate="true"/>
+                    </td>
+                   <!-- <td>
+                 
+                        <apex:commandButton value="Invite" action="{!createInviteReq}" reRender="abc" oncomplete="alert('{!InvReqMsg}')" rendered="{!cont.dispInvite}">
+                            <apex:param value="{!cont.con.id}" assignTo="{!invReqConId}" id="x" name="x"/>
+                        </apex:commandButton>
+                        
+                        <apex:outputText value="Access Granted" rendered="{!Not(cont.dispInvite)}"> </apex:outputText>
+                    </td> -->
+                    </tr>
+                </apex:repeat>
+                </table>    <br/>
+                 <div style="text-align:center;">
+                <br/>
+                <apex:commandButton value="Add Contact" action="{!addNewContact}" reRender="contactSection"/>
+                </div>
+                <li class="form-section" style="padding-left: 0;">Applicant Address</li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Street" for="one-c" />
+                    <apex:inputField value="{!Application__c.Company_Address__c}" id="one-c" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Street2" for="one-d" />
+                    <apex:inputField value="{!Application__c.Company_Address_Street_2__c}" id="one-d" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="City" for="one-e" />
+                    <apex:inputField value="{!Application__c.Company_Address_City__c}" id="one-e" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="State" for="one-f" />
+                    <apex:selectList size="1" value="{!Application__c.Company_Address_State__c}" id="one-f">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="AK" itemLabel="AK"/>
+                        <apex:selectOption itemvalue="AL" itemLabel="AL"/>
+                        <apex:selectOption itemvalue="AR" itemLabel="AR"/>
+                        <apex:selectOption itemvalue="AZ" itemLabel="AZ"/>                        
+                        <apex:selectOption itemvalue="CA" itemLabel="CA"/>
+                        <apex:selectOption itemvalue="CO" itemLabel="CO"/>
+                        <apex:selectOption itemvalue="CT" itemLabel="CT"/>
+                        <apex:selectOption itemvalue="DE" itemLabel="DE"/>
+                        <apex:selectOption itemvalue="FL" itemLabel="FL"/>
+                        <apex:selectOption itemvalue="GA" itemLabel="GA"/>
+                        <apex:selectOption itemvalue="HI" itemLabel="HI"/>
+                        <apex:selectOption itemvalue="IA" itemLabel="IA"/>
+                        <apex:selectOption itemvalue="ID" itemLabel="ID"/>
+                        <apex:selectOption itemvalue="IL" itemLabel="IL"/>
+                        <apex:selectOption itemvalue="IN" itemLabel="IN"/>                        
+                        <apex:selectOption itemvalue="KS" itemLabel="KS"/>
+                        <apex:selectOption itemvalue="KY" itemLabel="KY"/>
+                        <apex:selectOption itemvalue="LA" itemLabel="LA"/>
+                        <apex:selectOption itemvalue="MA" itemLabel="MA"/>
+                        <apex:selectOption itemvalue="MD" itemLabel="MD"/>
+                        <apex:selectOption itemvalue="ME" itemLabel="ME"/>                                               
+                        <apex:selectOption itemvalue="MI" itemLabel="MI"/>
+                        <apex:selectOption itemvalue="MN" itemLabel="MN"/>
+                        <apex:selectOption itemvalue="MO" itemLabel="MO"/>
+                        <apex:selectOption itemvalue="MS" itemLabel="MS"/>                       
+                        <apex:selectOption itemvalue="MT" itemLabel="MT"/>
+                        <apex:selectOption itemvalue="NC" itemLabel="NC"/>
+                        <apex:selectOption itemvalue="ND" itemLabel="ND"/>
+                        <apex:selectOption itemvalue="NE" itemLabel="NE"/>
+                        <apex:selectOption itemvalue="NH" itemLabel="NH"/>
+                        <apex:selectOption itemvalue="NJ" itemLabel="NJ"/>
+                        <apex:selectOption itemvalue="NM" itemLabel="NM"/>
+                        <apex:selectOption itemvalue="NV" itemLabel="NV"/>                                                                                                                       
+                        <apex:selectOption itemvalue="NY" itemLabel="NY"/>  
+                        <apex:selectOption itemvalue="OH" itemLabel="OH"/>
+                        <apex:selectOption itemvalue="OK" itemLabel="OK"/>
+                        <apex:selectOption itemvalue="OR" itemLabel="OR"/>
+                        <apex:selectOption itemvalue="PA" itemLabel="PA"/>
+                        <apex:selectOption itemvalue="RI" itemLabel="RI"/>
+                        <apex:selectOption itemvalue="SC" itemLabel="SC"/>
+                        <apex:selectOption itemvalue="SD" itemLabel="SD"/>
+                        <apex:selectOption itemvalue="TN" itemLabel="TN"/>
+                        <apex:selectOption itemvalue="TX" itemLabel="TX"/>
+                        <apex:selectOption itemvalue="UT" itemLabel="UT"/>
+                        <apex:selectOption itemvalue="VT" itemLabel="VT"/>
+                        <apex:selectOption itemvalue="VA" itemLabel="VA"/>
+                        <apex:selectOption itemvalue="WA" itemLabel="WA"/>
+                        <apex:selectOption itemvalue="WI" itemLabel="WI"/>
+                        <apex:selectOption itemvalue="WV" itemLabel="WV"/>                        
+                        <apex:selectOption itemvalue="WY" itemLabel="WY"/>                                                    
+                    </apex:selectList>
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Country" for="one-g" />
+                    <apex:inputField value="{!Application__c.Company_Address_Country__c}" id="one-g" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Zipcode" for="one-h" />
+                    <apex:inputField value="{!Application__c.Company_Address_Zip_Code__c}" id="one-h" />
+                </li>
+                <li class="form-section"></li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Company Website" for="one-i" />
+                    <apex:inputField value="{!Application__c.Company_Website__c}" id="one-i" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="What Year was the Applicant founded?" for="one-j" />
+                    <apex:inputField value="{!Application__c.What_Year_was_the_Applicant_founded__c}" id="one-j" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="List all other names under which the Applicant operates:" for="one-k" />
+                    <apex:inputField value="{!Application__c.All_other_names_under_which_Applicant__c}" id="one-k" />
+                </li>
+                                                        
+                
+                <apex:inputHidden value="{!contactId}" id="RadioButtonValue" />
+                <script>
+                    setSelected();
+                    function changeValue(input, textid) {
+                        document.getElementById(textid).value = input.value;
+                    }
+                    function setSelected(){
+                        document.getElementById('{!thisApplication.Primary_Contact__c}').checked = true;
+                    }
+                </script>
+                </apex:outputPanel> 
+               
+                <li class="form-section" style="padding-left: 0;">Company Structure</li>
+                <li> <b>{!$Label.Insurance_CompanyStructure}</b></li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Entity Type"  for="one-m"/>
+                    <apex:selectList size="1" value="{!Application__c.Entity_Type__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Corporation" itemLabel="Corporation"/>
+                        <apex:selectOption itemvalue="Partnership" itemLabel="Partnership"/>    
+                        <apex:selectOption itemvalue="LLC" itemLabel="LLC"/>
+                    </apex:selectList>                  
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:actionRegion >
+                        <apex:outputLabel value="Is Applicant Company Publicly Traded?" for="one-n"/>
+                        <apex:selectList size="1" value="{!Application__c.Is_Company_Publicly_Traded__c}">
+                            <apex:selectOption itemvalue="" itemLabel="Select"/>
+                            <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                            <apex:selectOption itemvalue="No" itemLabel="No"/>
+                            <apex:actionSupport event="onchange" reRender="tickerSymbol1"/>
+                        </apex:selectList>
+                    </apex:actionRegion>
+                </li>
+                <apex:outputPanel layout="none" id="tickerSymbol1">
+                <apex:outputPanel rendered="{!Application__c.Is_Company_Publicly_Traded__c=='Yes'}">
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Ticker Symbol" for="one-o" />
+                    <apex:inputField value="{!Application__c.Ticker_Symbol__c}" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Market" for="one-o" />
+                    <apex:inputField value="{!Application__c.Market__c}" id="one-o" />
+                </li>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                
+                <apex:outputPanel layout="none" id="parentSymbol">
+                <apex:outputPanel rendered="{!Application__c.Parent_Company__c!=null}">
+                <li style="margin-bottom:30px;">
+                    <apex:actionRegion >
+                        <apex:outputLabel value="Is Parent Company Publicly Traded?"  for="one-p"/>
+                        <apex:selectList size="1" value="{!Application__c.Is_Parent_Company_Publicly_Traded__c}">
+                            <apex:selectOption itemvalue="" itemLabel="Select"/>
+                            <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                            <apex:selectOption itemvalue="No" itemLabel="No"/>
+                            <apex:actionSupport event="onchange" reRender="tickerSymbol2"/>
+                        </apex:selectList>
+                </apex:actionRegion>
+                </li>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                
+                <apex:outputPanel layout="none" id="tickerSymbol2">
+                <apex:outputPanel rendered="{!Application__c.Is_Parent_Company_Publicly_Traded__c=='Yes'}">
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Ticker Symbol" for="one-q" />
+                    <apex:inputField value="{!Application__c.Parent_Company_Ticker_Symbol__c}" id="one-q" />
+                </li>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                
+                
+                
+                
+                
+                <li class="form-section" style="padding-left: 0;">Business Operations</li>                
+                <fieldset>                
+                <b>Please indicate the following about your business:</b>                
+                <apex:outputPanel layout="block" style="padding-top:20px;">
+                    <apex:actionRegion >
+                        <apex:outputLabel value="Does the Applicant have E-Commerce capabilities?"  for="one-l"/>
+                        <apex:selectList size="1" value="{!Application__c.E_Commerce_capabilities__c}">
+                            <apex:selectOption itemvalue="" itemLabel="Select"/>
+                            <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                            <apex:selectOption itemvalue="No" itemLabel="No"/>
+                            <apex:actionSupport event="onchange" reRender="developeYourself"/>
+                        </apex:selectList>
+                    </apex:actionRegion>
+                </apex:outputPanel>
+                
+                <br/>
+                
+                <apex:outputPanel id="developeYourself" layout="none">
+                <apex:outputPanel rendered="{!Application__c.E_Commerce_capabilities__c=='Yes'}" >
+                <apex:actionRegion >
+                <apex:outputLabel value="Did the Applicant develop them all?"  />
+                    <apex:selectList size="1" value="{!Application__c.Did_you_develop_them_all_yourself__c}">
+                        <apex:selectOption itemvalue="" itemLabel="Select"/>
+                        <apex:selectOption itemvalue="Yes" itemLabel="Yes"/>
+                        <apex:selectOption itemvalue="No" itemLabel="No"/>
+                        <apex:actionSupport event="onchange" reRender="ecomm"/>
+                    </apex:selectList>
+                </apex:actionRegion>
+                
+                </apex:outputPanel>
+                </apex:outputPanel>                
+                
+                <br/>
+                
+                <apex:outputPanel id="ecomm" layout="none">
+                <apex:outputPanel rendered="{!Application__c.Did_you_develop_them_all_yourself__c=='No'}" >
+                <apex:outputLabel style="width:100%;margin-left:-340px;padding-top:50px;" value="List the company/ies that provide the Applicant's e-commerce platform and capabilities:" /><br/><br/><br/><br/>
+                <apex:outputPanel id="ecommerce"> <br/>                
+                <apex:repeat value="{!ecommCompany}" var="rel" >
+                    <li><apex:outputLabel value="" style="width:300px;"/>
+                    <apex:inputField value="{!rel.Related_Account_User_Input__c}" /></li>
+                </apex:repeat>
+                </apex:outputPanel>
+                <apex:commandLink value="Add More" reRender="ecommerce" action="{!addEcomm}" style="padding-left:380px"/>                
+                </apex:outputPanel>
+                </apex:outputPanel>
+                </fieldset>            
+                <fieldset>
+
+                <apex:outputLabel value="List the Applicant's top competitors:" /><br/><br/>                
+                <apex:outputPanel id="principalCompetitors">
+                <apex:repeat value="{!competitorCompany}" var="rel">
+                    <li><apex:outputLabel value="" style="width:300px;"/>
+                    <apex:inputField value="{!rel.Related_Account_User_Input__c}"/></li>
+                </apex:repeat>
+                </apex:outputPanel>
+                <apex:commandLink value="Add More" reRender="principalCompetitors" action="{!addCompetitor}" style="padding-left:380px"/>
+                </fieldset>
+                
+                <fieldset>
+                <apex:outputLabel value="List the Applicant's top suppliers:" /><br/><br/><br/>        
+                <apex:outputPanel id="suppliers">
+                <apex:repeat value="{!supplierCompany}" var="rel">
+                    <li><apex:outputLabel value="" style="width:300px;"/>
+                    <apex:inputField value="{!rel.Related_Account_User_Input__c}"/></li>
+                </apex:repeat>
+                </apex:outputPanel>
+                <br />
+                <apex:commandLink value="Add More" reRender="suppliers" action="{!addSupplier}" style="padding-left:380px"/>
+                </fieldset>
+                
+                
+            </ul>
+            <br/><br/>
+            <div style="text-align:center;">
+            <apex:commandButton value="Save" action="{!saveApplication}" />
+            <apex:commandButton value="Next" action="{!next1}"/>
+            </div>
+            <br/>
+            <div style="display:inline-block;width:100%;">
+               <apex:image value="{!$Resource.RPXLogo}" style="float:left; height:20px;" /> 
+            
+                <apex:outputText value="NPE Patent Infringement Expense Policy" style="margin-left: 260px;"/>
+                                   
+                <apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank" style="float:right;">Legal Notice</apex:outputLink>
+            </div>
+         </fieldset>
+    </apex:form>
+</apex:page>

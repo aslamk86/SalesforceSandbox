@@ -1,0 +1,3 @@
+<apex:page id="evernoteAcquisitionPage" standardController="Acquisition_Opportunity__c">
+    <Evernote:EvernoteIframeComponent objectType="Acquisition_Opportunity__c" salesforceRecordId="{!Acquisition_Opportunity__c.id}" evernoteURI=""></Evernote:EvernoteIframeComponent>
+</apex:page>

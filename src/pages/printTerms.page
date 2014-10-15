@@ -1,0 +1,27 @@
+<apex:page sidebar="false" showHeader="false" renderAs="pdf" title="Insurance Application">
+        
+    <div style="display:inline-block;">
+    <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+    </div>
+    <div>
+    <h1 style="font-size:20px;">Terms and Conditions</h1>     
+        IMPORTANT NOTICES AND CONFIDENTIALITY<br/><br/>
+                        <p>
+                        Last revised: October 7, 2014<br/><br/>
+All information submitted by the applicant (“you”) in this Application will be treated as confidential and not disclosed by the insurer (as described in this Application), RPX Insurance Services, LLC, or RPX Corporation (collectively, “RPXIS”) except to the extent the information (1) is publicly known and made generally available in the public domain prior to the time of submission or becomes publicly available through no action of RPXIS; (2) is already in the possession of RPXIS from a non-confidential source when submitted by you; (3) is obtained by RPXIS from a third party without a breach of such third party's obligations of confidentiality; or (4) is independently developed without use of or reference to your information.  RPXIS shall take reasonable measures to protect the secrecy of and avoid disclosure and unauthorized use of your confidential information. RPXIS may use submitted information for internal research and development, and any data generated from such information will not be shared or otherwise disclosed to third parties in any manner except in an anonymized form. 
+                        </p>
+                        <p>
+                        If you enter any information in this Application, that information will be saved automatically. Your information will be provided to our third party service providers, who will be obligated to protect the information and will use the information only in performing services for RPXIS.
+                        </p>
+                        <p>
+                        In addition, in the event that you are directly or indirectly working with any insurance brokers in connection with this Application, those insurance brokers will have access to all information that you enter in this Application. 
+                        </p>                        
+                        <p>
+                        The privacy of communication over the Internet cannot be guaranteed because the Internet is not a secure medium.  As a result, RPX cannot guarantee the security of any information entered or submitted in this Application.  Any transmission is at your own risk.  RPX does not assume any responsibility for any harm, loss or damage that may be caused by the entry or submission of information in this Application.  
+                        </p>
+                        <p>
+                        The individual accepting these terms on behalf of the applicant must be an authorized representative of the applicant.  Please click “I Agree” below to indicate your agreement to the above.
+                        </p>
+   </div>
+     
+</apex:page>

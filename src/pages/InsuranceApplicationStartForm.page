@@ -1,0 +1,219 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        .linkHeader {
+            text-decoration:none;
+        }
+        .custPopup{
+            background-color: white;
+            border-width: 2px;
+            border-style: solid;
+            z-index: 100;
+            left: 50%;
+            padding:10px;
+            position:absolute;
+            width: 300px;
+            margin-left: -120px;
+            margin-top: 120px;
+            
+        }
+        .popupBackground{
+            background-color:black;
+            opacity: 0.20;
+            filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 99;
+        }            
+    </style>
+    
+    
+    
+    
+    
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+
+    <apex:outputPanel id="tstpopup" layout="none">
+        <apex:outputPanel id="backPanel" styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+            <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+             <table id="innertable">
+                <tr>
+                    <td>By clicking Accept you agree to the <a href="#" onclick="document.getElementById('terms').style.display='block';document.getElementById('printterms').style.display='block';">Insurance Application Terms Of Service</a></td>
+                </tr>
+                <tr id="terms" style="display:none;">
+                    <td>
+                        <br/>
+                        <div style="height:200px; overflow-y: scroll; padding:3px;" >
+                        
+                        IMPORTANT NOTICES AND CONFIDENTIALITY<br/><br/>
+                        <p>
+                        Last revised: October 7, 2014<br/><br/>
+All information submitted by the applicant (“you”) in this Application will be treated as confidential and not disclosed by the insurer (as described in this Application), RPX Insurance Services, LLC, or RPX Corporation (collectively, “RPXIS”) except to the extent the information (1) is publicly known and made generally available in the public domain prior to the time of submission or becomes publicly available through no action of RPXIS; (2) is already in the possession of RPXIS from a non-confidential source when submitted by you; (3) is obtained by RPXIS from a third party without a breach of such third party's obligations of confidentiality; or (4) is independently developed without use of or reference to your information.  RPXIS shall take reasonable measures to protect the secrecy of and avoid disclosure and unauthorized use of your confidential information. RPXIS may use submitted information for internal research and development, and any data generated from such information will not be shared or otherwise disclosed to third parties in any manner except in an anonymized form. 
+                        </p>
+                        <p>
+                        If you enter any information in this Application, that information will be saved automatically. Your information will be provided to our third party service providers, who will be obligated to protect the information and will use the information only in performing services for RPXIS.
+                        </p>
+                        <p>
+                        In addition, in the event that you are directly or indirectly working with any insurance brokers in connection with this Application, those insurance brokers will have access to all information that you enter in this Application. 
+                        </p>                        
+                        <p>
+                        The privacy of communication over the Internet cannot be guaranteed because the Internet is not a secure medium.  As a result, RPX cannot guarantee the security of any information entered or submitted in this Application.  Any transmission is at your own risk.  RPX does not assume any responsibility for any harm, loss or damage that may be caused by the entry or submission of information in this Application.  
+                        </p>
+                        <p>
+                        The individual accepting these terms on behalf of the applicant must be an authorized representative of the applicant.  Please click “I Agree” below to indicate your agreement to the above.
+                        </p>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="printterms" style="display:none;">
+                    <td><apex:outputLink value="/apex/printTerms" target="_blank">Print Insurance Application Terms of Service</apex:outputLink></td>
+                </tr>
+                <tr>                        
+                    <td style="text-align:center;">
+                        <apex:commandButton value="I Agree" action="{!existingApplicationCommunity}" />
+                        &nbsp;&nbsp;<apex:commandLink value="Cancel" action="{!closePopup}" rerender="tstpopup" />
+                    </td>
+                </tr>                    
+                </table>
+            </apex:outputPanel>
+        </apex:outputPanel>
+    
+    
+    
+    <div style="display:inline-block;width:100%;">
+
+        <div>
+            <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+        </div>
+        <!-- div>
+            <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">Back</apex:outputLink>
+        </div -->
+
+    </div>
+    
+    <fieldset>
+    <div>
+    <h4>Welcome <i>{!$User.Firstname} {!$User.LastName}</i></h4>
+    <!-- div style="float:right"><a href="#" class="linkHeader"><b>Settings</b></a> | <a href="#" class="linkHeader"><b>Sign Out</b></a></div -->
+    </div>
+    <hr/>
+    <h6>Applicant Name : <i><apex:outputPanel rendered="{!$Profile.Name!='Customer Community Login User'}"><apex:inputField value="{!Application__c.Company_Name__c}" required="true" /></apex:outputPanel>
+        <apex:outputPanel rendered="{!$Profile.Name=='Customer Community Login User'}">{!companyName}</apex:outputPanel></i></h6>
+    <br/>
+    <apex:commandButton rendered="{!$Profile.Name!='Customer Community Login User'}" action="{!fetchApplications}" value="Search Applications" rerender="existingApplications"/>            
+    
+    <br/>
+    <p>
+        <span>To begin the application process, please select the application you wish to work on from the list below.  <br/><br/>
+The application will ask you for financial information, NPE assertion activity history and NPE litigation cost information.  The process will go more quickly if you have that information when you begin the application.  Answer all questions completely and to the best of your knowledge.  All information provided is important to the underwriting process and will be relied upon in generating your quotation terms.  <br/><br/>
+If you need to leave the application prior to completing all the questions you can resume the application where you leave off by logging back in to this page and selecting the application in progress.  The&nbsp;<apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank">Legal Notice</apex:outputLink> section provides important information about this Application, the coverage being applied for and RPX Insurance Services, LLC.
+</span>
+    </p>
+               
+    
+    <apex:outputPanel id="nestedAccounts">
+        <apex:pageBlock rendered="{!$Profile.Name=='Customer Community Login User'}">
+    
+    <apex:pageBlockTable value="{!allApplications}" var="app">
+        <apex:column headerValue="Application Number">  
+               {!app.Name}
+        </apex:column>
+         <apex:column headerValue="Company Name">
+              {!app.Company_Name__r.Name} 
+        </apex:column>    
+        <apex:column value="{!app.CreatedDate}"/>
+        <apex:column value="{!app.Status__c}"/>
+        <apex:column rendered="{!$Profile.Name!='Customer Community Login User'}">
+                    <apex:facet name="header">Last Modified By</apex:facet>
+                    {!app.LastModifiedBy.Name} 
+        </apex:column>
+        <apex:column >
+                    <apex:commandLink styleClass="btn" value="Continue Application" action="{!showPopUp}" rendered="{!app.Status__c=='Draft Application' && !app.Accepted_Terms__c}">
+                        <apex:param assignTo="{!existingApplication}"  id="existingApp" value="{!app.id}" name="existingApp"/>
+                    </apex:commandLink>
+                    <apex:commandLink styleClass="btn" value="Continue Application" action="{!existingApplication}" rendered="{!app.Status__c=='Draft Application' && app.Accepted_Terms__c}">
+                        <apex:param assignTo="{!existingApplication}"  id="existingAppAccepted" value="{!app.id}" name="existingAppAccepted"/>
+                    </apex:commandLink>
+                    <apex:commandLink styleClass="btn" value="Delete Application" action="{!deleteExistingApplication}" rendered="{!app.Status__c=='Draft Application' && $Profile.Name!='Customer Community Login User'}" rerender="existingApplications" onclick="if(!confirm('Are you sure you want to clear out all current data from the Application? Pressing Confirm will cause all data to be deleted and can not be reversed')){return};">
+                        <apex:param assignTo="{!existingApplication}"  id="deleteExistingApp" value="{!app.id}" name="deleteExistingApp"/>
+                    </apex:commandLink>
+                    <apex:commandLink styleClass="btn" value="Clone Application" action="{!cloneApplication}" rendered="{!app.Status__c=='Completed Application' && hasDraft==false && $Profile.Name!='Customer Community Login User'}">
+                        <apex:param assignTo="{!existingApplication}"  id="cloneApp" value="{!app.id}" name="cloneApp"/>
+                    </apex:commandLink>
+                    <apex:outputPanel rendered="{!app.Status__c!='Draft Application'}">
+                        <apex:outputLink styleClass="btn" value="/apex/InsuranceApplicationSummaryPDF" target="_blank">View Application
+                            <apex:param name="id" value="{!app.id}" />
+                        </apex:outputLink>
+                    </apex:outputPanel>
+                </apex:column>
+    </apex:pageBlockTable>
+    </apex:pageBlock>
+    </apex:outputPanel>
+    
+    <apex:outputPanel id="existingApplications" rendered="{!$Profile.Name!='Customer Community Login User'}">
+    
+    <br/>
+        
+    <div>            
+        <h5>Past Applications &nbsp;<apex:outputPanel rendered="{!$Profile.Name=='Customer Community Login User'}">({!selectedAccountName})</apex:outputPanel></h5><br/><br/> 
+            <apex:pageBlock >
+            <apex:pageBlockSection >                
+                <apex:outputPanel layout="block">
+                    <apex:outputLabel rendered="{!appExisting==null || appExisting.size == 0}">No application records to display</apex:outputLabel>
+                </apex:outputPanel>
+                <apex:outputPanel layout="block">
+                    <apex:commandButton action="{!startNewShortForm}" value="Start New Short Application" rendered="{!appExisting!=null && (appExisting.size == 0 || hasDraft==false)}">
+                    </apex:commandButton>
+                    <apex:commandButton action="{!startNewApplication}" value="Start New Long Application" rendered="{!appExisting!=null && (appExisting.size == 0 || hasDraft==false)}">
+                    </apex:commandButton>
+                </apex:outputPanel>                    
+            </apex:pageBlockSection>
+            <apex:pageBlocktable value="{!appExisting}" var="existing" rendered="{!appExisting!=null && appExisting.size > 0}">
+            <apex:column headerValue="Application Number">  
+               {!existing.Name}
+            </apex:column>
+                <apex:column value="{!existing.createdDate}"/>
+                <apex:column value="{!existing.Status__c}"/>
+                <apex:column >
+                    <apex:facet name="header">Last Modified By</apex:facet>
+                    {!existing.LastModifiedBy.Name} 
+                </apex:column>               
+                <apex:column >
+                    <apex:commandLink styleClass="btn" value="Continue Application" action="{!existingApplication}" rendered="{!existing.Status__c=='Draft Application'}">
+                        <apex:param assignTo="{!existingApplication}"  id="existingApp" value="{!existing.id}" name="existingApp"/>
+                    </apex:commandLink>
+                    <apex:commandLink styleClass="btn" value="Delete Application" action="{!deleteExistingApplication}" rendered="{!existing.Status__c=='Draft Application'}" rerender="existingApplications" onclick="if(!confirm('Are you sure you want to clear out all current data from the Application? Pressing Confirm will cause all data to be deleted and can not be reversed')){return};">
+                        <apex:param assignTo="{!existingApplication}"  id="deleteExistingApp" value="{!existing.id}" name="deleteExistingApp"/>
+                    </apex:commandLink>
+                    <apex:commandLink styleClass="btn" value="Clone Application" action="{!cloneApplication}" rendered="{!existing.Status__c=='Completed Application' && hasDraft==false}">
+                        <apex:param assignTo="{!existingApplication}"  id="cloneApp" value="{!existing.id}" name="cloneApp"/>
+                    </apex:commandLink>
+                    <apex:outputPanel rendered="{!existing.Status__c!='Draft Application'}">
+                        <apex:outputLink styleClass="btn" value="/apex/InsuranceApplicationSummaryPDF" target="_blank">View Application
+                            <apex:param name="id" value="{!existing.id}" />
+                        </apex:outputLink>
+                    </apex:outputPanel>
+                </apex:column>
+               
+            </apex:pageBlocktable>
+            <apex:outputPanel id="somepanel"></apex:outputPanel>
+            </apex:pageBlock>
+    </div>
+    
+    </apex:outputPanel>
+
+    
+    </fieldset>
+        
+    </apex:form>
+    
+</apex:page>

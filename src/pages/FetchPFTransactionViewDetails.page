@@ -1,0 +1,47 @@
+<apex:page standardcontroller="Assets__c" extensions="FetchPFTransactionViewDetails" showHeader="false">    
+    <script>   
+    window.onload=function(){       
+        FetchPatActFn();
+    }       
+     function openTechTagTab(id){                        
+        window.open('{!$Label.Instance_URL}'+'apex/TransactionDetails?TransactionId='+id);
+    } 
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >       
+        <apex:actionFunction name="FetchPatActFn" action="{!FetchTransactions}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>       
+          
+        <apex:pageBlock id="pgblk">  
+        Total Transaction Records : {!patlwPageInfo.Count}      
+            <apex:pageBlockTable value="{!FetchPatentFamilyViewWrapList}" var="resp" id="pgblktbl" rendered="{!FetchPatentFamilyViewWrapList.size > 0}">                                         
+                     <apex:column headerValue="Transaction Id">
+                    <!--apex:commandLink value="{!resp.transaction_id}" target="_self" onclick="openTechTagTab('{!resp.transaction_id}')" rerender="abc"/-->
+                    <apex:outputLink value="{!$Label.Instance_URL}apex/TransactionDetails?TransactionId={!resp.transaction_id}" target="_self" onclick="openTechTagTab('{!resp.transaction_id}');return false;">{!resp.transaction_id}</apex:outputLink>
+                    </apex:column> 
+                    
+                   <!-- <apex:column headerValue="Transaction Date">
+                        <apex:outputText value="{0,date,MM/dd/yyyy}">
+                            <apex:param value="{!resp.transaction_date}"/>
+                        </apex:outputText>
+                    </apex:column> -->
+                    <apex:column value="{!resp.transaction_date}" headerValue="Transaction Date"/>
+                    <apex:column value="{!resp.seller_entity}" headerValue="Seller Entity"/>
+                    <apex:column value="{!resp.seller_type}" headerValue="Seller Type"/>                    
+                    <apex:column value="{!resp.buyer_entity}" headerValue="Buyer Entity"/>                                                                                                 
+                    <apex:column value="{!resp.buyer_type}" headerValue="Buyer Type"/>                                    
+                    <apex:column value="{!resp.purchase_price}" headerValue="Purchase Price"/>  
+                    <apex:column value="{!resp.assets_count}" headerValue="Asset Count"/> 
+            </apex:pageBlockTable>   <br/><br/>
+        <div style="float:right;">
+        Page : {!patViewPageNum} of {!patlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevLicensees}"  disabled="{!patViewPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreLicensees}" disabled="{!(patlwPageInfo=='' && patViewPageNum==1) || (patlwPageInfo!=null && patlwPageInfo.pages!=null && patViewPageNum!=null && patlwPageInfo.pages <= patViewPageNum)}" value="Next" rerender="pgblk,pgMsg"/>
+        </div>
+        <apex:outputText id="outTxt" rendered="{!noRec}">                  
+        <b>No Transaction Records Found</b>
+        </apex:outputText>        
+    </apex:pageBlock>        
+           <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-weight:bold;color:red" ></apex:actionStatus>
+ </apex:form>
+
+</apex:page>

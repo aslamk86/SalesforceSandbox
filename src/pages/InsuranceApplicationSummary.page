@@ -1,0 +1,978 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!getAllData}" title="RPXIS Insurance Application">
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+     
+.crumbs { margin-left:auto; margin-right:auto; position:relative; }
+.crumbs li a{
+    display: block;
+    float: left;
+    font-size: 11px;
+    margin-left: -13px;
+    padding: 5px 17px 8px 15px;
+    position: relative;
+    text-decoration: none;
+    font-weight:bold;
+}
+.crumbs li a:hover {
+    color: white;
+}
+
+.selected{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    width:134px;
+    background-position: 100% -96px;
+}
+
+.otherSteps{
+    color: white;
+    background-image: url('{!$Resource.bgcrumbs}');
+    background-repeat: no-repeat;
+    background-position: 100% -48px;
+    width:134px;
+    cursor: pointer;
+}
+.section-header{
+margin-bottom: 15px;
+padding-left: 170px;
+font-weight: bold;
+border-bottom: 1px solid #EEE;
+padding: 1.5em 0px 0.7em;
+font-size: 1.1em;
+width: 700px;
+text-align: left;
+margin-left: -100px;
+padding-left: 170px;
+}
+
+.left{text-align:left;width:60%;border-bottom:none;}
+.right{text-align:right;width:40%;border-bottom:none;font-weight:bold;font-size: 13px;}
+
+.customTable{
+    font-weight:bold;
+}
+
+.customDivContainer{
+    float:left;padding-left:20px;
+
+    //width:120px;
+}
+
+.message.messageCell{
+    borer-bottom:0px;
+}
+
+    </style>
+    <apex:form styleClass="forms columnar" style="width:1000px; margin:0 auto" id="theForm">
+    <apex:inputHidden value="{!Application__c.Status__c}"/>
+    <apex:inputHidden value="{!Application__c.Short_Form__c}"/>        
+    <div style="display:inline-block;width:100%;">
+
+    <div>
+        <apex:image value="{!$Resource.RPXLogo}" style="float:left; margin-bottom:20px;" />
+    </div>
+    <div>
+        <apex:outputLink value="/apex/InsuranceApplicationStartForm" style="float:right;padding-top:30px;">{!$Label.Home}</apex:outputLink>
+    </div>
+
+    </div>
+    
+    <fieldset>
+
+            <div style="text-align:center;">
+                <h5>RPXIS Insurance Application</h5>
+
+                <!-- apex:commandLink value="General Information" action="{!back1}" /> >> <apex:commandLink value="Financial Information" action="{!next1}"/> >> <apex:commandLink value="Anticipated Event" action="{!next2}" /> >> <apex:commandLink value="NPE History" action="{!next3}"/> >> <apex:commandLink value="IP Pracitices" action="{!next4}" /> >> <apex:outputField value="Summary"/ -->
+                <div>
+                <ul class="crumbs">
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:8;" action="{!back1}">General Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:7;" action="{!next1}">Financial Information</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:6;" action="{!next2}">Forward Looking Events</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:5;" action="{!next3}">NPE History</apex:commandLink></li>
+                    <li><apex:commandLink styleClass="otherSteps" style="z-index:4;" action="{!next4}">IP Practices</apex:commandLink></li>                    
+                    <li><a href="" class="selected" style="z-index:3;">Summary</a></li>                                                        
+                 </ul>
+                </div>  
+                 <div style=";padding-top:50px;">                
+                <div><apex:commandButton value="Back" action="{!next4}"/>
+                <apex:commandButton value="Submit" action="{!next6}" onclick="return confirm('I certify that this Application is true to the best of my knowledge after I made reasonable inquires and conducted a reasonable investigation and I confirm I am a duly authorized signatory of Applicant.\n\n
+Upon clicking OK below you will be emailed a pdf version of the RPXIS Insurance Application for e-signature. Your RPXIS Insurance Application will NOT be submitted until you complete the e-signature process.It may take a few minutes for the email to arrive');"/> 
+                             
+                <apex:outputLink value="/apex/InsuranceApplicationSummaryPDF?id={!thisApplication.id}" target="_blank"  styleClass="btn" style="text-decoration:none;padding: 4px;" >Print</apex:outputLink>                
+                               
+            </div>
+            </div>
+            </div>   
+            <apex:outputPanel id="summarySections">
+                           
+            <apex:outputPanel >            
+            
+            <div style="padding-top:50px">
+            <div>
+                <apex:pageMessages id="showmsg" escape="false"></apex:pageMessages>
+            </div>
+            <div><h4>{!$Label.Insurance_Summary}</h4></div><br/>
+               <div><h4 align="left">General Information</h4><div style="float:right;padding-right:100px;"><apex:commandLink style="text-decoration: none;" action="{!back1}">[Edit]</apex:commandLink></div></div>
+               <hr />
+               
+               <table class="width-100" align="left">
+               <tr>
+                <td class="right">
+                    Applicant Company Name
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Company_Name__r.Name}" id="one-b" />
+                </td>
+                </tr>
+                
+                <tr>
+                <td class="right">
+                    Parent Company Name<br/>
+                    (if different than Applicant Name)
+                </td>
+                <td class="left">                    
+                    <apex:outputField value="{!Application__c.Parent_Company__c}" id="one-a" />                    
+                </td>
+                </tr>
+                </table>
+               
+               <div><h4 align="left">Contact Information</h4></div>                
+                <hr/>
+                <table style="margin:auto;">
+                <tr>
+                    <th><b>First Name</b></th><th><b>Last Name</b></th><th><b>Email</b></th><th><b>Phone</b></th><th><b>Primary Contact?</b></th>
+                </tr>
+                <apex:repeat value="{!contactList}" var="con">                    
+                    <tr>
+                    <td><apex:outputField value="{!con.firstName}"/></td>
+                    <td><apex:outputField value="{!con.LastName}"/></td>
+                    <td><apex:outputField value="{!con.Email}"/></td>
+                    <td><apex:outputField value="{!con.Phone}"/></td>
+                    <td><apex:image value="/img/checkbox_checked.gif" rendered="{!Application__c.Primary_Contact__c==con.id}"/></td>
+                    </tr>
+                </apex:repeat>                
+                </table><br/>
+               <table id="table1" class="width-100" align="left">
+
+                
+                
+                <tr>
+                <td colspan="2">
+                    <h4 align="left">Company Address</h4>
+                </td>
+                </tr>
+                
+                <tr>                
+                <td class="right">
+                    Street
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Company_Address__c}" id="one-c" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="right">
+                    Street2
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Company_Address_Street_2__c}" id="one-d" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="right">
+                    City
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Company_Address_City__c}" id="one-e" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="right">
+                    State
+                </td>
+                <td class="left">                    
+                    <apex:outputField value="{!Application__c.Company_Address_State__c}" id="one-f" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="right">
+                    Country
+                </td>
+                <td class="left">                    
+                    <apex:outputField value="{!Application__c.Company_Address_Country__c}" id="one-g" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="right">
+                    Zipcode
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Company_Address_Zip_Code__c}" id="one-h" />
+                </td>
+                </tr>
+                <tr>
+                <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                <td class="right">
+                    Company Website
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Company_Website__c}" id="one-i" />
+                </td>
+                </tr>
+                
+                <tr>
+                <td class="right">
+                    What Year was the Applicant founded?
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.What_Year_was_the_Applicant_founded__c}" id="one-j" />
+                </td>
+                </tr>
+                
+                <tr>
+                <td class="right">
+                    List all other names under which the Applicant operates:
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.All_other_names_under_which_Applicant__c}" id="one-k" />
+                </td>
+                </tr>                                                           
+                
+                </table>
+                                
+                <br />
+                <div><h4 align="left">Company Structure</h4></div>
+                <hr />
+                
+                <table id="table3" class="width-100">
+                <tr>
+                <td class="right">
+                    Entity Type
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Entity_Type__c}" id="one-m" />
+                </td>
+                </tr>
+                
+                <tr>
+                <td class="right">
+                    Is Applicant Publicly Traded?
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Is_Company_Publicly_Traded__c}" id="one-n" />
+                </td>
+                </tr>
+                                
+                <apex:outputPanel layout="none" rendered="{!Application__c.Is_Company_Publicly_Traded__c=='Yes'}">
+                <tr>
+                <td class="right">
+                    Ticker Symbol
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Ticker_Symbol__c}" id="one-o" />
+                </td>
+                </tr>
+                <tr>
+                <td class="right">
+                    Market
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Market__c}" />
+                </td>
+                </tr>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!Application__c.Parent_Company__c!=null}">
+                <tr>                
+                <td class="right">
+                    Is Parent Company Publicly Traded?
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Is_Parent_Company_Publicly_Traded__c}" id="one-p" />
+                </td>
+                </tr>
+                
+                <apex:outputPanel layout="none" rendered="{!Application__c.Is_Parent_Company_Publicly_Traded__c='Yes'}">
+                <tr>
+                <td class="right">
+                    Ticker Symbol
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Parent_Company_Ticker_Symbol__c}" id="one-q" />
+                </td>
+                </tr>             
+                </apex:outputPanel>
+                </apex:outputPanel>                                   
+                </table>
+                
+                <br />
+                <div><h4 align="left">Business Operations</h4></div>
+                <hr />
+                <table id="table5" class="width-50" style="margin:auto;">
+                <tr>
+                <td>                
+                    <b>Does the Applicant have E-Commerce capabilities?</b>
+                </td>
+                <td>
+                    <apex:outputField value="{!Application__c.E_Commerce_capabilities__c}" id="one-l" />
+                </td>
+                </tr>  
+                <apex:outputPanel rendered="{!Application__c.E_Commerce_capabilities__c=='Yes'}" layout="none">
+                <tr>
+                    <td><b>Did the Applicant develop them all?</b></td>
+                    <td><apex:outputField value="{!Application__c.Did_you_develop_them_all_yourself__c}" /></td>
+                </tr>
+                <apex:outputPanel rendered="{!Application__c.Did_you_develop_them_all_yourself__c=='No'}" layout="none">
+                <tr>
+                    <td><b>List the company/ies that provide the Applicant&#39;s e-commerce platform and capabilities.</b></td>
+                </tr>
+                <apex:repeat value="{!ecommCompany}" var="rel">
+                <tr class="left">
+                    <td><apex:outputField value="{!rel.Related_Account_User_Input__c}"/></td>
+                </tr>
+                
+                </apex:repeat>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                </table>
+                <table id="table3" class="width-50" style="margin:auto;">
+                <tr>
+                <td><b>List the Applicant's top competitors:</b></td>
+                </tr>
+                <apex:repeat value="{!competitorCompany}" var="rel">
+                <tr class="left">
+                    <td><apex:outputField value="{!rel.Related_Account_User_Input__c}"/></td>
+                </tr>
+                </apex:repeat>
+                </table>
+                
+                <table id="table4" class="width-50" style="margin:auto;">
+                <tr>
+                <td><b>List the Applicant's top suppliers or partners:</b></td>
+                </tr>
+                <apex:repeat value="{!supplierCompany}" var="rel">
+                <tr class="left">
+                    <td><apex:outputField value="{!rel.Related_Account_User_Input__c}"/></td>
+                </tr>
+                </apex:repeat>
+                </table>
+                
+                
+                
+                <br />
+                <div><h4 align="left">{!$Label.Insurance_FinancialInfo}</h4><div style="float:right;padding-right:100px;"><apex:commandLink style="text-decoration: none;" action="{!next1}">[Edit]</apex:commandLink></div></div>
+                <hr />
+                
+                <apex:outputLabel style="text-align:left;width:120px;">Fiscal Year Ended:</apex:outputLabel><apex:outputField value="{!Application__c.Fiscal_Year_Ended__c}" />
+                
+                <table class="width-100">               
+                <tr>
+                    <th ></th><th ><b>2014 <i>(est)</i></b></th><th ><b>2013</b></th><th><b>2012</b></th><th><b>2011</b></th>
+                </tr>
+                <apex:repeat value="{!financialDetails}" var="finDetails" >
+                <tr>
+                    <td><b><apex:outputField value="{!finDetails.Detail_Type__c}"/></b><apex:outputPanel rendered="{!finDetails.Detail_Type__c!='Headcount'}"><br/><i>(in 000's)</i></apex:outputPanel></td>
+                    <td><apex:outputField value="{!finDetails.X2014__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2013__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2012__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2011__c}" /></td>                                                            
+                </tr>
+                
+                </apex:repeat>
+                <tr>
+                    
+                    <td ><b>Notes</b></td><td colspan="4"><apex:outputField value="{!Application__c.Key_Financial_Notes__c}" /></td>
+                </tr>
+                </table>                               
+                <br />
+                <div style="display:block;">
+                <span class="customTable"  style="padding-right:30px;font-size:18px;"><b>Does the Applicant have any product lines accounting for >10% of revenue?</b></span>
+                <apex:outputField value="{!Application__c.Any_product_line__c}" /><br/>
+                </div>
+                
+                <apex:outputPanel rendered="{!Application__c.Any_product_line__c=='Yes'}" layout="none">
+                <div style="padding-top: 20px;"><h4 align="left">{!$Label.Insurance_ProductInfo}</h4></div>
+                <hr />
+                
+
+                <table class="width-100">
+                <!-- <tr>
+                    <b>{!$Label.Insurance_ProductAccounting}</b>
+                </tr>     -->           
+                <tr>
+                    <th><b>Product Name</b></th><th><b>2014 <i>(est)</i></b></th><th><b>2013</b></th><th><b>2012</b></th><th><b>2011</b></th>
+                </tr>
+                <apex:repeat value="{!productRevenue}" var="finDetails" >
+                <tr>
+                    <td><apex:outputField value="{!finDetails.Product_Name__c}"/></td>
+                    <td><apex:outputField value="{!finDetails.X2014_text__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2013_Text__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2012_Text__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2011_Text__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                <tr>
+                    <td ><b>Notes</b></td><td colspan="4"><apex:outputField value="{!Application__c.Product_Details_Notes__c}" /></td>
+                    <!-- <td>Notes</td><td><apex:outputField value="{!Application__c.Product_Details_Notes__c}"/></td> -->
+                </tr>
+                </table>
+                </apex:outputPanel>
+                
+                <br />
+                <div style="display:block;width:100%;">
+                <span class="customTable"  style="padding-right:30px;font-size:18px;"><b>Does the Applicant have any customers accounting for >10% of revenue?</b></span>
+                <apex:outputField value="{!Application__c.Customers_accounting_for_10_of_revenue__c}" /><br/>
+                </div>
+                <apex:outputPanel rendered="{!Application__c.Customers_accounting_for_10_of_revenue__c=='Yes'}">
+
+                <div style="padding-top: 20px;"><h4 align="left">{!$Label.Insurance_CustomerInfo}</h4></div>
+                <hr />
+                
+                <table class="width-100">
+                <!--<tr>
+                    <b>{!$Label.Insurance_CustomerAccounting}</b>
+                </tr> -->
+                <tr>
+                    <th><b>Customer Name</b></th><th><b>2014 <i>(est)</i></b></th><th><b>2013</b></th><th><b>2012</b></th><th><b>2011</b></th>
+                </tr>
+                <apex:repeat value="{!customerRevenue}" var="finDetails" >
+                <tr>
+                    <td><apex:outputField value="{!finDetails.Customer__c}"/></td>
+                    <td><apex:outputField value="{!finDetails.X2014_text__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2013_Text__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2012_Text__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.X2011_Text__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                <tr>
+                    <td ><b>Notes</b></td><td colspan="4"><apex:outputField value="{!Application__c.Customer_Details_Notes__c}" /></td>
+                    <!-- <td>Notes</td><td><apex:outputField value="{!Application__c.Customer_Details_Notes__c}"/></td> -->
+                </tr>
+                </table>
+                </apex:outputPanel>
+                
+                <br />
+                <div style="display:block;width:100%;">
+                <span class="customTable" style="padding-right:30px;font-size:18px;"> <b>Has the Applicant completed any acquisitions or divestitures over the last 3 years?</b> </span>
+                <apex:outputField value="{!Application__c.Any_acquisitions__c}"  /><br/>
+                </div>
+                
+                <apex:outputPanel rendered="{!Application__c.Any_acquisitions__c=='Yes'}" layout="none">  
+                <div style="padding-top: 20px;"><h4 align="left">Acquisitions and Divestitures</h4></div>
+                <hr />
+                
+                <table class="width-100">
+               <!-- <tr>
+                    <b>{!$Label.Insurance_Acq_Div}</b>
+                </tr> -->
+                <tr>
+                    <th><b>Entity Name</b></th><th><b>Divestiture or <br/>Acquisition</b></th><th><b>Year</b></th><th><b>Value of Deal (in 000's)</b></th><th><b>Brief Description</b></th>
+                </tr>
+                <apex:repeat value="{!acqAndDivestures}" var="finDetails" >
+                    
+                <tr>
+                    <td><apex:outputField value="{!finDetails.Entity_Name__c}"/></td>
+                    <td><apex:outputField value="{!finDetails.Divestiture_or_Acquisition__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.Year__c}"  /></td>
+                    <td><apex:outputField value="{!finDetails.Value_of_Deal__c}" /></td>
+                    <td><apex:outputField value="{!finDetails.Brief_Description__c}" /></td>                                                            
+                </tr>
+                </apex:repeat>
+                </table>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!shortForm}">
+                <span class="customTable" style="padding-right:30px;font-size:18px;"> <b>Has the Applicant raised any material funding?</b> </span>
+                <apex:outputField value="{!Application__c.Applicant_raised_any_material_funding__c}"  />
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!shortForm && Application__c.Applicant_raised_any_material_funding__c=='Yes'}">
+                
+                    <div style="padding-top: 20px;"><h4 align="left">Please provide all rounds of professional funding, including IPO</h4></div>
+                    <hr />
+                
+                <table class="width-100">
+                <tr>
+                     <th><b>Series/Round</b></th><th><b>Date</b></th><th><b>Amount (in 000&#39;s)</b></th><th><b>Lead Investors</b></th>
+                </tr>
+                <apex:repeat value="{!funding}" var="fund" >
+                <tr>
+                    <td><apex:outputField value="{!fund.Series_Round__c}"/></td>
+                    <td><apex:outputField value="{!fund.Funding_Date__c}" /></td>
+                    <td><apex:outputField value="{!fund.Funding_Amount__c}"  /></td> 
+                    <td><apex:outputField value="{!fund.Lead_Investors__c}"  /></td>                                                                   
+                </tr>
+                </apex:repeat>
+                </table>
+                </apex:outputPanel>
+                <br />
+                <div style="padding-top: 20px;"><h4 align="left">{!$Label.Insurance_Events}</h4><div style="float:right;padding-right:100px;"><apex:commandLink style="text-decoration: none;" action="{!next2}">[Edit]</apex:commandLink></div></div>
+                <hr />
+                
+                <table style="width-100">
+                <tr>
+                <td class="right">                
+                    In the next 12 months does the Applicant intend to raise capital?
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Applicant_will_raise_capital_in_12mo__c}" />
+                </td>
+                </tr> 
+                <apex:outputPanel layout="none" rendered="{!Application__c.Applicant_will_raise_capital_in_12mo__c=='Yes'}">
+                <tr>
+                <td class="right">                
+                    What is the target amount of capital? (in 000's)
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Target_Amount_of_Capital__c}" />
+                </td>
+                </tr> 
+
+                <tr>
+                <td class="right">                
+                    What is the source of capital raising?
+                </td>
+                <td class="left">
+                    <!-- <apex:outputText value="{!Application__c.What_is_the_source_of_Capital_raising__c}" /> -->
+                    <apex:outputText value="Private Capital" rendered="{!Application__c.Private_Capital__c}"/>&nbsp;
+                    <apex:outputText value="IPO" rendered="{!Application__c.IPO__c}"/>&nbsp;
+                    <apex:outputText value="Other" rendered="{!Application__c.Other__c}"/>                    
+                </td>
+                </tr> 
+
+                <tr>
+                <td class="right">                
+                    What is the anticipated S-1 filing date?
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Anticipated_S_1_filling_date__c}" />
+                </td>
+                </tr> 
+                </apex:outputPanel>
+                <tr>
+                <td class="right">                
+                    During the one year period of any Policy issued, in reliance on this Application, does the Applicant anticipate any:
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Acquisitions_or_Divertituters__c}"/>Acquisitions or Divestitures<br/>
+                    <apex:outputField value="{!Application__c.Notes_AcqDis__c}" rendered="{!Application__c.Notes_AcqDis__c!=''}"/><br/>
+                    <apex:outputField value="{!Application__c.New_Products_or_Services__c}"/>New Products or Services<br/>
+                    <apex:outputField value="{!Application__c.Notes_newProdServices__c}" rendered="{!Application__c.Notes_newProdServices__c!=''}"/><br/>
+                    <apex:outputField value="{!Application__c.Expansion_to_new_geographic_locations__c}"/>Expansion to new geographic locations<br/>
+                    <apex:outputField value="{!Application__c.Notes_ExpToNewGeo__c}" rendered="{!Application__c.Notes_ExpToNewGeo__c!=''}"/><br/>                    
+                    <apex:outputField value="{!Application__c.Dist_Channels_Partners_Marketing__c}"/>Distribution Channels/Partners or Marketing Strategies<br/>
+                    <apex:outputField value="{!Application__c.Notes_partners__c}" rendered="{!Application__c.Notes_partners__c!=''}"/><br/>
+                </td>
+                </tr>
+                </table>
+
+                
+                <br />
+                <div><h4 align="left">Applicant&#39;s Litigation History</h4><div style="float:right;padding-right:100px;"><apex:commandLink style="text-decoration: none;" action="{!next3}">[Edit]</apex:commandLink></div></div>
+                <hr />
+                 <div style="width:950px;">
+                   <apex:outputPanel rendered="{!shortform}" layout="block">
+                   <div class="customDivContainer">        
+                               <b> <apex:outputLabel value="Has the Applicant ever been in a Patent Infringement litigation?" style="width: inherit;margin-left: -20px;"/></b>
+                                <apex:outputField value="{!Application__c.Applicant_ever_been_in_a_Patent_Lit__c}"/>                                                                            
+                   </div>
+                   </apex:outputPanel>
+                <apex:repeat value="{!existingDefendantHistory}" var="def" rendered="{!!shortForm || (Application__c.Applicant_ever_been_in_a_Patent_Lit__c=='Yes' && shortForm)}"> 
+               
+                    <div style="clear:both; height:380px; padding-top:20px;" >
+                        <div style="font-weight:bold;padding-bottom:10px;">Case Name :&nbsp;<apex:outputField value="{!def.Case_Name__c}"/></div>
+                        <div style="clear:both;">
+                            <div class="customDivContainer">
+                                <div class="customTable">File Date</div>
+                                <div><apex:outputField value="{!def.File_date__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolve Date</div>
+                                <div><apex:outputField value="{!def.Resolve_Date__c}"/></div>
+                            </div>                          
+                            <div class="customDivContainer">
+                                <div class="customTable">Parent Plaintiff</div>
+                                <div><apex:outputField value="{!def.Parent_Plaintiff__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Named Defendant</div>
+                                <div><apex:outputField value="{!def.Defendant_names__c}"/></div>
+                            </div>      
+                            <div class="customDivContainer" >
+                                <div class="customTable">Applicant Law Firm</div>
+                                <div><apex:outputField value="{!def.Applicant_Law_Firm__c}"/></div>
+                            </div>                    
+                        </div> 
+                        <div style="clear:both; padding-top:25px;">
+                           <div class="customDivContainer" >
+                                <div class="customTable">Status</div>
+                                <div><apex:outputField value="{!def.Status__c}" /></div>
+                            </div> 
+                             <div style="margin-top: -20px;margin-left: 18px;" class="customDivContainer">
+                                <div class="customTable">Final Litigation Expenses /<br/>Litigation Expenses to Date (in 000's)</div>
+                                <div><apex:outputField value="{!def.Litigation_Expenses__c}" /></div>
+                            </div> 
+                            <div class="customDivContainer" >
+                                <div class="customTable">Settlement Amount (in 000's)</div>
+                                <div><apex:outputField value="{!def.Settlement__c}" /></div>
+                            </div>
+                            <div class="customDivContainer" >
+                                <div class="customTable">Cost/Offer to License (in 000's)</div>
+                                <div><apex:outputField value="{!def.Settlement_Offer__c}"/></div>
+                            </div>  
+                            <div class="customDivContainer" >
+                                <div class="customTable">Damage Award (in 000's)</div>
+                                <div><apex:outputField value="{!def.Damage_Award__c}"/></div>
+                            </div>                                                 
+                        </div>
+                        <div style="clear:both; padding-top:25px;">
+                             <div style="margin-top: -20px;" class="customDivContainer">
+                                <div class="customTable">Did you request<br/> indemnification?</div>
+                                <div><apex:outputField value="{!def.Did_you_request_indemnification__c}"/></div>
+                            </div>
+                             <div class="customDivContainer" style="padding-left: 48px;">
+                                <div style="margin-top: -20px;" class="customTable">Did you receive<br/> any Indemnification?</div>
+                                <div><apex:outputField value="{!def.Indemnification_Recieved__c}"   /></div>
+                            </div>        
+                            <apex:outputPanel rendered="{!def.Did_you_request_indemnification__c=='Yes'}">
+                            <div class="customDivContainer" style="padding-left: 48px;">
+                                <div class="customTable">Company</div>
+                                <div><apex:outputField value="{!def.Company__c}"   /></div>
+                            </div>            
+                            </apex:outputPanel>    
+                            <apex:outputPanel rendered="{!def.Indemnification_Recieved__c=='Yes'}">
+                            <div class="customDivContainer" style="padding-left: 48px;">
+                                <div class="customTable">Amount (in 000's)</div>
+                                <div><apex:outputField value="{!def.Amount_Indemnified_for__c}"   /></div>
+                            </div>            
+                            </apex:outputPanel>    
+                            <div class="customDivContainer" >
+                                <div class="customTable">Notes</div>
+                                <div><apex:outputField value="{!def.Notes__c}" /></div>
+                            </div>                               
+                        </div>
+                       
+                        <div style="clear:both; padding-top:25px;">                   
+                           <div class="customDivContainer" >
+                                <div style="margin-top: -20px;" class="customTable">Did you receive an Assertion letter or offer to license?&nbsp;
+                                <apex:outputField value="{!def.Did_you_receive_an_Assertion_letter__c}" /></div>
+                            </div><br/>
+                            <apex:outputPanel rendered="{!def.Did_you_receive_an_Assertion_letter__c=='Yes'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Received Date</div>
+                                <div><apex:outputField value="{!def.Received_Date__c}" /></div>
+                            </div>
+                            
+                            <div class="customDivContainer" >
+                                <div class="customTable">Legal cost prior to Litigation (in 000's)</div>
+                                <div><apex:outputField value="{!def.Legal_cost_prior_to_litigation__c}" /></div>
+                            </div>
+                            
+                            </apex:outputPanel>
+                       </div>
+                    </div>       
+                    <hr/>             
+                </apex:repeat>                    
+
+                </div>
+
+               
+                
+                <div style="width:1000px;clear:both;padding-top:50px;">
+                    <div class="customDivContainer">        
+                       <apex:outputLabel value="<b>Have you received any assertion letters or offers to licenses within the last 36 months?</b>" escape="false" style="width:auto;margin-left: -20px;"/>
+                       <apex:outputField value="{!Application__c.Have_you_received_any_assertion_letters__c}"/>                                                                            
+                    </div>
+                </div>
+                
+                <apex:outputPanel rendered="{!Application__c.Have_you_received_any_assertion_letters__c=='Yes'}">
+                 <br /><br/><br/>
+                 <div align="left"><b>Assertion Letter History</b></div>
+                 <!-- <div><h4 align="left">Applicant’s Assertion Letter and Offer to License History</h4></div> -->
+                <hr />
+                </apex:outputPanel>
+                
+                <div style="width:950px;">
+                <apex:repeat value="{!assertionList}" var="assert" rendered="{!Application__c.Have_you_received_any_assertion_letters__c=='Yes'}">                    
+                   <div style="clear:both; height:200px; padding-top:20px;background-color: #F2F2F2;" >
+                        <div style="clear:both;">
+                            <div class="customDivContainer">
+                                <div class="customTable">Asserting Party</div>
+                                <div><apex:outputField value="{!assert.Parent_Plaintiff__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Date Letter Received</div>
+                                <div><apex:outputField value="{!assert.First_Contact_Date__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Status</div>
+                                <apex:actionRegion >
+                                <div><apex:outputField value="{!assert.Assertion_Status__c}">
+                                        <apex:actionSupport event="onchange" reRender="assertionStatus"/>
+                                     </apex:outputField>
+                                </div>
+                                </apex:actionRegion>
+                            </div>
+                            <apex:outputPanel layout="none" id="assertionStatus">
+                            <apex:outputPanel rendered="{!assert.Assertion_Status__c=='Resolved'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolved Date</div>
+                                <div><apex:outputField value="{!assert.Resolved_Date__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                            <div class="customDivContainer">
+                                <div class="customTable">Patents Asserted (Optional)</div>
+                                <div><apex:outputField value="{!assert.Patents__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Technology Asserted</div>
+                                <div><apex:outputField value="{!assert.Technology_Asserted__c}"/></div>
+                            </div>
+                           
+                        </div>
+                        <div style="clear:both;">                                                                                    
+                            <div class="customDivContainer">
+                                <div class="customTable">Legal Cost</div>
+                                <div><apex:outputField value="{!assert.Legal_Cost__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolution/Settlement cost</div>
+                                <div><apex:outputField value="{!assert.License_Resolution__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Comments</div>
+                                <div><apex:outputField value="{!assert.Comments__c}"/></div>
+                            </div>
+                        </div>                                                                     
+                    </div>
+                    <hr/>
+                </apex:repeat>                              
+                </div>
+                <div style="width:950px;clear:both;padding-top:50px;">
+                    <div class="customDivContainer">
+        
+                                <apex:outputLabel value="<b>Have you received any other indemnification requests?</b>" escape="false" style="width:auto;margin-left: -20px;"/>
+                                <apex:outputField value="{!Application__c.Any_other_indemnification_requests__c}"/>                                                                            
+                    </div>
+                <div>
+                <apex:outputPanel id="indemList" layout="none">
+                <apex:outputPanel rendered="{!Application__c.Any_other_indemnification_requests__c=='Yes'}">
+                 <br /><br/><br/>
+                <div align="left"><b>Indemnification History</b></div>                
+                <apex:repeat value="{!indemnificationList}" var="assert">                    
+                   <div style="clear:both; height:200px; padding-top:20px;background-color: #F2F2F2;" >
+                        <div style="clear:both;"> 
+                            <div class="customDivContainer">
+                                <div class="customTable">Requesting Party</div>
+                                <div><apex:outputField value="{!assert.Requesting_Party__c}" /></div>
+                            </div>
+                            <div class="customDivContainer" style="margin-left:50px;">
+                                <div class="customTable">Asserting Party</div>
+                                <div><apex:outputField value="{!assert.Parent_Plaintiff__c}" /></div>
+                            </div>
+                            <div class="customDivContainer" style="margin-left:40px;">
+                                <div class="customTable">Date Letter Received</div>
+                                <div><apex:outputField value="{!assert.First_Contact_Date__c}" /></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Status</div>
+                                <apex:actionRegion >
+                                <div><apex:outputField value="{!assert.Assertion_Status__c}">
+                                        <apex:actionSupport event="onchange" reRender="indemStatus,indemStatusDetails"/>
+                                     </apex:outputField>
+                                </div>
+                                </apex:actionRegion>
+                            </div>
+                            <apex:outputPanel layout="none" id="indemStatus">
+                            <apex:outputPanel rendered="{!assert.Assertion_Status__c=='Resolved'}">
+                            <div class="customDivContainer">
+                                <div class="customTable">Resolved Date</div>
+                                <div><apex:outputField value="{!assert.Resolved_Date__c}" /></div>
+                            </div>
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                           
+                            </div>
+                            <div style="clear:both;">                                                        
+                             <div class="customDivContainer">
+                                <div class="customTable">Patents Asserted (Optional)</div>
+                                <div><apex:outputField value="{!assert.Patents__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Technology Asserted</div>
+                                <div><apex:outputField value="{!assert.Technology_Asserted__c}"/></div>
+                            </div>
+                            <div class="customDivContainer" >
+                                <div class="customTable">Legal Cost Requested</div>
+                                <div><apex:outputField value="{!assert.Legal_Cost__c}"/></div>
+                            </div>
+                            
+                           <apex:outputPanel layout="none" id="indemStatusDetails">
+                           <apex:outputPanel rendered="{!assert.Assertion_Status__c=='Resolved'}">
+                           <div class="customDivContainer">
+                                <div class="customTable" >Legal Cost Paid</div>
+                                <div><apex:outputField value="{!assert.License_Resolution__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Settlement Paid</div>
+                                <div><apex:outputField value="{!assert.Settlement_Details__c}"/></div>
+                            </div>     
+                            </apex:outputPanel>
+                            </apex:outputPanel>
+                                                        
+                        </div>
+                        <!-- div style="clear:both;">                                                                                                           
+                            <div class="customDivContainer">
+                                <div class="customTable">Estimated to you (if you received indemnification)</div>
+                                <div><apex:outputField value="{!assert.Estimated_to_you__c}"/></div>
+                            </div>
+                            <div class="customDivContainer">
+                                <div class="customTable">Estimated to Others (If you were requested to give it)</div>
+                                <div><apex:outputField value="{!assert.Estimated_to_Others__c}"/></div>
+                            </div>                                                     
+                        </div -->                                               
+                        
+                    </div>
+                    <hr/>
+                </apex:repeat>                  
+                </apex:outputPanel>
+                </apex:outputPanel>
+                </div>
+                </div>
+              
+                <br /><br />
+                <div><h4 align="left">IP Practices</h4><div style="float:right;padding-right:100px;"><apex:commandLink style="text-decoration: none;" action="{!next4}">[Edit]</apex:commandLink></div></div>
+                <hr />
+                
+                
+                <table style="width-100">
+                <tr>
+                <td class="right">                
+                    Does the Applicant currently have any insurance covering patent litigation?
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Any_insurance_covering_patent_lits__c}" />
+                </td>
+                </tr> 
+     
+                <apex:outputPanel rendered="{!Application__c.Any_insurance_covering_patent_lits__c=='Yes'}">
+                <tr>
+                <td class="right">
+                    Insurer
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Insurer_Name__c}" />
+                    
+                </td>
+                </tr> 
+                <tr>
+                <td class="right">
+                    Expiration date of policy
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.Expiration_date_of_policy__c}" /> 
+                    
+                </td>
+                </tr>
+                
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!!shortForm}">
+                <tr>
+                <td class="right">      
+                    Has the Applicant ever obtained patent related insurance in the past?
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Patent_related_insurance_in_the_past__c}" />
+                </td>
+                </tr> 
+                
+                <apex:outputPanel rendered="{!Application__c.Patent_related_insurance_in_the_past__c=='Yes'}">
+                <tr>
+                <td class="right">     
+                   Insurer 
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Past_insurer_name__c}" /> 
+                </td>
+                </tr> 
+                 <tr>
+                <td class="right">     
+                    Expiration dates of coverage:
+                </td>
+                <td class="left">                    
+                    <apex:outputField value="{!Application__c.Expiration_dates_of_coverage__c}" />  
+                </td>
+                </tr> 
+                </apex:outputPanel>
+
+                <tr>
+                <td class="right">      
+                    How many patent re-examinations or reviews has the Applicant initiated over the past 5 years?
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Patent_re_examinations_or_reviews_5_yrs__c}" />
+                </td>
+                </tr>
+
+                <tr>
+                <td class="right">      
+                    Is the Applicant a member of any defensive buying organization(s)?
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Member_of_any_defensive_buying_orgs__c}" />
+                </td>
+                </tr>
+                
+                <apex:outputPanel rendered="{!Application__c.Member_of_any_defensive_buying_orgs__c=='Yes'}">
+                <tr>
+                <td class="right">      
+                    Please indicate which organizations:
+                </td>
+                <td class="left">
+                    <apex:outputField value="{!Application__c.AST__c}"/>Allied Security Trust<br/>
+                    <apex:outputField value="{!Application__c.OIN__c}"/>Open Invention Network<br/>
+                    <apex:outputField value="{!Application__c.Unified_Patents__c}"/>Unified Patents<br/>
+                    <apex:outputField value="{!Application__c.Other__c}"/>Other                    
+                    <apex:outputText value="{!Application__c.Other_Defensive_Buying_Organization__c}"  rendered="{!Application__c.Other__c}"/>
+                </td>
+                </tr>
+                </apex:outputPanel>
+                </apex:outputPanel>
+                <tr>
+                <td class="right">      
+                    Please briefly describe any other actions the Applicant has taken to mitigate NPE patent infringement risk (including any inbound patent licenses):
+                </td>
+                <td class="left">
+                    <apex:outputText value="{!Application__c.Please_describe_any_other_actions_taken__c}" />
+                </td>
+                </tr>
+                </table>                                                                                                
+                
+            </div>
+            </apex:outputPanel>
+            </apex:outputPanel>
+            <div style="margin-left: 400px;display:block;">                
+                <div><apex:commandButton value="Back" action="{!next4}"/>
+                <apex:commandButton value="Submit" action="{!next6}" onclick="return confirm('I certify that this Application is true to the best of my knowledge after I made reasonable inquires and conducted a reasonable investigation and I confirm I am a duly authorized signatory of Applicant.\n\nUpon clicking OK below you will be emailed a pdf version of the RPXIS Insurance Application for e-signature. Your RPXIS Insurance Application will NOT be submitted until you complete the e-signature process.It may take a few minutes for the email to arrive');" />               
+                <apex:outputLink value="/apex/InsuranceApplicationSummaryPDF?id={!thisApplication.id}" target="_blank" styleClass="btn" style="padding: 4px;" >Print</apex:outputLink>
+                </div>
+            <br/>
+             
+            </div>
+            <div style="display:inline-block;width:100%;">
+               <apex:image value="{!$Resource.RPXLogo}" style="float:left; height:20px;" /> 
+            
+                <apex:outputText value="NPE Patent Infringement Expense Policy" style="margin-left: 260px;"/>
+                                   
+                <apex:outputLink value="/apex/InsuranceLegalNotice" target="_blank" style="float:right;">Legal Notice</apex:outputLink>
+            </div>
+            </fieldset>
+    </apex:form>
+    
+</apex:page>

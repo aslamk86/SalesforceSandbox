@@ -1,0 +1,28 @@
+<apex:page standardController="Product_or_Service__c" extensions="AcqOppForPSController" contenttype="application/vnd.ms-excel">
+	{!Product_or_Service__c.Name}    Relevant Acquisitions    <c:PSTTime /><br/>
+	<apex:pageBlock >  
+          <apex:pageBlockTable value="{!Acquisitions}" var="acquisition" id="table" columnsWidth="20%,20%,20%,20%,20%"  rendered="{!(Acquisitions.size > 0)}">
+                         
+              <apex:column headerValue="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}">
+                  <apex:outputLink target="_blank"  value="{!URLFOR($Action.Acquisition_Opportunity__c.View, acquisition.id)}">{!acquisition.name}</apex:outputLink>
+              </apex:column>
+              
+              <apex:column headerValue="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" >
+                  <apex:outputField value="{!acquisition.StageName__c}"/>
+              </apex:column>
+              
+              <apex:column headerValue="{!$ObjectType.Acquisition_Opportunity__c.Fields.Account__c.Label}">
+                  <apex:outputLink target="_blank"  value="{!URLFOR($Action.Account.View, acquisition.Account__c)}">{!acquisition.Account__r.Name}</apex:outputLink>
+              </apex:column>
+              
+              <apex:column headervalue="{!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}">
+                  <apex:outputField value="{!acquisition.CreatedDate}"/>
+              </apex:column>   
+               
+              <apex:column headervalue="{!$ObjectType.Acquisition_Opportunity__c.Fields.LastModifiedDate.Label}">
+                  <apex:outputField value="{!acquisition.LastModifiedDate}"/>
+              </apex:column> 
+              
+          </apex:pageBlockTable>
+       </apex:pageBlock> 
+</apex:page>

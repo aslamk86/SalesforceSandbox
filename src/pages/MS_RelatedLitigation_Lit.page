@@ -1,0 +1,10 @@
+<!--
+    Page         : MS_RelatedLitigation_Lit
+    Description  : Show related litigations based on patents in-suit
+    Created By   : Martin Sieler
+    Created Date : October 10, 2012
+-->
+
+<apex:page controller="MS_RelatedLitigationCtrl" title="{!'Litigation (Overview): ' & Lit.Name}" tabStyle="Litigation__c" sidebar="false" id="pg">
+<c:MS_RelatedLitigation />
+</apex:page>

@@ -1,0 +1,31 @@
+<apex:page sidebar="false" showHeader="false" title="Insurance Application">
+<link rel="icon" type="image/png" href="{!$Resource.Favicon}" />        
+<div style="width:1000px;margin:auto;">
+
+    <div style="display:inline-block;">
+    <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+    </div>
+    <div>
+    <h1 style="font-size:20px;">Legal Notice</h1><br/><br/>     
+        <apex:outputText value=" {!$Label.Insurance_LegalNotice}" escape="false"/>
+       <br/><br/>               
+        <ol>
+           <li>The Application must be submitted by an authorized representative of the applicant.</li>
+           <li>All questions must be answered before a quotation is provided.  Any supplemental information requested and provided is considered an integral part of this Application. </li>
+           <li>Answer all questions to the best of your knowledge and belief after conducting a reasonable investigation to verify the accuracy of your response.  Information provided in response to questions in the Application is presumptively material to any underwriting decision made by insurer.  All material facts must be disclosed, as failure to do so may void any coverage or render it voidable, or may severely prejudice your rights in the event of a claim.  A material fact is one likely to influence acceptance or assessment of the Application by insurer.  If you are in any doubt as to what constitutes a material fact, you should err on the side of full disclosure. </li>
+           <li>All information you provide to insurer during the underwriting process, whether volunteered by applicant or provided in response to a request from insurer will be treated as part of your Application.</li>
+           <li>If the information in this Application materially changes prior to the effective date of the policy, if any, the Applicant agrees to notify Insurer who retains the right to modify or withdraw any quotation.</li>
+           <li>The insurance applied for under this Application provides litigation expense reimbursement and qualified settlement coverage for patent litigation brought against Applicant by non-practicing entities (NPEs), as defined in the Policy.</li>
+           <li><b>The completion and signing of this Application does not bind the applicant or insurer to consummate a Policy.</b></li>
+        </ol>
+   </div>
+  <b> Notice to Florida applicants:</b>{!$Label.Insurance_FloridaNotice}<br/><br/>
+  <b>Notice to New Jersey applicants:</b>{!$Label.Insurance_NewJerseyNotice}<br/><br/>
+  <b>Notice to New York applicants:</b>{!$Label.Insurance_NewyorkNotice}<br/><br/>
+  <b>Notice to Pennsylvania applicants:</b>{!$Label.Insurance_PennsylvaniaNotice}<br/><br/>
+  <b>Notice to all other state applicants:</b>{!$Label.Insurance_OtherStateNotice}  
+  <br/><br/><br/>
+  RPX Insurance Services, LLC is licensed as an agent/broker in the following states: Arizona Lic #1018270, California Lic #0H74909, Colorado Lic #394382, Connecticut Lic #2409284, Delaware Lic #1329949, DC Lic #2963759, Georgia Lic #168707, Hawaii Lic #397869, Hawaii-MGA Lic #398019, Idaho Lic #490603, Illinois Lic #100434795, Indiana Lic #830163, Louisiana Lic #622226, Maryland Lic #2093880, Massachusetts Lic #1913943, Michigan Lic #0097483, Minnesota Lic #40282194, Missouri Lic #8321006, Nebraska Lic #100213264, New Jersey Lic #1357740, New York Lic #1223890, North Carolina Lic #1000214593, Oklahoma Lic #100194450, Ohio Lic #958142, Oregon Lic #100234941, Pennsylvania Lic #631244, Texas Lic #1759559, Utah Lic #418291, Virginia Lic #132041, Washington Lic #805682.
+  
+</div>  
+</apex:page>

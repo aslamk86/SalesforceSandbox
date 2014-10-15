@@ -1,0 +1,5 @@
+<apex:page showHeader="true" sidebar="true" standardController="Claims__Incident_Report__c" extensions="AcknowledgementController" renderAs="PDF">
+	<img src="{!ImageURL}" />
+	<br />
+	<apex:outputText escape="false" value="{!PDFText}" />
+</apex:page>

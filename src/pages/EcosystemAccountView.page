@@ -1,0 +1,141 @@
+<apex:page standardcontroller="Account" extensions="EcosSystemController" title="EcoSystem for {!Account.Name}" sidebar="false">
+    <apex:includeScript value="{!URLFOR($Resource.jQuery_DataTables, '/media/js/jquery.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.jQuery_DataTables, '/media/js/jquery.dataTables.js')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.jQuery_DataTables, '/media/css/demo_page.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.jQuery_DataTables, '/media/css/demo_table.css')}"/>
+    
+    <script type="text/javascript">
+    j$ = jQuery.noConflict();
+        j$(document).ready(function() {
+            initializepastCodefendants();
+            initializeSuggestedRelevantCompanies();
+    });
+    
+    function initializepastCodefendants(){
+          j$('#pastCodefendants').dataTable({
+               "bAutoWidth": false,
+               "sScrollY": "360",
+                "bPaginate": false,
+                "oLanguage": {
+                  "sSearch": "Filter records:"
+                 },
+                 "aoColumns": [
+                         null,                          
+                         null,
+                         null,
+                         null,
+                         {"bSortable": false},
+                         {"bSortable": false}
+                      ]            
+           });        
+
+        }
+        
+        function initializeSuggestedRelevantCompanies(){
+            j$('#suggestedRelevantCompanies').dataTable({
+               "bAutoWidth": false,
+               "sScrollY": "360",
+                "bPaginate": false,
+                "oLanguage": {
+                  "sSearch": "Filter records:"
+                 },
+                "aoColumns": [
+                         null,                          
+                         null,
+                         null,                        
+                         null,
+                         {"bSortable": false}
+                      ]             
+           });
+        }
+    
+    
+    </script>
+    <style>
+        .tableHeader{
+            font-size:20px;            
+        }
+        .tableHeader2{
+            font-size:15px;
+        }
+    </style>
+    <c:LockComponent />
+    <apex:form >
+    <apex:outputPanel layout="block">
+    <apex:outputPanel id="defendants" layout="block" style="display: table-cell; width:50%">
+            <h2 class="tableHeader">Past Codefendants</h2>
+            <table cellpadding="0" cellspacing="0" border="0" class="display" id="pastCodefendants" width="100%">
+            <thead>
+                <tr>
+                    <th>Company Name</th>
+                    <th>Primary<br/> Market<br/> Share</th>
+                    <th>Number<br/> of<br/> Overlapping</th>
+                    <th>% Overlap</th>         
+                    <th>Display<br/> Litigations</th>
+                    <th>Has<br/>Ecosystem?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!coDefendantObj}" var="cod">
+                <tr>
+                    <td>{!cod.co_defendant_name}</td>
+                    <td>{!cod.primary_market_sector}</td>
+                    <td style="text-align:center">{!cod.num_overlapping_camps}</td>
+                    <td style="text-align:center">{!cod.percent_sim}</td>
+                    <td style="text-align:center"><apex:outputLink target="_blank" value="{!cod.portal_search}"><apex:image value="/img/setup/search.png" width="20px" height="20px"/></apex:outputLink></td>
+                    <td>
+                         <apex:image value="/img/checkbox_unchecked.gif" rendered="{!!cod.PastEcoSystem}"/>
+
+                         <apex:outputLink value="/apex/EcoSystemPage?id={!cod.salesforce_id_codef}" rendered="{!cod.PastEcoSystem}" target="_blank">
+                            <apex:image value="/img/checkbox_checked.gif" rendered="{!cod.PastEcoSystem}"/>
+                         </apex:outputLink>
+                    </td>
+                </tr>
+                </apex:repeat>                   
+            </tbody>
+        </table>
+        <div style="float:right;">
+            Page : {!coDefPageNum} of {!cdwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevCoDefRecords}" onclick="lockScreen(true);" disabled="{!coDefPageNum==1}" value="Prev" oncomplete="initializepastCodefendants();lockScreen(false);" rerender="defendants"/>
+            <apex:commandButton action="{!loadMoreCoDefRecords}" onclick="lockScreen(true);" disabled="{!cdwPageInfo.pages<=coDefPageNum}" value="Next" oncomplete="initializepastCodefendants();lockScreen(false);" rerender="defendants"/>
+        </div>
+    </apex:outputPanel>
+    
+    <apex:outputPanel id="suggestedRelevantCompanies" style="display: table-cell;padding-left:10px;width:50%" layout="block">
+    <h2 class="tableHeader">Suggested Relevant Companies</h2>
+   
+    <table cellpadding="0" cellspacing="0" border="0" class="display" id="suggestedRelevantCompanies" width="100%">
+     <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>% Similarity</th>
+            <th>Portfolio<br/> Similarity</th>
+            <th>Litigated<br/> Patent<br/> Similarity</th>
+            <th>Has<br/>Ecosystem?</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        
+        <apex:repeat value="{!relatedCompanyObj}" var="rel">              
+        <tr>
+            <td>{!rel.relevant_company_name}</td>
+            <td>{!rel.overall_similarity}</td>
+            <td>{!rel.portfolio_similarity}</td>
+            <td>{!rel.litigation_similarity}</td>
+            <td><apex:image value="/img/checkbox_unchecked.gif" rendered="{!!rel.PastEcoSystem}"/>
+
+            <apex:outputLink value="/apex/EcoSystemPage?id={!rel.relevant_company}" rendered="{!rel.PastEcoSystem}" target="_blank">
+                <apex:image value="/img/checkbox_checked.gif" rendered="{!rel.PastEcoSystem}"/>
+            </apex:outputLink>            
+            </td>
+        </tr>
+        </apex:repeat>
+    </tbody>
+    </table>
+
+    </apex:outputPanel>
+    
+    </apex:outputPanel>
+    </apex:form>
+</apex:page>

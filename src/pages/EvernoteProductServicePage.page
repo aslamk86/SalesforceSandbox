@@ -1,0 +1,3 @@
+<apex:page id="evernoteProductServicePage" standardController="Product_or_Service__c">
+    <Evernote:EvernoteIframeComponent objectType="Product_or_Service__c" salesforceRecordId="{!Product_or_Service__c.id}" evernoteURI=""></Evernote:EvernoteIframeComponent>
+</apex:page>

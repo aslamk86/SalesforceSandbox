@@ -1,0 +1,85 @@
+<apex:page controller="FetchTransactionDetails" tabStyle="Patent__c">
+   <script>   
+    window.onload=function(){       
+        FetchTransactionDetails();
+    } 
+    function openAcqTab(id){                
+        //window.open('https://cs15.salesforce.com/'+id);
+        window.open('{!$Label.Instance_URL}'+id);
+    }
+    </script>
+    <apex:pagemessages id="pgMsg"/>
+    <apex:form >
+    <apex:sectionHeader title="Transaction Id" subtitle="{!$CurrentPage.parameters.TransactionId}"/>  
+    <apex:actionStatus startText="Loading.." id="statusId" startStyle="font-size:130%;font-weight:bold;color:red" ></apex:actionStatus>
+    <apex:actionFunction name="FetchTransactionDetails" action="{!FetchTransactions}" status="statusId" reRender="pgblk,pgblktbl,outTxt,pgMsg"/>
+     <apex:pageBlock id="pgblk" title="Transaction Details">  
+       <!-- Total Transaction Records : {!patlwPageInfo.Count}    -->  
+            <apex:pageBlockTable value="{!FetchTransactionDetailWrapList}" var="resp" id="pgblktbl" rendered="{!FetchTransactionDetailWrapList.size > 0}">                                       
+                    <apex:column value="{!resp.transaction_id}" headerValue="Transaction Id"/> 
+                    <apex:column value="{!resp.transaction_date}" headerValue="Transaction Date"/> 
+                    <apex:column value="{!resp.seller_entity}" headerValue="Seller Entity"/>
+                    <apex:column value="{!resp.seller_type}" headerValue="Seller Type"/>
+                    <apex:column value="{!resp.buyer_entity}" headerValue="Buyer Entity"/>                                                                                                 
+                    <apex:column value="{!resp.buyer_type}" headerValue="Buyer Type"/>                                    
+                    <apex:column value="{!resp.purchase_price}" headerValue="Purchase Price"/>   
+                    <apex:column value="{!resp.assets_count}" headerValue="Asset Count"/>
+            </apex:pageBlockTable>   <br/><br/>               
+        
+            <apex:pageBlock title="Related Acquisitions">  
+            Total Related Acquisition Records : {!rlacqlwPageInfo.Count}      
+            <apex:pageBlockTable value="{!TDRelatedAcqsWrapList}" var="resp" id="pgblktbl" > 
+                <apex:column headerValue="Acquisition Name">
+                    <!--apex:commandLink value="{!resp.acq_name}" target="_self" onclick="openAcqTab('{!resp.acquisition_id}')" rerender="abc"/--> 
+                    <apex:outputLink value="{!$Label.Instance_URL}{!resp.acquisition_id}" target="_self" onclick="openAcqTab('{!resp.acquisition_id}');return false;">{!resp.acq_name}</apex:outputLink>                                                              
+                    </apex:column>                                    
+            </apex:pageBlockTable><br/><br/>
+            <div style="float:right;">
+            Page : {!acqViewPageNum} of {!rlacqlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevAcqs}"  disabled="{!acqViewPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreAcqs}" disabled="{!(rlacqlwPageInfo=='' && acqViewPageNum==1)||(rlacqlwPageInfo!=null && rlacqlwPageInfo.pages!=null && acqViewPageNum!=null && rlacqlwPageInfo.pages <= acqViewPageNum)}" value="Next" rerender="pgblk,pgMsg"/>
+            </div>
+            <apex:outputText id="outTxt" rendered="{!noOppRec}">                  
+            <b>No Related Acquisition Records Found</b>
+            </apex:outputText> 
+        </apex:pageBlock>
+         <apex:pageBlock title="Related Patents">   
+             Total Related Patent Records : {!rlpatlwPageInfo.Count}    
+            <apex:pageBlockTable value="{!TDRelatedPatentsWrapList}" var="resp" id="pgblktbl2" >                     
+                <apex:column value="{!resp}" headerValue="Patent Number"/>                
+            </apex:pageBlockTable><br/><br/>
+            <div style="float:right;">
+            Page : {!patViewPageNum} of {!rlpatlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevPatents}"  disabled="{!patViewPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMorePatents}" disabled="{!(rlpatlwPageInfo=='' && patViewPageNum==1)|| (rlpatlwPageInfo!=null && rlpatlwPageInfo.pages!=null && patViewPageNum!=null && rlpatlwPageInfo.pages <= patViewPageNum)}" value="Next" rerender="pgblk,pgMsg"/>
+            </div>
+            <apex:outputText id="outTxt" rendered="{!noPatRec}">                  
+            <b>No RelatedPatent Records Found</b>
+            </apex:outputText> 
+        </apex:pageBlock>
+        <apex:pageBlock title="Related Assignments"> 
+            Total Related Assignment Records : {!rlassnlwPageInfo.Count}       
+            <apex:pageBlockTable value="{!TDRelatedAssnWrapList}" var="resp" id="pgblktbl3" >                     
+                <apex:column value="{!resp.assignment_id}" headerValue="Assignment Id"/>     
+                <apex:column value="{!resp.frame_number}" headerValue="Frame Number"/>              
+                <apex:column value="{!resp.reel_frame}" headerValue="Reel Frame"/>  
+                <apex:column value="{!resp.reel_number}" headerValue="Reel Number"/>    
+                <apex:column value="{!resp.time_added}" headerValue="Time Added"/>  
+            </apex:pageBlockTable><br/><br/>
+            <div style="float:right;">
+            Page : {!assnViewPageNum} of {!rlassnlwPageInfo.pages}
+            <apex:commandButton action="{!loadPrevAssns}"  disabled="{!assnViewPageNum==1}" value="Prev" rerender="pgblk,pgMsg"/>
+            <apex:commandButton action="{!loadMoreAssns}" disabled="{!(rlassnlwPageInfo=='' && assnViewPageNum==1)||(rlassnlwPageInfo!=null && rlassnlwPageInfo.pages!=null && assnViewPageNum!=null && rlassnlwPageInfo.pages <= assnViewPageNum)}" value="Next" rerender="pgblk,pgMsg"/>
+            </div>
+            <apex:outputText id="outTxt" rendered="{!noassnRec}">                  
+            <b>No Related Assignment Records Found</b>
+            </apex:outputText> 
+        </apex:pageBlock>
+        <apex:outputText id="outTxt" rendered="{!noRec}">                  
+        <b>No Transaction Records Found</b>
+        </apex:outputText>        
+    </apex:pageBlock>        
+         
+ </apex:form>
+
+</apex:page>

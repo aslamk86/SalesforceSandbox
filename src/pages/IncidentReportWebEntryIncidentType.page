@@ -1,0 +1,48 @@
+<apex:page showHeader="false" sidebar="false" standardController="Claims__Incident_Report__c" extensions="IncidentReportWebController" standardStylesheets="true" >
+    <apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+        }
+        
+    </style>
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+    <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+    <div style="display:inline-block;">
+    <h1 style="text-align:center;">Notice of Incident or Other Event by Insured(s)<sup>1</sup></h1>
+            <p> 
+            Please use this form to report incidents that may be accepted as claims and incidents that may become claims. This Notice of Incident must be completed and submitted within the Reporting Window, per the insurance Claims Instructions. Please also use this form to report other events requiring notice under your policy.
+            </p>
+    </div>
+
+
+
+   <fieldset>
+            <ul>
+                <li class="form-section">1.Notice Information</li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Please indicate incident/other event category" for="two-a" />
+                    <apex:inputField value="{!report.Incident_or_Event_Notification__c}" id="two-a" required="true"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Date Insured(s) first became aware of the incident/other event" for="two-b" />
+                    <apex:inputField value="{!report.Claims__IncidentDate__c}" id="twob" />
+                </li>
+                <li style="margin-top: 30px;margin-left:365px">
+                    <apex:commandButton action="{!next}" value="Next" style="width:80px;" />
+                </li>
+            </ul>
+        </fieldset>
+        <p>
+        <sup>1</sup>Acceptance of this Notice of an Incident and Acknowledgement of Receipt of same is not acceptance of a Claim as a covered Claim.
+        </p>
+        <p>
+            Please note: All references to the Policy are to the RPX NPE Patent Infringement Expense Policy issued to the Named Insured. The definitions of all capitalized terms are provided in the Policy. This notice does not modify the terms and conditions of the Policy.<br/>V04-14
+        </p>
+
+        
+    </apex:form>
+</apex:page>

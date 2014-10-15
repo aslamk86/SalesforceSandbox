@@ -1,0 +1,209 @@
+<apex:page controller="LinkPotentiallyRelevantCompaniesCtrl" tabstyle="Acquisition_Opportunity__c" id="pg">
+    <apex:form id="frm">
+    <script>
+     TypeAheadSearch = {
+       interval : 500,
+       lastKeypress : null,
+       interceptKeypress : function() {
+          this.lastKeypress = new Date().getTime();
+          var that = this;
+          setTimeout(function() {
+             var currentTime = new Date().getTime();
+             if(currentTime - that.lastKeypress > that.interval) {
+                that.sendRequest();
+             }
+          }, that.interval + 100);
+       },
+       sendRequest : function() {
+          search();
+       }
+      }
+      
+      //------------------------------------------------------------------------
+      //Check if "Enter Key" is pressed in Search Text
+        //------------------------------------------------------------------------
+        function handleKeyPress(e) {
+            if (e.keyCode == 13) {
+                search();
+                return false;
+            }
+            }
+            
+            //------------------------------------------------------------------------
+      //CheckAll Check Boxes
+        //------------------------------------------------------------------------
+      function checkAll(checkAll, divId) {
+        var tableObj = document.getElementById(divId);
+        var elements = tableObj.getElementsByTagName('input');
+  
+        for(i=0 ; i < elements.length; i++) {
+          if(elements[i].type == 'checkbox' && elements[i].disabled == false) {
+            elements[i].checked = checkAll;
+          }
+        }
+      }
+      
+      //------------------------------------------------------------------------
+      //Select "Select All" checkbox if all checkboxes are checked
+        //------------------------------------------------------------------------
+      function updateCheckAll(divId) {
+        var tableObj = document.getElementById(divId);
+        var elements = tableObj.getElementsByTagName('input');
+        
+        var isAllChecked = true;
+        var checkAll;
+        for(i=0 ; i < elements.length; i++) {
+          if(elements[i].name.indexOf('chkSelectAll') > 0) {
+           checkAll = elements[i];
+          }
+          if(elements[i].type == 'checkbox' && elements[i].name.indexOf('chkSelectAll') < 0) {
+            if(elements[i].checked == false) {
+             isAllChecked = false;
+            }
+          }
+        }
+        checkAll.checked = isAllChecked;
+      }
+      
+    </script>
+    
+    <apex:sectionHeader title="{!pageTitle}" subtitle="{!acqOpp.Name}" />
+    <apex:pageMessages id="pgmsg"/> 
+    <apex:actionFunction name="search" action="{!search}" rerender="pbbutton,searchResult,pgmsg" status="statusLoading" />
+    <c:LockComponent /> 
+    
+    <apex:pageBlock id="pb">
+            <apex:outputPanel rendered="{!runningInAcqOppContext}" id="patentFamily">
+            <!-- Acquisition Related Families Section -->
+                <apex:pageblockSection columns="1" title="Acquisition Opportunity Patent Families"> 
+                    <apex:pageBlockTable value="{!lstPatentFamilies}" var="this">
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputPanel >
+                                    <span>
+                                      <apex:inputCheckBox id="chkSelectAll" onclick="checkAll(this.checked,'pg:frm:pb:patentFamily');" rendered = "{!IF(lstPatentFamilies.size > 0 , true,false)}"/>
+                                    </span>
+                                    <span style="vertical-align:top;padding-top:0px;margin:0px;position: relative; top:0px;">
+                                      Select All
+                                    </span>
+                                </apex:outputPanel>
+                            </apex:facet> 
+                            <apex:inputCheckBox value="{!this.isSelected}" onclick="updateCheckAll('pg:frm:pb:patentFamily');"/>
+                        </apex:column>
+                    
+                      <apex:column headerValue="{!$ObjectType.Assets__c.Fields.Name.Label}">
+                        <apex:outputLink value="{!URLFOR($Action.Assets__c.View, this.patentFamily.Id)}" target="_blank">{!this.patentFamily.Name}</apex:outputLink>
+                      </apex:column>
+                    
+                        <apex:column headerValue="Patent Numbers">
+                        <apex:outputText value="{!this.patentNumbers}" escape="false"/>
+                        </apex:column>
+                        
+                    </apex:pageBlockTable>
+                </apex:pageblockSection>
+            </apex:outputPanel>
+           
+      <!-- Filter Conditions Section -->  
+        <apex:pageblockSection columns="1" title="Filter Companies">
+          <apex:pageblockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.Account.Fields.Primary_Market_Sector__c.Label}" for="MarketSector"/>
+              <apex:inputField id="MarketSector" value="{!account.Primary_Market_Sector__c}"/>
+          </apex:pageblockSectionItem>
+      
+          <apex:pageblockSectionItem >
+            <apex:outputLabel value="Company Type" for="CompanyType"/> 
+            <apex:selectList value="{!companyType}" id="CompanyType" size="1" multiselect="false">
+              <apex:selectOptions value="{!companyTypeOptions}"/>
+            </apex:selectList>
+          </apex:pageblockSectionItem>
+      
+          <apex:pageblockSectionItem >
+            <apex:outputLabel value="{!$ObjectType.Account.Fields.Name.Label}" for="AccountName"/>
+            <apex:outputPanel >
+              <apex:inputText id="AccountName" value="{!account.Name}" onkeypress="return handleKeyPress(event);" onkeyup="TypeAheadSearch.interceptKeypress();"/>
+              <apex:actionStatus id="statusLoading">
+                <apex:facet name="start">
+                  <span style = "color: red;">Searching...</span>
+                  <img src = "/img/loading.gif" />
+                </apex:facet>
+              </apex:actionStatus>
+            </apex:outputPanel>
+                </apex:pageblockSectionItem>
+                
+            <apex:inputCheckBox value="{!bypassProductServiceMatch}" label="Bypass Product Services Match?" rendered="{!IF(CurrentView == 'Licensee',false,true)}"/>
+          
+          <apex:pageblockSectionItem >
+            <apex:outputPanel />
+            <apex:outputPanel id="pbbutton" style="white-space:nowrap;text-align:center;">
+              <apex:commandButton value="Search" onclick="lockScreen(true);" action="{!search}" onComplete="lockScreen(false);checkAll(false,'pg:frm:pb:searchResult');" rerender="pb,pgmsg"  />&nbsp;
+              <apex:commandButton value="Link {!pageTitle}" action="{!CreateCompanyWhoCareRecords}" rendered="{!IF(lstAccounts.size > 0, true, false)}"  rerender="pb,pgmsg"/>&nbsp; 
+              <apex:commandButton value="Back" action="{!cancel}"/>&nbsp;
+            </apex:outputPanel>
+          </apex:pageblockSectionItem>
+      
+        </apex:pageblockSection>
+     
+            <!-- Accounts Section -->  
+            <apex:actionFunction action="{!doSort}" name="sortData" rerender="searchResult" status="sortingStatus" oncomplete="lockScreen(false);">
+            <apex:param name="sortField" assignTo="{!sortField}" value="" />
+            </apex:actionFunction>
+       
+        <apex:outputPanel id="searchResult">
+                <apex:pageblockSection id="resultpbSection" columns="1" title="Accounts" rendered="{!IF(lstAccounts.size > 0, true, false)}" > 
+                    <apex:pageBlockTable value="{!lstAccounts}" var="this" id="resultTable">
+                        <apex:column style="width:10px;">
+                            <apex:facet name="header">
+                                <apex:outputPanel >
+                                    <span>
+                                      <apex:inputCheckBox id="chkSelectAll" onclick="checkAll(this.checked, 'pg:frm:pb:searchResult');" rendered = "{!IF(lstAccounts.size > 0 , true,false)}"/>
+                                    </span>
+                                    <span style="vertical-align:top;padding-top:0px;margin:0px;position: relative; top:0px;">
+                                      Select All
+                                    </span>
+                                </apex:outputPanel>
+                            </apex:facet> 
+                            <apex:inputCheckBox value="{!this.isSelected}" id="chkItem" onclick="updateCheckAll('pg:frm:pb:searchResult');" disabled="{!this.isDisabled}"/>
+                        </apex:column>
+        
+                        <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel > 
+                                <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true);sortData('Name')">
+                                  {!$ObjectType.Account.Fields.Name.Label}
+                                  <img src="{!IF(sortField = 'Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                </apex:outputLink>
+                             </apex:outputPanel>
+                        </apex:facet>
+                            <apex:outputLink value="{!URLFOR($Action.Account.View, this.account.Id)}" target="_blank">{!this.account.Name}</apex:outputLink>
+                        </apex:column>
+        
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputPanel > 
+                                    <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true);sortData('RecordType.Name')">
+                                        Type
+                                        <img src="{!IF(sortField = 'RecordType.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                    </apex:outputLink>
+                                </apex:outputPanel>
+                            </apex:facet>
+                            {!this.account.RecordType.Name} 
+                        </apex:column>
+        
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputPanel > 
+                                    <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true);sortData('RPX_RCRate__c')">
+                                      {!$ObjectType.Account.Fields.RPX_RCRate__c.Label}
+                                      <img src="{!IF(sortField = 'RPX_RCRate__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                                    </apex:outputLink>
+                                </apex:outputPanel>
+                            </apex:facet>
+                          {!this.account.RPX_RCRate__c}
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageblockSection>
+        </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    
+</apex:page>

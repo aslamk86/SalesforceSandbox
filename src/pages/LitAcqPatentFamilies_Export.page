@@ -1,0 +1,14 @@
+<apex:page StandardController="Acquisition_Opportunity__c" extensions="LitAcquisitionPatentFamiliesController" contenttype="application/vnd.ms-excel">
+		{!Acquisition_Opportunity__c.Name}    Litigation Patent Families    <c:PSTTime /> <br/>
+		<apex:pageBlock rendered="{!lstPatentFamilies.size > 0}">
+			<apex:pageBlockTable value="{!lstPatentFamilies}" var="patentFamily">
+				<apex:column headerValue="{!$ObjectType.Assets__c.Fields.Name.Label}">
+					<apex:outputLink value="/{!patentFamily.Id}" target="_blank">
+						{!patentFamily.Name}
+					</apex:outputLink>
+				</apex:column>
+				<apex:column value="{!patentFamily.Number_of_US_Patents__c}"/>
+				<apex:column value="{!patentFamily.Number_of_US_Applications__c}"/>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+</apex:page>

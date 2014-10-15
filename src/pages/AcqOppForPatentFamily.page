@@ -1,0 +1,75 @@
+<apex:page standardController="Assets__c" extensions="AcqOppForPatentFamilyController">
+    <apex:form >
+    <apex:actionFunction action="{!DoSort}" name="sortData" rerender="resultPnl" oncomplete="lockScreen(false);" >
+        <apex:param name="sortField" assignTo="{!sortField}" value="" />
+  </apex:actionFunction> 
+  
+  <c:LockComponent />
+        <apex:pageMessages />
+        <apex:pageBlock rendered="{!(lstAcqOpp.size > 0)}" id="resultPnl">
+            <apex:pageBlockTable value="{!lstAcqOpp}" var="acqOpp">
+                
+                <apex:column >
+                    <apex:facet name="header">
+                      <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true); sortData('Name');">
+                            <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}" />
+                        <img src="{!IF(sortField = 'Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                      </apex:outputLink>
+                    </apex:facet>
+                        
+                    <apex:outputLink value="/{!acqOpp.Id}" target="_blank">
+                    <apex:outputField value="{!acqOpp.Name}" />
+                  </apex:outputLink>
+                </apex:column>
+
+<!-- Kala - Added to show the Record Type -->
+                <apex:column >
+                    <apex:facet name="header">
+                      <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true); sortData('RecordTypeId');">
+                            <apex:outputLabel value="Type" />
+                        <img src="{!IF(sortField = 'RecordTypeId', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                      </apex:outputLink>
+                    </apex:facet>
+                        
+                    <apex:outputLink value="/{!acqOpp.RecordType.DeveloperName}" target="_blank">
+                    <apex:outputField value="{!acqOpp.RecordType.DeveloperName}" />
+                  </apex:outputLink>
+                </apex:column>
+<!-- End - To show Record Type -->
+
+                
+                <apex:column >
+                    <apex:facet name="header">
+                      <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true); sortData('StageName__c');">
+                            <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" />
+                        <img src="{!IF(sortField = 'StageName__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                      </apex:outputLink>
+                    </apex:facet>
+                <apex:outputField value="{!acqOpp.StageName__c}" />
+                </apex:column>
+                
+                <apex:column >
+                    <apex:facet name="header">
+                      <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true); sortData('CreatedDate');">
+                            <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}" />
+                        <img src="{!IF(sortField = 'CreatedDate', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                      </apex:outputLink>
+                    </apex:facet>
+                <apex:outputField value="{!acqOpp.CreatedDate}" />
+                </apex:column>
+                
+                <apex:column >
+                    <apex:facet name="header">
+                      <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true); sortData('Owner.Name');">
+<!--                            <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.OwnerId.Label}" />-->
+                            <apex:outputLabel value="Owner" />
+                        <img src="{!IF(sortField = 'Owner.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                      </apex:outputLink>
+                    </apex:facet>
+                <apex:outputField value="{!acqOpp.OwnerId}" />
+                </apex:column>
+                    
+            </apex:pageBlockTable>
+        </apex:pageBlock> 
+    </apex:form>
+</apex:page>

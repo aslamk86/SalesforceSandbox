@@ -1,0 +1,203 @@
+<apex:page controller="MemberAccountController" action="{!updateAccounts}">
+<apex:form id="frm" >
+   <apex:actionFunction action="{!DoSort}" name="sortData" rerender="pnlHeatMap" status="sortingStatus">
+        <apex:param name="sortField" assignTo="{!sortField}" value="" />
+   </apex:actionFunction> 
+   
+  <apex:sectionheader title="Accounts" subtitle="HeatMap"/>
+  <apex:pageBlock rendered="{!IF(memberAccount.size!=0,true,false)}" title="Active Members" Id="pnlHeatMap">
+      <apex:pageBlockTable value="{!memberAccount}" var="mAccount">
+       <apex:column >
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Name')">Company<img src="{!IF(sortField = 'Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputLink value="/{!mAccount.Account.Id}"  style="white-space:nowrap;">{!mAccount.Account.Name}</apex:outputLink>     
+        </apex:column>
+        
+        <apex:column headerValue="Color">
+             <div class="{!mAccount.color}"></div>
+         </apex:column>
+         
+         <apex:column >
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Owner.Name')">Account Owner<img src="{!IF(sortField = 'Owner.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputLink value="/{!mAccount.Account.OwnerId}"  style="white-space:nowrap;">{!mAccount.Account.Owner.Name}</apex:outputLink>     
+        </apex:column>
+        
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('AdjustedTotal')">Adjusted Total<img src="{!IF(sortField = 'AdjustedTotal', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputText value="{0,number,#.##}" style="{!mAccount.appliedStyle}">
+               <apex:param Value="{!mAccount.adjustedTotal}"/>
+           </apex:outputText>  
+        </apex:column>
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('ContractROI__c')">Contract ROI<img src="{!IF(sortField = 'ContractROI__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.ContractROI__c}"/>
+        </apex:column>
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('ProratedROI__c')">Prorated ROI<img src="{!IF(sortField = 'ProratedROI__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.ProratedROI__c}" />
+        </apex:column>
+        
+        <apex:column >
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Membership_Start_Date__c')">Start Date<img src="{!IF(sortField = 'Membership_Start_Date__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.Membership_Start_Date__c}" />
+        </apex:column>
+        
+        
+        <apex:column >
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('RenewalDate__c')">Renewal Date<img src="{!IF(sortField = 'RenewalDate__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.RenewalDate__c}" />
+        </apex:column>
+        
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Volume_of_dismissals__c')">Dismissals<img src="{!IF(sortField = 'Volume_of_dismissals__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.Volume_of_dismissals__c}" />
+        </apex:column>
+               
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Last12MonthROI__c')">Last12Month ROI<img src="{!IF(sortField = 'Last12MonthROI__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.Last12MonthROI__c}" />
+        </apex:column>
+        
+        
+        <apex:column >
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Most_Recent_OM__c')">Most Recent OM<img src="{!IF(sortField = 'Most_Recent_OM__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.Most_Recent_OM__c}" />
+        </apex:column>
+        
+        <apex:column >
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('Most_Recent_Litigation__c')">Most Recent Lit<img src="{!IF(sortField = 'Most_Recent_Litigation__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.Most_Recent_Litigation__c}" />
+        </apex:column>
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('RPX_RCRate__c')">	
+Rate<img src="{!IF(sortField = 'RPX_RCRate__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.RPX_RCRate__c}" />
+        </apex:column>
+        
+        <apex:column style="text-align:right">
+          <apex:facet name="header">
+            <apex:outputPanel > 
+              <apex:outputLink value="javascript:void(0);" onclick="sortData('CROverride_for_Heat_Map__c')">CROverride<img src="{!IF(sortField = 'CROverride_for_Heat_Map__c', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+              </apex:outputLink>
+            </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!mAccount.account.CROverride_for_Heat_Map__c}" />
+        </apex:column>
+        
+        <!-- to be commented -->
+          
+<!--          <apex:column headerValue="Auto Total">-->
+<!--              <apex:outputText value="{0,number,#.##}">-->
+<!--                  <apex:param Value="{!mAccount.autoTotal}"/>-->
+<!--              </apex:outputText>-->
+<!--          </apex:column>-->
+<!--          <apex:column headerValue="Contract ROI Score" Value="{!mAccount.contractROIScore}"/>-->
+<!--          <apex:column headerValue="Prorated ROI Score" Value="{!mAccount.proratedROIScore}"/>-->
+<!--           <apex:column headerValue="ROI Total">-->
+<!--              <apex:outputText value="{0,number,#.##}">-->
+<!--                  <apex:param Value="{!mAccount.ROITotal}"/>-->
+<!--              </apex:outputText>-->
+<!--          </apex:column>-->
+<!--          <apex:column headerValue="Renewal Score" Value="{!mAccount.renewalScore}"/>-->
+<!--          <apex:column headerValue="Dismissals Score" Value="{!mAccount.dismissalsScore}"/>-->
+<!--          <apex:column headerValue="12 Month ROI Score" Value="{!mAccount.twelveMonthROIScore}"/>-->
+<!--          <apex:column headerValue="Most Recent OM Score" Value="{!mAccount.mostRecentOM_Score}"/>-->
+<!--          -->
+<!--          <apex:column headerValue="Most Recent Lit Score" Value="{!mAccount.mostRecentLitScore}"/>-->
+<!--          -->
+<!--           <apex:column headerValue="Recency Total">-->
+<!--              <apex:outputText value="{0,number,#.##}">-->
+<!--                  <apex:param Value="{!mAccount.recencyTotal}"/>-->
+<!--              </apex:outputText>-->
+<!--          </apex:column>-->
+<!--          	-->
+<!--          <apex:column headerValue="Rate Score" Value="{!mAccount.rateScore}"/>-->
+      </apex:pageBlockTable>
+  </apex:pageBlock>
+<style type="text/css">
+.Red
+{
+height:10px; 
+width:30px;
+background-color:red;
+}
+.Green
+{
+height:10px; 
+width:30px;
+background-color:green;
+}
+.Yellow
+{
+height:10px; 
+width:30px;
+background-color:yellow;
+}
+</style>
+</apex:form>
+</apex:page>

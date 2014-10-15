@@ -1,0 +1,15 @@
+<apex:page standardController="Acquisition_Opportunity__c" tabstyle="Acquisition_Opportunity__c" contenttype="application/vnd.ms-excel" extensions="PotentiallyReleventCompaniesExt">
+	{!Acquisition_Opportunity__c.Name}    Potentially Relevant Companies   <c:PSTTime /> <br/>
+	<apex:pageBlock rendered="{!(lstCompaniesWhoCare.size > 0)}">
+		<apex:pageBlockTable value="{!lstCompaniesWhoCare}" var="this">
+		  <apex:column headerValue="{!$ObjectType.Account.Fields.Name.Label}">
+		    <apex:outputLink value="{!URLFOR($Action.Account.View, this.Account__c)}" target="_blank">{!this.Account__r.Name}</apex:outputLink>
+		  </apex:column>
+
+		  <apex:column headerValue="Type">
+				{!this.Account__r.RecordType.DeveloperName}
+		  </apex:column>
+		  
+   	</apex:pageBlockTable>
+	</apex:pageBlock>
+</apex:page>

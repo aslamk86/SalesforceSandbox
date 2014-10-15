@@ -1,0 +1,108 @@
+<apex:page controller="NewLitigationAcquisitionCtrl" tabStyle="Acquisition_Opportunity__c">
+  
+  <style>
+    textarea {
+      width:400px;
+    }
+  </style>
+  <apex:sectionHeader title="Acquisition Edit" subtitle="New Acquisition" />
+  <apex:form >
+    <apex:pageBlock title="Acquisition Edit" mode="edit">
+      <apex:pageMessages />
+      
+      <apex:pageBlockButtons location="top">
+        <apex:commandButton value="Save" action="{!save}" />
+<!--        <apex:commandButton value="Save & New" action="{!saveAndNew}" />-->
+        <apex:commandButton value="Cancel" action="{!cancel}" immediate="true"/>
+      </apex:pageBlockButtons>
+
+      <apex:pageBlockButtons location="bottom">
+        <apex:commandButton value="Save" action="{!save}" />
+<!--        <apex:commandButton value="Save & New" action="{!saveAndNew}" />-->
+        <apex:commandButton value="Cancel" action="{!cancel}" immediate="true"/>
+      </apex:pageBlockButtons>
+      
+      <apex:pageBlockSection title="Opportunity Information" columns="2">
+        <apex:inputField value="{!acqOpp.Name}" required="true" />
+        <apex:outputField value="{!acqOpp.OwnerId}" />
+        <apex:inputField value="{!acqOpp.Account__c}" required="true" />
+        <apex:inputField value="{!acqOpp.SellersExplicitExpectation__c}" required="false" />
+        <apex:inputField value="{!acqOpp.StageName__c}" required="true" />
+        <apex:inputField value="{!acqOpp.Amount_for_Pipeline__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Deal_Probability__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Last_Action__c}" required="false" style="width:230px;"/>
+        <apex:inputField value="{!acqOpp.Probability__c}" required="false" />
+        <apex:inputField value="{!acqOpp.NextStep__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Priority__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Action_Item_Assigned_To__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Degree_of_Dialogue__c}" required="false" />
+        <apex:outputPanel ></apex:outputPanel>
+        <apex:inputField value="{!acqOpp.Suit_Ranking__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="Additional Deal Details" columns="1">
+        <apex:inputField value="{!acqOpp.Current_Status__c}" required="false" />
+        <!--<apex:inputField value="{!acqOpp.DefendantNotes__c}" required="false" />-->
+        <apex:inputField value="{!acqOpp.Deal_Notes__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Private_Deal_Notes__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="Won/Lost Summary" columns="2">
+        <apex:inputField value="{!acqOpp.CloseDate__c}" required="false" />
+        <apex:outputPanel ></apex:outputPanel>
+        
+        <apex:inputField value="{!acqOpp.Purchase_Date__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Closed_Lost_Primary_Reason_LIT__c}" required="false" />
+        
+        <apex:inputField value="{!acqOpp.ContractEffectiveDate__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Closed_Lost_Secondary_Reason_LIT__c}" required="false" />
+        
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="License Options" columns="2">
+        <apex:inputField value="{!acqOpp.Free_Options_Negotiated__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Free_Option_Expiration_Date__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Free_Options_Used__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="Free Option Notes" columns="1">
+        <apex:inputField value="{!acqOpp.Free_Option_Notes__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="Summary of Patents" columns="2">
+        <apex:inputField value="{!acqOpp.Earliest_priority__c}" required="false" />
+        <apex:inputField value="{!acqOpp.No_of_US_Patents_Roll_Up__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Expiration_Date__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Primary_Market_Sector__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="Summary" columns="1">
+        <apex:inputField value="{!acqOpp.Summary__c}" required="false" />
+<!--        <apex:inputField value="{!acqOpp.Claim_Terms_and_Construction__c}" required="false" />-->
+        <apex:inputField value="{!acqOpp.Licensing_and_Ownership_History__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Litigation_Forecast__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Claims_Previously_Held_Invalid__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Representative_Claims__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="Deal Memo" columns="1">
+        <apex:inputField value="{!acqOpp.Executive_Summary__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Theories_of_Relevance__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Detection__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Spec_Support__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Key_Claim_s__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Seller_Research__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Priority_Research__c}" required="false" />
+        <apex:inputField value="{!acqOpp.File_History_Review__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Enforcement_Review__c}" required="false" />
+        <apex:inputField value="{!acqOpp.SME_Review__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Other_Research_Notes__c}" required="false" />
+        <apex:inputField value="{!acqOpp.Analysis_Notes__c}" required="false" />
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection title="System Information" columns="2">
+        <apex:inputField value="{!acqOpp.ClonedFrom__c}" required="false" />
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

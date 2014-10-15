@@ -1,0 +1,50 @@
+<apex:page StandardController="Acquisition_Opportunity__c" extensions="RelatedAcquisitionOpportunityLicenseeExt">
+<apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock id="pblock" rendered="{!(licensees.size > 0)}">
+      
+      <apex:pageBlockButtons location="top">
+   	   	<apex:commandButton value="Export" onclick="window.open('/apex/RelatedAcqLicensee_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;"/> 
+   	   </apex:pageBlockButtons>
+      <apex:outputPanel >
+      <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+      <apex:pageBlockTable value="{!licensees}" var="licensee">
+        
+        <apex:column headerValue="{!$ObjectType.Licensees__c.Fields.Account__c.Label}">
+          <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Licensees__c.Fields.Account__c.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Account__r.Name" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Account__r.Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+           
+          <apex:outputLink value="/{!licensee.Account__c}" title="View Account" target="_blank">
+            <apex:outputField value="{!licensee.Account__r.Name}"/>
+          </apex:outputLink>           
+        </apex:column> 
+        <apex:column headerValue="# of Patent Families">
+            {!mapCounts[licensee.Account__c]}
+        </apex:column>
+        <!--
+        <apex:column headerValue="{!$ObjectType.Licensees__c.Fields.Patent_Family__c.Label}">
+          <apex:outputLink value="/{!licensee.Patent_Family__c}" title="View Patent Family" target="_blank">
+            <apex:outputField value="{!licensee.Patent_Family__r.Name}"/>
+          </apex:outputLink>           
+        </apex:column>
+        
+        
+        <apex:column headerValue="{!$ObjectType.Licensees__c.Fields.Licensee_Note__c.Label}">
+          <apex:outputField value="{!licensee.Licensee_Note__c}"/>
+        </apex:column>
+        -->
+      </apex:pageBlockTable>
+     </apex:outputPanel>
+    
+    </apex:pageBlock>
+     <apex:outputPanel rendered="{!(licensees.size == 0)}">
+        No records to display
+     </apex:outputPanel>
+  </apex:form>
+</apex:page>

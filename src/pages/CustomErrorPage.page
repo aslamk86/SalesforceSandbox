@@ -1,0 +1,3 @@
+<apex:page sidebar="false" showHeader="false">
+<apex:iframe src="https://st-sso.rpxcorp.com/sso_error.html"/>
+</apex:page>

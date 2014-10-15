@@ -1,0 +1,166 @@
+<apex:page id="pg" standardController="Account" cache="true" standardStylesheets="false" extensions="LitigationCheatSheetController" contentType="application/vnd.ms-excel#{!SUBSTITUTE(SUBSTITUTE(Account.Name,' ','_'),',','_')}_Litigation_Cheat_Sheet.xls"> 
+{!xmlheader}
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" 
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+      <Author></Author>
+      <LastAuthor></LastAuthor>
+      <Company></Company>
+      <Version>11.6360</Version>
+  </DocumentProperties>
+  
+  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+    <WindowHeight>8535</WindowHeight>
+    <WindowWidth>12345</WindowWidth>
+    <WindowTopX>480</WindowTopX>
+    <WindowTopY>90</WindowTopY>
+    <ProtectStructure>False</ProtectStructure>
+    <ProtectWindows>False</ProtectWindows>
+  </ExcelWorkbook>
+ <Styles>
+        <Style ss:ID="Default" ss:Name="Normal">
+            <Alignment ss:Vertical="Bottom"/>
+            <Borders/>
+            <Font/>
+            <Interior/>
+            <NumberFormat/>
+            <Protection/>
+        </Style>
+        <Style ss:ID="s23">
+          <Font x:Family="Swiss" ss:Bold="1"/>
+        </Style>
+        <Style ss:ID="s22">
+          <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+        </Style>
+  </Styles>
+
+  <Worksheet ss:Name="Litigation">
+    <Table ss:ExpandedColumnCount="25">
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+        <Column ss:Width="150"/>
+          
+    <Row ss:StyleID="s23">
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Name.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Summary__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Priority__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Deal_Probability__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Degree_of_Dialogue__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Suit_Ranking__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.SellersExplicitExpectation__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Current_Status__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.NextStep__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Deal_Notes__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Court__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Docket_Number__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Case_Name__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Lead_Counsel_Firm__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Filed__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Litigation__c.Fields.Case_Phase__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String">All Defendant Name(s)</Data></Cell>
+        <Cell><Data ss:Type="String">Patents In Suit</Data></Cell>
+        <Cell><Data ss:Type="String">Is Non-Party Entity</Data></Cell>
+        
+        
+    </Row>
+    <apex:repeat value="{!lstLitigationAcqOpp}" var="row">
+      <Row>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Name)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Summary__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Priority__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Deal_Probability__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Degree_of_Dialogue__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Suit_Ranking__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.SellersExplicitExpectation__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Current_Status__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.NextStep__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Deal_Notes__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.litigation.Court__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.litigation.Docket_Number__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.litigation.Case_Name__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.litigation.Lead_Counsel_Firm__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String">
+            <apex:outputText value="{0,date,MM'/'dd'/'yyyy}"> 
+              <apex:param value="{!row.litigation.Filed__c}" /> 
+            </apex:outputText></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.litigation.Case_Phase__c)}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText value="{!row.defendants}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText value="{!row.patents}"/></Data></Cell>
+        <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText value="{!IF(row.isNPE,'True','False')}"/></Data></Cell>
+      </Row>
+    </apex:repeat>
+    </Table>
+  </Worksheet>
+
+  <Worksheet ss:Name="OMA">
+    <Table ss:ExpandedColumnCount="12"  >
+          <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+            <Column ss:Width="150"/>
+    
+    <Row ss:StyleID="s23">
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Name.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Account__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Source__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label)}"/></Data></Cell>  
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Summary__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.SellersExplicitExpectation__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Who_cares__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Scariness__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Quick_opinion__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE($ObjectType.Acquisition_Opportunity__c.Fields.Phase_0_Comments__c.Label)}"/></Data></Cell>
+        <Cell><Data ss:Type="String">OMA Patents</Data></Cell>
+    </Row>
+
+    <apex:repeat value="{!lstOMAAcqOpp}" var="row">
+    <Row>
+    	<Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Name)}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Account__r.Name)}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Source__r.Name)}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.StageName__c)}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Summary__c)}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.SellersExplicitExpectation__c)}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!row.acqOpp.Who_cares__c}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!row.acqOpp.Scariness__c}"/></Data></Cell>
+      <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Quick_opinion__c)}"/></Data></Cell>
+   		<Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText escape="false" value="{!HTMLENCODE(row.acqOpp.Phase_0_Comments__c)}"/></Data></Cell>
+   	  <Cell ss:StyleID="s22"><Data ss:Type="String"><apex:outputText value="{!row.patents}"/></Data></Cell>
+    </Row>
+    </apex:repeat>
+    
+   </Table>
+    
+  </Worksheet>
+
+  </Workbook>
+<apex:outputText value="{!endfile}" escape="false"/>
+</apex:page>

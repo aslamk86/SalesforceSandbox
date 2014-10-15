@@ -1,0 +1,49 @@
+<apex:page standardController="Acquisition_Opportunity__c" tabstyle="Acquisition_Opportunity__c" extensions="PotentiallyReleventCompaniesExt">
+  
+  <apex:form id="frm">
+    <c:LockComponent />
+    
+        <!-- Accounts Section -->  
+        <apex:actionFunction action="{!doSort}" name="sortData" rerender="frm" oncomplete="lockScreen(false);">
+        <apex:param name="sortField" assignTo="{!sortField}" value="" />
+        </apex:actionFunction>
+            
+    <apex:pageMessages />
+        <apex:pageBlock rendered="{!(lstCompaniesWhoCare.size > 0)}">
+            <apex:pageBlockButtons location="top">
+              <apex:commandButton value="Export" onclick="window.open('/apex/PotentiallyRelCompanies_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;"/> 
+            </apex:pageBlockButtons>
+            <apex:pageBlockTable value="{!lstCompaniesWhoCare}" var="this">
+
+              <apex:column >
+                    <apex:facet name="header">
+                        <apex:outputPanel > 
+                            <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true);sortData('Account__r.Name')">
+                              {!$ObjectType.Account.Fields.Name.Label}
+                              <img src="{!IF(sortField = 'Account__r.Name', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputLink>
+                        </apex:outputPanel>
+                    </apex:facet>
+                <apex:outputLink value="{!URLFOR($Action.Account.View, this.Account__c)}" target="_blank">{!this.Account__r.Name}</apex:outputLink>
+              </apex:column>
+
+
+              <apex:column >
+                <apex:facet name="header">
+                        <apex:outputPanel > 
+                            <!-- Replaced Record Type to Type as per the JIRA ticket CRM-26 -->
+                            <apex:outputLink value="javascript:void(0);" onclick="lockScreen(true);sortData('Account__r.Type')">
+                                <apex:outputText value="Type"/>
+                              <img src="{!IF(sortField = 'Account__r.Type', IF(isAscending = true, '/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+                            </apex:outputLink>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    {!this.Account__r.Type}
+              </apex:column>
+              
+        </apex:pageBlockTable>
+        
+        </apex:pageBlock>
+    </apex:form>
+  
+</apex:page>

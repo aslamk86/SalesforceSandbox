@@ -1,0 +1,153 @@
+<apex:page controller="AccountRelevantOpportunities" tabStyle="Account" sidebar="true" title="Relevant Opportunity Candidates" showheader="true" readOnly="true">
+    <br /> Product/Service Matched Acquisitions {!myAccountName}- Limited to 200 <br />
+    This list is a compilation of Acquisition records that share 1 or more Product/Service tags with {!myAccountName}. If you have questions on the Product/Service tags for this Account, please contact Patent Analysis.<br />
+    <br /><h2> Back to <a href='/{!accId}'>{!myAccountName}</a>
+    <br />
+    </h2>
+    <br />
+  <apex:form >
+    <c:LockComponent />
+    <apex:pageBlock id="pb">
+      <apex:pageMessages id="pgmsg"/>
+      
+      <apex:pageBlockButtons location="bottom">
+          <apex:commandButton value="Sort" action="{!filterAndSort}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pb,pgmsg,resultPanel"/> 
+          <apex:commandButton value="Filter Results" action="{!filterAndSort}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pb,pgmsg,resultPanel"/>
+          <apex:commandButton value="Reset" action="{!reset}" onclick="lockScreen(true);" oncomplete="lockScreen(false);" rerender="pb,pgmsg,resultPanel"/> 
+      </apex:pageBlockButtons>
+      
+      <apex:pageBlockSection columns="2" 
+         id="filterBySection" title="Filter By :"> 
+                
+                <apex:pageBlockSectionItem >
+                  <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}" />
+                  <apex:inputField value="{!filterCriteria.Name}"/>
+                </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem />        
+                
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" />
+<!--          <apex:inputField value="{!filterCriteria.StageName__c}"/>-->
+          <c:MultiSelectComponent AvailableList="{!lstAllStages}" ChosenList="{!lstSelectedStages}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem />
+        
+<!--        <apex:pageBlockSectionItem >-->
+<!--          <apex:outputLabel value="{!$ObjectType.Acquisition_Opportunity__c.Fields.CloseDate__c.Label}" />-->
+<!--          <apex:inputField value="{!filterCriteria.CloseDate__c}" required="false"/>-->
+<!--        </apex:pageBlockSectionItem>-->
+<!--        <apex:pageBlockSectionItem />-->
+        
+        <apex:pageBlockSectionItem >
+            <apex:outputLabel value="Created between: " for="startDate"/>
+            
+            <apex:outputPanel >
+                <apex:inputField value="{!startDateFilter.Date_Filter__c}" id="startDate"/>
+                &nbsp; and &nbsp;
+                <apex:inputField value="{!endDateFilter.Date_Filter__c}" id="endDate"/>
+            </apex:outputPanel>
+            
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem />
+        
+      </apex:pageBlockSection>
+      
+      <apex:pageBlockSection columns="1" title="Sort By :">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="" />
+          <apex:outputPanel >
+          <table border="0">
+          <apex:repeat value="{!sortFields}" var="sort">
+            <tr>
+              <td>
+                <apex:selectList value="{!sort.selectedField}" size="1" title="Field Name">
+                  <apex:selectOptions value="{!sort.fieldNames}"></apex:selectOptions>
+                </apex:selectList>
+              </td>
+              <td> 
+                <apex:selectList value="{!sort.selectedOrder}" size="1" title="Sort Order">
+                  <apex:selectOptions value="{!sort.lstSortOrder}"></apex:selectOptions>
+                </apex:selectList>
+              </td>
+            </tr>
+          </apex:repeat>
+          
+          </table>
+                         
+          </apex:outputPanel>
+          
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+      
+    </apex:pageblock>
+    
+    <apex:outputPanel id="resultPanel">
+        <apex:pageBlock title="Relevant Opportunity Candidates" rendered="{!(acqOppList.size > 0)}">  
+            <apex:pageBlockSection columns="1" collapsible="false" id="filterBySection">
+                
+          <!-- Search Results Section Starts -->
+          <apex:pageBlockTable value="{!acqOppList}" var="wrapper" id="table" >
+              
+              <apex:column style="width:5%;">
+                  <apex:facet name="header"> 
+                    Company <br/> Does Not Care
+                  </apex:facet>
+                  <apex:inputCheckBox value="{!wrapper.doNotCare}" disabled="true"/>
+              </apex:column>
+              
+              <apex:column style="width:20%;">
+                  <apex:facet name="header"> 
+                    {!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}
+                  </apex:facet>
+                  <apex:outputLink value="{!URLFOR($Action.Acquisition_Opportunity__c.View, wrapper.acqOpp.id)}">{!wrapper.acqOpp.name}</apex:outputLink>
+              </apex:column>
+              
+              <apex:column headerValue="Type">
+                  <apex:outputField value="{!wrapper.acqOpp.RecordType.Name}"/>
+              </apex:column>
+              
+              <apex:column style="width:10%;">
+                  <apex:facet name="header">
+                    {!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}
+                  </apex:facet>
+                  <apex:outputField value="{!wrapper.acqOpp.StageName__c}"/>
+              </apex:column>
+              <apex:column style="width:10%;">
+                  <apex:facet name="header">
+    <!--                {!$ObjectType.Acquisition_Opportunity__c.Fields.CloseDate__c.Label}-->
+                    Last Stage Change
+                  </apex:facet>
+    <!--              <apex:outputField value="{!wrapper.acqOpp.CloseDate__c}"/>-->
+                  <apex:outputText value="{0,date,MM/dd/yyyy}">
+                    <apex:param value="{!wrapper.lastStageChangedDt}"/>
+                  </apex:outputText>
+                  
+              </apex:column>  
+              <apex:column >
+                  <apex:facet name="header">
+                  {!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}
+                  </apex:facet>
+                  <apex:outputField value="{!wrapper.acqOpp.CreatedDate}"/>
+              </apex:column>            
+              <apex:column >
+                  <apex:facet name="header">
+                  <!-- Text Area field cannot be used in order by  -->
+                  {!$ObjectType.Acquisition_Opportunity__c.Fields.Summary__c.Label}
+                  </apex:facet>
+                  <apex:outputField value="{!wrapper.acqOpp.Summary__c}"/>
+              </apex:column>
+              
+          </apex:pageBlockTable>
+          <!-- Search Results Section Ends -->
+                </apex:pageBlockSection>
+        </apex:pageBlock>
+       </apex:outputPanel>
+    </apex:form> 
+
+    <br /> <br />
+    <h2> {!$User.FirstName}, please note: These matches are <em>automated</em> results based on links to products or service. 
+    <br />Any potential relevance indicated here should be separately verified.
+    </h2>
+    <br />
+
+</apex:page>

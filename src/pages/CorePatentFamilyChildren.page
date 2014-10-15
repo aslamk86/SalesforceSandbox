@@ -1,0 +1,72 @@
+<apex:page standardController="Assets__c" extensions="CoreRecordController" id="thePage" title="Core Patent Family Children{!if(isnull(patentFamily), '', ': ' & patentFamily.Name)}" tabStyle="Assets__c" sidebar="false" showHeader="false"> 
+    
+    <apex:includeScript value="{!URLFOR($Resource.jquery, 'jquery-1.10.0.min.js')}"/>
+    
+    <script>
+        
+        $(document).ready(function() {
+		    // update row highlights
+		    //console.log("Entering doc ready with " + $("a.highlightMyRow").length + " items.");
+		    $("a.highlightMyRow").closest("tr").addClass("highlightedRow");
+		});
+    
+    </script>
+        
+    <style>
+    
+        .childPatentTableContainer {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .childPatentTableContainer_Error {
+            max-height: 100px; /* Needs to be shorter to make space for the error box. */
+            overflow-y: auto;
+        }
+        
+        tr.highlightedRow td {
+            background-color: #D9E7B6;
+        }
+    
+    </style>
+    
+    <apex:pagemessages id="pageMessages"/>
+
+    <apex:pageBlock id="childrenPageBlock" rendered="{!!isError}" mode="detail" tabStyle="Patent__c" >
+        
+        <div class="childPatentTableContainer">
+	        <apex:pageBlockTable value="{!childPatentRows}" var="row" >
+	            <apex:column headerValue="Patent ID" >
+	                <a href="{!row.patentDetailURL}" class="{!if(row.isInSalesforce, 'highlightMyRow', '')}" title="View patent detail" target="_top">{!row.patent.Name}{!if(row.isInSalesforce, '', '*')}</a>
+	            </apex:column>
+	            
+	            <apex:repeat value="{!$ObjectType.Patent__c.FieldSets.Patent_Family_Related_List}" var="field">
+	                <apex:column value="{!row.patent[field]}" headerValue="{!field.label}" />
+	            </apex:repeat>
+	        </apex:pageBlockTable>
+        </div>
+        
+        <apex:facet name="footer">
+            <i><strong>* Note:</strong> Only the highlighted rows in the above table have been imported into Salesforce.</i>
+        </apex:facet>
+        
+    </apex:pageBlock>
+    
+    <!-- REVERT BACK TO A "NORMAL" RELATED LIST IF THERE IS AN ERROR -->
+    <apex:pageBlock id="childrenPageBlock_Reverted" rendered="{!isError}" mode="detail" tabStyle="Patent__c" >
+        
+        <div class="childPatentTableContainer_Error">
+            <apex:pageBlockTable value="{!childPatentRows}" var="row" >
+                <apex:column headerValue="Patent ID" >
+                    <a href="{!row.patentDetailURL}" title="View patent detail" target="_top">{!row.patent.Name}</a>
+                </apex:column>
+                
+                <apex:repeat value="{!$ObjectType.Patent__c.FieldSets.Patent_Family_Related_List}" var="field">
+                    <apex:column value="{!row.patent[field]}" headerValue="{!field.label}" />
+                </apex:repeat>
+            </apex:pageBlockTable>
+        </div>
+        
+    </apex:pageBlock>
+      
+</apex:page>

@@ -1,0 +1,43 @@
+<apex:page controller="CoreRecordController" id="thePage" title="Core Patent{!if(isnull(patent), '', ': ' & patent.Name)}" tabStyle="Patent__c">	
+    
+    <script type="text/javascript">
+        
+        function alertAPIResponseText() {
+		    // Adds an alert which displays the semi-raw api output for the passed row 
+		    alert("API Response Text (Patents Endpoint):\n\n{!apiResponseText}");
+		}
+        
+    </script>
+    
+    <apex:sectionHeader subtitle="{!patent.Name}" title="Core Patent" description="This patent is not currently stored in Salesforce. You are viewing the contents of the patent as retrieved via the Core database API."/>
+    
+    <apex:form id="theForm">
+    
+        <apex:pagemessages id="pageMessages"/>
+    
+        <apex:pageBlock title="Patent Detail" id="thePageBlock" rendered="{!!isError}" mode="maindetail" ondblclick="alertAPIResponseText();">
+            
+            <apex:pageBlockButtons >
+                <input type="button" class="btn" value="View in Google Patents" title="View in Google Patents (new tab)" onclick ="window.open('http://www.google.com/patents/{!patent.Name}', '_blank');"/>
+                <input type="button" class="btn" value="View on USPTO" title="View on USPTO (new tab)" onclick ="window.open('http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=/netahtml/PTO/search-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN/{!patent.Patent_No__c}', '_blank');"/>
+            </apex:pageBlockButtons>
+            
+            <apex:pageBlockSection columns="2">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Patent Family"/>
+                    <apex:outputPanel >
+                        <a href="{!patentFamilyDetailURL}" title="View patent family detail">{!patentFamily.Name}</a>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem > &nbsp; </apex:pageBlockSectionItem>
+                <apex:repeat value="{!$ObjectType.Patent__c.FieldSets.Patent_Detail}" var="field">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!field.label}"/>
+                        <apex:outputField value="{!patent[field]}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat>
+            </apex:pageBlockSection>
+			
+        </apex:pageBlock>
+    </apex:form>  
+</apex:page>

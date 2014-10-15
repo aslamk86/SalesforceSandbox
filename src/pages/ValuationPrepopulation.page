@@ -1,0 +1,6 @@
+<apex:page standardController="Valuation_Tracking__c" extensions="ValuationPrepopulationExtn" action="{!populateAndRedirect}">
+<apex:form >
+    <apex:outputField value="{!Valuation_Tracking__c.Acquisition__c}"/>
+    <apex:outputLabel >Redirecting please wait...</apex:outputLabel>
+</apex:form>   
+</apex:page>

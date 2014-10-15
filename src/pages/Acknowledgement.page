@@ -1,0 +1,10 @@
+<apex:page showHeader="true" sidebar="true" standardController="Claims__Incident_Report__c" extensions="AcknowledgementController">
+	<apex:form >
+		<apex:pageBlock title="Acknowledgement Letter">
+			<apex:inputTextArea richText="false" cols="100" rows="80" value="{!letterText}" />
+			<apex:pageBlockButtons >
+				<apex:commandButton value="Print" action="{!print}" />
+			</apex:pageBlockButtons>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

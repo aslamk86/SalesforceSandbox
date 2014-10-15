@@ -1,0 +1,274 @@
+<apex:page showHeader="false" sidebar="false" standardController="Claims__Incident_Report__c" extensions="IncidentReportWebController" standardStylesheets="true" action="{!checkAndRedirect}">
+    <apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+    <style>
+        .forms.columnar label {
+          float: left;
+          width: 325px;
+          text-align: right;
+          margin-right: 20px;
+          margin-left: 40px;
+        }
+        .errorMsg
+        {
+        margin-left: 345px;
+        }
+        .widthModifier{
+            width:240px;
+        }
+     
+           </style>
+
+
+
+
+    <apex:form styleClass="forms columnar" style="width:985px; margin:0 auto" id="theForm">
+        <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+        <div style="display:inline-block;">
+            <h1 style="text-align:center;">Notice of Incident or Other Event by Insured(s)<sup>1</sup></h1>
+            <p> 
+            Please use this form to report incidents that may be accepted as claims and incidents that may become claims. This Notice of Incident must be completed and submitted within the Reporting Window, per the insurance Claims Instructions. Please also use this form to report other events requiring notice under your policy.
+            </p>
+        </div>
+        <fieldset>
+            <ul>
+                <li class="form-section">1. Notice Information</li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Please indicate incident/other event category" for="twoa" />
+                    <apex:outputField value="{!report.Incident_or_Event_Notification__c}" id="twoa" >
+                     </apex:outputField>&nbsp;
+                     <apex:commandLink action="/apex/IncidentReportWebEntryIncidentType" value="[change]" immediate="true"/>          
+                </li>
+                <li>
+                    <apex:outputLabel value="Date Insured(s) first became aware of the incident/other event" for="two-b" />
+                    <apex:outputField value="{!report.Claims__IncidentDate__c}" id="twob" />&nbsp;
+                    <apex:commandLink action="/apex/IncidentReportWebEntryIncidentType" value="[change]" immediate="true"/>          
+                </li>
+              </ul>
+              <ul>
+                <li style="margin-top:30px">
+                    <apex:outputLabel value="Insured(s)" for="insured" />
+                    <apex:inputField value="{!report.insured__c}" id="insured" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Report Date" for="reportDate" />
+                    <apex:inputField value="{!report.Claims__Date_Reported__c}" id="reportDate" />
+                </li>
+                <li>
+                    <apex:outputLabel value="Policy Number" for="policyNumber" />
+                    <apex:inputField value="{!report.policy_number__c}" id="policyNumber" styleclass="widthModifier"/>
+                </li>
+                <li class="form-section">2. Contact Information of Insured(s)</li>
+                <li>
+                    <apex:outputLabel styleClass="width-200" value="Contact Person First Name" for="contactFirst" />
+                    <apex:inputField value="{!report.Claims__First_Name__c}" id="contactFirst" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Contact Person Last Name" for="contactLast" />
+                    <apex:inputField value="{!report.Claims__Last_Name__c}" id="contactLast" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Position of Contact Person" for="contactPosition" />
+                    <apex:inputField value="{!report.contact_person_position__c}" id="contactPosition" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Street" for="street" />
+                    <apex:inputField value="{!report.street_address__c}" id="street" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="City/State/Zip Code/Country" for="address" />
+                    <apex:inputField style="height:75px;" value="{!report.contact_address__c}" id="address" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Office Phone Number" for="officePhone" />
+                    <apex:inputField value="{!report.Office_Phone_Number__c}" id="officePhone" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Mobile Number" for="mobile" />
+                    <apex:inputField value="{!report.Mobile_Number__c}" id="mobile" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="Email Address" for="email" />
+                    <apex:inputField value="{!report.Claims__Email__c}" id="email" styleclass="widthModifier"/>
+                </li>                                                         
+            </ul>
+
+        <!-- c:IncidentReportLayout1 rendered="{!type=='A'}"/ -->
+        <apex:outputPanel rendered="{!type=='A'}">
+        <ul>
+             <li class="form-section">3. Other Insurance</li>
+                <li style="margin-bottom:80px;">
+                    <apex:outputLabel value="Does the Insured(s) have any other insurance policies that are potentially responsive to any cause(s) of action in the litigation giving rise to this incident?" for="three-a" />
+                    <apex:inputField value="{!report.Other_policies__c}" id="three-a"  styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="If you answered yes, please provide the policy information for any other potentially responsive insurance policy." for="three-b" />
+                    <apex:inputField style="height:75px;" value="{!report.Other_policy_information__c}" id="three-b" styleclass="widthModifier" />
+                </li>
+                <li style="margin-bottom:60px;">
+                    <apex:outputLabel value="Has notice been given on any other insurance policies potentially responsive to any cause(s) of action in the litigation giving rise to this incident?" for="three-c" />
+                    <apex:inputField value="{!report.Other_policy_notice__c}" id="three-c" styleclass="widthModifier"/>
+                </li>
+                <li style="margin-bottom:60px;">
+                    <apex:outputLabel value="Has the incident been accepted as a Claim by any other insurers?" for="three-d"  />
+                    <apex:inputField value="{!report.other_insurers_accepted_as_claim__c}" id="three-d" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="If you answered yes, then please describe any conditions or limitations on the acceptance of the Claim." for="three-e" />
+                    <apex:inputField style="height:75px;" value="{!report.conditions_on_claim__c}" id="three-e" styleclass="widthModifier"/>
+                </li>
+                <li class="form-section">4. Incident Information</li>
+                <li>
+                    <apex:outputLabel value="Please identify the patent holder(s)." for="four-a" />
+                    <apex:inputField value="{!report.Potential_claimants__c}" id="four-a" styleclass="widthModifier"/>
+                </li>                
+                <li style="margin-top: 30px;">                    
+                    <apex:outputLabel value="Please list the specific asserted patent number(s), separated by a semi-colon." for="four-c" />
+                    <apex:inputField style="height:75px;" value="{!report.Specific_Alleged_Patent_Numbers__c}" id="four-c" styleclass="widthModifier" />                   
+                </li>
+                <li>
+                    <apex:outputLabel value="Please describe the alleged Patent Infringement." for="four-d" />
+                    <apex:inputField style="height:75px;" value="{!report.Alleged_patent_infringement__c}" id="four-d" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel for="four-f" value="Please describe the nature of the requested monetary relief, if any, from the claimant(s)." />
+                    <apex:inputField style="height:75px;" value="{!report.nature_of_monetary_relief__c}" id="four-f" styleclass="widthModifier"/>
+                </li>
+                <li class="form-section">5. Nature of Litigation Giving Rise to the the Incident</li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="Has the Insured(s) been served with the complaint?" for="five-a" />
+                    <apex:inputField value="{!report.served_with_complaint__c}" id="five-a" styleclass="widthModifier"/>
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="If you answered yes, on what date was the Insured(s) served?" for="five-b" />
+                    <apex:inputField value="{!report.date_when_served__c}" id="five-b" />
+                </li>
+                <li style="margin-bottom:30px;">
+                    <apex:outputLabel value="If known, what is the due date for the Insured(s)’s first responsive pleading?" for="five-c" />
+                    <apex:inputField value="{!report.due_date_first_pleading__c}" id="five-c"  />
+                </li>
+                <li style="margin-bottom:60px;">
+                    <apex:outputText value="Please attach a copy of the complaint, exhibits, return of service form, and any other documents served on the Insured(s) on the next page." />
+                </li>
+                <li class="form-section">6. Communications between the Insured(s) and Plaintiff</li>
+                <li style="margin-bottom:80px;">
+                    <apex:outputLabel value="Prior to the filing of the litigation giving rise to the incident, were there any communications between the Insured(s) and the plaintiff?" for="six-a" />
+                    <apex:inputField value="{!report.Prior_communications__c}" id="six-a" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="If you answered yes, please provide copies of any written communications on the next page, and please provide descriptions of the date and content of any telephone or in-person communications." for="six-b" />
+                    <apex:inputField style="height:75px;" value="{!report.Description_of_prior_communication__c}" id="six-b" styleclass="widthModifier" />
+                </li>
+                <li style="margin-bottom:80px;">
+                    <apex:outputLabel value="Subsequent to the filing of the litigation giving rise to the incident, have there been any communications between the Insured(s) and the plaintiff besides any court filings?" for="six-c" />
+                    <apex:inputField value="{!report.Subsequent_communications__c}" id="six-c" styleclass="widthModifier" />
+                </li>
+                <li>
+                    <apex:outputLabel value="If you answered yes, please provide copies of any written communications on the next page, and please provide descriptions of the date and content of any telephone or in-person communications." for="six-d" />
+                    <apex:inputField style="height:75px;" value="{!report.Description_of_subsequent_communications__c}" id="six-d" styleclass="widthModifier"/>
+                </li>
+                <li class="form-section">7. Litigation Counsel Selection</li>
+                <li style="margin-bottom:80px;">
+                    <apex:outputLabel value="Do you intend to engage Panel Litigation Counsel to defend the Insured(s) in the litigation giving rise to the incident?" for="seven-a" />
+                    <apex:inputField value="{!report.intend_to_engage__c}" id="seven-a" styleclass="widthModifier" />
+                </li>
+                <li style="margin-bottom:80px;">
+                    <apex:outputLabel value="If yes, have you identified any Panel Litigation Counsel candidates you may potentially engage to defend the Insured(s) in the litigation giving rise to the incident?" for="seven-b" />
+                    <apex:inputField value="{!report.identified_potential_panel__c}" id="seven-b" styleclass="widthModifier" />
+                </li>
+                <li>
+                    <apex:outputLabel value="If you answered yes, please identify the Panel Litigation Counsel candidates." for="seven-c" />
+                    <apex:inputField style="height:75px;" value="{!report.Identified_potential_candidate_info__c}" id="seven-c" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel value="If you do not intend to engage Panel Litigation Counsel and intend to engage Non-Panel Litigation Counsel, please identify Non-Panel Litigation Counsel that the Insured(s) intends to request RPX RRG’s consent to represent the Insured(s) in the litigation giving rise to the incident." for="seven-d" />
+                    <apex:inputField style="height:75px;" value="{!report.Identified_non_panel_candidates__c}" id="seven-d" styleclass="widthModifier"/>
+                </li> 
+                 <li  style="margin-top: 70px; text-align:center;">
+                   <apex:commandButton action="{!save}" value="Save & Add Attachments" />
+               </li> 
+        </ul>    
+        
+        
+        </apex:outputPanel>
+        <!-- c:IncidentReportLayout2 rendered="{!type=='B'}"/ -->
+        <apex:outputPanel rendered="{!type=='B'}">
+        <ul>             
+                <li class="form-section">3. Incident Event Information</li>
+                <li>
+                    <apex:outputLabel value="Please identify the patent holder(s)." for="four-ab" />
+                    <apex:inputField value="{!report.Potential_claimants__c}" id="four-ab" styleclass="widthModifier" />
+                </li>                
+                <li style="margin-top: 30px;">                    
+                    <apex:outputLabel value="Please identify the potential indemnitee(s) if this is an Indemnification Demand." for="four-b" />
+                    <apex:inputField value="{!report.Indemnitee__c}" id="four-b" styleclass="widthModifier" />                    
+                </li>
+                <li style="margin-top: 30px;">                    
+                    <apex:outputLabel value="Please list the specific asserted patent number(s), separated by a semi-colon." for="four-cb" />
+                    <apex:inputField style="height:75px;" value="{!report.Specific_Alleged_Patent_Numbers__c}" id="four-cb" styleclass="widthModifier"/>                   
+                </li>
+                <li style="margin-top: 30px;">
+                    <apex:outputLabel value="Please describe the alleged Patent Infringement." for="four-db" />
+                    <apex:inputField style="height:75px;" value="{!report.Alleged_patent_infringement__c}" id="four-db" styleclass="widthModifier"/>
+                </li>
+                <li style="margin-top: 30px;">
+                    <apex:outputLabel value="Please describe the circumstances by which you first became aware of the facts or circumstances of the Reportable Event." for="four-e" />
+                    <apex:inputField style="height:75px;" value="{!report.description_of_circumstances__c}" id="four-e" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel for="four-fb" value="Please describe the nature of the requested monetary relief, if any, from the claimant(s)." />
+                    <apex:inputField style="height:75px;" value="{!report.nature_of_monetary_relief__c}" id="four-fb" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel for="four-g" value="Did the claimant request a license amount?" />
+                    <apex:inputField value="{!report.License_Amount_Requested__c }" id="four-g" styleclass="widthModifier"/>
+                </li>
+                <li>
+                    <apex:outputLabel for="four-h" value="If Yes, please specify the specific amount in a numeric value." />
+                    <apex:inputField value="{!report.Specific_License_Amount_Requested__c}" id="four-h" styleclass="widthModifier"/>
+                </li>
+                <li  style="margin-top: 30px; text-align:center;">
+                    <apex:outputText value="Please attach any correspondence exchanges with the claimant(s) using the Save & Add Attachment button below" />
+                </li>
+                 <li style="text-align:center;">
+                   <apex:commandButton action="{!save}" value="Save & Add Attachments" />
+               </li> 
+        </ul>                
+        </apex:outputPanel>
+        <!-- c:IncidentReportLayout3 rendered="{!type=='C'}"/ -->
+        <apex:outputPanel rendered="{!type=='C'}">
+        <ul>
+           
+               <li class="form-section">3. Explanation</li>                
+               <li>
+                   <apex:outputLabel value="Please describe the circumstances of the organizational change or change in RPX membership status." for="three-bc">
+                   <br /><br/><span id="counter" style="font-style:italic; font-size:75%;" >Max. 255 Characters</span></apex:outputLabel>
+                   
+                   <apex:inputField style="height:150px;" value="{!report.Other_policy_information__c}" id="three-bc" styleclass="widthModifier" onkeyup="countLetters(this.value);" />
+                   <script>
+                   function countLetters(str){
+                       if(255 - str.replace(/\n/g, "\n\r").length >= 0){
+                           document.getElementById('counter').innerHTML=255 - str.replace(/\n/g, "\n\r").length+' Characters left';
+                           document.getElementById('counter').style.color="Black";
+                       }
+                       else if(255 - str.replace(/\n/g, "\n\r").length < 0){
+                           document.getElementById('counter').innerHTML=str.replace(/\n/g, "\n\r").length- 255+' Characters exceeded';
+                           document.getElementById('counter').style.color="Red";
+                           }
+                   }
+                   </script>                   
+               </li>         
+               <li style="text-align:center;">
+                   <apex:commandButton action="{!save}" value="Save & Add Attachments" />
+               </li>      
+        </ul> 
+        </apex:outputPanel>
+        </fieldset>
+        <p>
+        <sup>1</sup>Acceptance of this Notice of an Incident and Acknowledgement of Receipt of same is not acceptance of a Claim as a covered Claim.
+        </p>
+        <p>
+                Please note: All references to the Policy are to the RPX NPE Patent Infringement Expense Policy issued to the Named Insured. The definitions of all capitalized terms are provided in the Policy. This notice does not modify the terms and conditions of the Policy.<br/>V04-14
+        </p>
+        
+    </apex:form>
+</apex:page>

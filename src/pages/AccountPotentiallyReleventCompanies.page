@@ -1,0 +1,86 @@
+<apex:page standardController="Account" tabstyle="Account" extensions="AccountPotentiallyReleventCompaniesExt" >
+  <script>
+      window.onload=function(){callControllerMethod();};
+  </script>  
+  <apex:form >
+   <apex:actionFunction action="{!sortData}" name="callControllerMethod" reRender="pblock" status="waitStatus"/>
+   <apex:pageMessages />
+
+   <apex:pageBlock id="pblock" rendered="{!(acquisitionOpportunities.size > 0)}">
+
+       <apex:pageBlockButtons location="top">
+        <apex:commandButton value="Export" onclick="window.open('/apex/AccountPotentiallyRelCompanies_Export?Id={!Account.Id}','_blank');return false;"/> 
+       </apex:pageBlockButtons>
+           <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+       <apex:pageBlockTable value="{!acquisitionOpportunities}" var="this" >
+         <apex:column headerValue="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}">
+           <apex:facet name="header">
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}" rerender="pblock" status="waitStatus">
+                <apex:param value="Name" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>
+           </apex:facet>
+           <apex:outputLink value="{!URLFOR($Action.Acquisition_Opportunity__c.View, this.Id)}" target="_blank">{!this.name}</apex:outputLink>
+         </apex:column>
+         <apex:column headerValue="Type">  
+           <apex:facet name="header">  
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="Type" status="waitStatus" rerender="pblock">
+                <apex:param value="recordType.name" name="sort" assignTo="{!currentSortColumn}"/>
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'recordType.name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>
+           </apex:facet>
+           {!this.recordType.name}
+         </apex:column>
+         <apex:column >
+            <apex:facet name="header">
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}" rerender="pblock" status="waitStatus">
+                <apex:param value="createdDate" name="sort" assignTo="{!currentSortColumn}"/>
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'createdDate',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!this.createdDate}" />
+         </apex:column>
+         <apex:column >
+           <apex:facet name="header">
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" rerender="pblock" status="waitStatus">
+                <apex:param value="StageName__c" name="sort" assignTo="{!currentSortColumn}"/>
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'StageName__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!this.StageName__c}" />  
+         </apex:column>
+         <apex:column >
+           <apex:facet name="header">
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Analysis_Assigned_to__c.Label}" rerender="pblock" status="waitStatus">
+                <apex:param value="Analysis_Assigned_to__c" name="sort" assignTo="{!currentSortColumn}"/>
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Analysis_Assigned_to__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!this.Analysis_Assigned_to__c}" />     
+         </apex:column>  
+         <apex:column >
+           <apex:facet name="header">
+             <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Analysis_Stage__c.Label}" rerender="pblock" status="waitStatus">
+                <apex:param value="Analysis_Stage__c" name="sort" assignTo="{!currentSortColumn}"/>
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Analysis_Stage__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>
+           </apex:facet>
+           <apex:outputField value="{!this.Analysis_Stage__c}" />
+         </apex:column>
+       </apex:pageBlockTable>  
+    </apex:pageBlock>  
+  </apex:form>
+  
+</apex:page>

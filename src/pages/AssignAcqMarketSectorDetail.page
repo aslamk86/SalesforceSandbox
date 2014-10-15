@@ -1,0 +1,131 @@
+<apex:page extensions="AssignAcqMarketSectorDetailController" id="pg" standardcontroller="Acquisition_Market_Sector_Detail__c"
+ tabStyle="Acquisition_Market_Sector_Detail__c">
+ 
+  <apex:sectionHeader title="Create Mapping Records" subtitle="{!acquisition.Name}" />
+  <apex:form id="frm">
+  
+  <script type="text/javascript">
+     TypeAheadSearch = {
+      interval : 500,
+      lastKeypress : null,
+      interceptKeypress : function() {
+         this.lastKeypress = new Date().getTime();
+         var that = this;
+         setTimeout(function() {
+            var currentTime = new Date().getTime();
+            if(currentTime - that.lastKeypress > that.interval) {
+               that.sendRequest();
+            }
+         }, that.interval + 100);
+      },
+      sendRequest : function() {
+         searchMarketSectorDetail();
+      }
+     }
+     
+     //------------------------------------------------------------------------
+      //Check if "Enter Key" is pressed in Search Text
+    //------------------------------------------------------------------------
+    function handleKeyPress(e) {
+       if (e.keyCode == 13) {
+           searchMarketSectorDetail();
+           return false;
+       }
+      }
+      
+      //------------------------------------------------------------------------
+      //CheckAll Check Boxes
+    //------------------------------------------------------------------------
+    function checkAll(checkAll) {
+      var tableObj = document.getElementById('pg:frm:pb:searchResult:resultTable');
+      var elements = tableObj.getElementsByTagName('input');
+
+      for(i=0 ; i < elements.length; i++) {
+        if(elements[i].type == 'checkbox' && elements[i].disabled != true) {
+          elements[i].checked = checkAll;
+        }
+      }
+    }
+    
+    //------------------------------------------------------------------------
+      //Select "Select All" checkbox if all checkboxes are checked
+    //------------------------------------------------------------------------
+    function updateCheckAll() {
+      var tableObj = document.getElementById('pg:frm:pb:searchResult:resultTable');
+      var elements = tableObj.getElementsByTagName('input');
+      
+      var isAllChecked = true;
+      for(i=0 ; i < elements.length; i++) {
+        if(elements[i].type == 'checkbox' && elements[i].name.indexOf('chkSelectAll') < 0) {
+          if(elements[i].checked == false) {
+           isAllChecked = false;
+           break;
+          }
+        }
+      }
+      document.getElementById('pg:frm:pb:searchResult:resultTable:chkSelectAll').checked = isAllChecked;
+    }
+     
+  </script>
+    <apex:pageMessages id="pgmsg"/>
+    <apex:actionFunction name="searchMarketSectorDetail" action="{!searchMarketSectorDetail}" 
+      rerender="pbbutton,searchResult,pgmsg" status="statusLoading" oncomplete="return checkAll(false);"/>
+    
+    <apex:pageBlock title="Search Market Sector Detail" id="pb">
+      <apex:pageBlockButtons location="bottom">
+        <apex:outputPanel id="pbbutton">
+          <apex:CommandButton value="Tag Acquisition" rendered = "{!IF(lstMarketSectorDetailWrapper.size > 0 , true,false)}" action="{!createAcqMarketSectorDetail}"/>
+          <apex:commandButton action="{!back}" value="Back" />
+        </apex:outputPanel>
+      </apex:pageBlockButtons>
+            
+      <apex:pageBlockSection >
+      <apex:pageBlockSectionItem >
+         <apex:outputLabel for="prodName" value="{!$ObjectType.Market_Sector_Detail__c.Fields.Name.Label}:"/>
+         <apex:outputPanel style="white-space:nowrap;">
+             <apex:inputText id="prodName" value="{!prodOrServSrchTxt}" onkeyup="TypeAheadSearch.interceptKeypress();" onkeypress="return handleKeyPress(event);"/>
+             <apex:actionStatus id="statusLoading">
+               <apex:facet name="start">
+                 <span style = "color: red;">Loading...</span>
+                 <img src = "/img/loading.gif" />
+               </apex:facet>
+             </apex:actionStatus>
+         </apex:outputPanel>
+       </apex:pageBlockSectionItem>
+      </apex:pageBlockSection> 
+
+      <apex:pageblockSection id="searchResult" columns="1" >
+         <br/>
+        <apex:outputPanel rendered = "{!IF(lstMarketSectorDetailWrapper.size > 0 , true,false)}">
+         <apex:pageBlockTable value="{!lstMarketSectorDetailWrapper}" var="msdWrap" id="resultTable">
+            <apex:column style="width:5%;text-align: center;vertical-align:top;">
+                  <apex:facet name="header">
+                  <apex:outputPanel style="vertical-align:top;">
+                     <apex:inputCheckBox id="chkSelectAll" onclick="checkAll(this.checked);" rendered = "{!IF(lstMarketSectorDetailWrapper.size > 0 , true,false)}"/>
+                        Select All
+                     </apex:outputPanel>
+               </apex:facet>
+               <apex:inputCheckBox value="{!msdWrap.isSelected}" disabled="{!msdWrap.isDisabled}"/>
+            </apex:column>
+             
+            <apex:column headervalue="{!$ObjectType.Market_Sector_Detail__c.Fields.Name.Label}" 
+              style="word-wrap:break-word;width:40%;">
+              <apex:outputField value="{!msdWrap.marketSectorDetail.Name}" style="word-wrap:break-word;"/>
+            </apex:column>
+             
+            <apex:column style="word-wrap:break-word;width:5%;" headerValue="{!$ObjectType.Acquisition_Market_Sector_Detail__c.Fields.CD_Priority__c.Label}">
+             <apex:outputField value="{!msdWrap.acqMarketSecDetail.CD_Priority__c}" rendered="{!msdWrap.isDisabled}"/>
+             <apex:inputField value="{!msdWrap.acqMarketSecDetail.CD_Priority__c}" style="width:80%;" rendered="{!Not(msdWrap.isDisabled)}"/> 
+            </apex:column>
+            
+            <apex:column style="word-wrap:break-word;width:55%;" headerValue="{!$ObjectType.Acquisition_Market_Sector_Detail__c.Fields.Notes__c.Label}">
+             <apex:outputField value="{!msdWrap.acqMarketSecDetail.Notes__c}" rendered="{!msdWrap.isDisabled}"/>
+             <apex:inputField value="{!msdWrap.acqMarketSecDetail.Notes__c}" style="height:15px; width:90%;" rendered="{!Not(msdWrap.isDisabled)}"/> 
+            </apex:column>
+            
+          </apex:pageBlockTable>
+        </apex:outputPanel>
+         </apex:pageblockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

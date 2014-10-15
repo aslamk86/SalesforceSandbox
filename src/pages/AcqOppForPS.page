@@ -1,0 +1,78 @@
+<apex:page standardController="Product_or_Service__c" extensions="AcqOppForPSController">
+    <apex:form >
+    <apex:pageBlock id="pblock" >  
+            <apex:pageMessages />
+              <apex:pageBlockButtons location="top">
+	   	   	    <apex:commandButton value="Export"  rendered="{!(Acquisitions.size > 0)}" onclick="window.open('/apex/AcqOppsForPS_Export?Id={!Product_or_Service__c.Id}','_blank');return false;"/> 
+	   	      </apex:pageBlockButtons>
+	   	      <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+              <apex:pageBlockTable value="{!Acquisitions}" var="acquisition" id="table" columnsWidth="20%,20%,20%,20%,20%"  rendered="{!(Acquisitions.size > 0)}">
+                             
+                  <apex:column >
+                      <apex:facet name="header">
+			           	 <apex:outputPanel >
+			             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Name.Label}" rerender="pblock" status="waitStatus">
+			             	<apex:param value="Name" name="sort" assignTo="{!currentSortColumn}"/>   
+			             </apex:commandLink>
+			             <img src="{!IF(currentSortColumn = 'Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+			             </apex:outputPanel>  
+			          </apex:facet>
+                      <apex:outputLink target="_blank"  value="{!URLFOR($Action.Acquisition_Opportunity__c.View, acquisition.id)}">{!acquisition.name}</apex:outputLink>
+                  </apex:column>
+                  
+                  <apex:column >
+                       <apex:facet name="header">
+			           	 <apex:outputPanel >
+			             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.StageName__c.Label}" rerender="pblock" status="waitStatus">
+			             	<apex:param value="StageName__c" name="sort" assignTo="{!currentSortColumn}"/>   
+			             </apex:commandLink>
+			             <img src="{!IF(currentSortColumn = 'StageName__c',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+			             </apex:outputPanel>  
+			          </apex:facet>
+                      <apex:outputField value="{!acquisition.StageName__c}"/>
+                  </apex:column>
+                  
+                  <apex:column >
+                       <apex:facet name="header">
+			           	 <apex:outputPanel >
+			             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.Account__c.Label}" rerender="pblock" status="waitStatus">
+			             	<apex:param value="Account__r.Name" name="sort" assignTo="{!currentSortColumn}"/>   
+			             </apex:commandLink>
+			             <img src="{!IF(currentSortColumn = 'Account__r.Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+			             </apex:outputPanel>  
+			          </apex:facet>
+                      <!--
+                      <apex:outputField value="{!acquisition.Account__c}"/>
+                      -->
+                      <apex:outputLink target="_blank"  value="{!URLFOR($Action.Account.View, acquisition.Account__c)}">{!acquisition.Account__r.Name}</apex:outputLink>
+                  </apex:column>
+                  
+                  <apex:column >
+                      <apex:facet name="header">
+			           	 <apex:outputPanel >
+			             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.CreatedDate.Label}" rerender="pblock" status="waitStatus">
+			             	<apex:param value="CreatedDate" name="sort" assignTo="{!currentSortColumn}"/>   
+			             </apex:commandLink>
+			             <img src="{!IF(currentSortColumn = 'CreatedDate',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+			             </apex:outputPanel>  
+			          </apex:facet>
+                      <apex:outputField value="{!acquisition.CreatedDate}"/>
+                  </apex:column>   
+                  
+                  <apex:column >
+                       <apex:facet name="header">
+			           	 <apex:outputPanel >
+			             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Acquisition_Opportunity__c.Fields.LastModifiedDate.Label}" rerender="pblock" status="waitStatus">
+			             	<apex:param value="LastModifiedDate" name="sort" assignTo="{!currentSortColumn}"/>   
+			             </apex:commandLink>
+			             <img src="{!IF(currentSortColumn = 'LastModifiedDate',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+			             </apex:outputPanel>  
+			          </apex:facet>
+                      <apex:outputField value="{!acquisition.LastModifiedDate}"/>
+                  </apex:column> 
+                                    
+              </apex:pageBlockTable>
+          
+       </apex:pageBlock>
+       </apex:form>
+</apex:page>

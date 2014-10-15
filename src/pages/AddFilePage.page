@@ -1,0 +1,30 @@
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!initializeAttachment}">
+<link rel="icon" type="image/png" href="{!$Resource.Favicon}" />
+<apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
+
+    <div style="display:inline-block;">
+        <apex:image value="{!$Resource.RPXLogo}" style="float:right; margin-bottom:20px;" />
+    </div>
+    <apex:form >
+    <div>
+    <apex:outputPanel >
+    <h4>Uploaded Documents</h4>
+    <apex:dataList value="{!Attachments}" var="att">
+        <apex:outputPanel >
+            <apex:outputField value="{!att.Name}"/>
+            <apex:commandLink action="{!deleteAttachment}" value="Delete" style="padding-left:10px">
+                <apex:param assignTo="{!deleteAttachmentId}" name="delAtt" value="{!att.id}"/>
+            </apex:commandLink>
+        </apex:outputPanel>
+    </apex:dataList>   
+    </apex:outputPanel>  
+    <h4>Attach the relevant file here</h4>
+    <apex:pageMessages ></apex:pageMessages>
+            <apex:inputFile fileName="{!attachment.Name}" value="{!attachment.body}"></apex:inputFile>
+            <br/><br/>
+            <apex:commandButton value="Attach File" action="{!addAssertionFile}" status="uploading" />
+            <apex:actionStatus startText="Uploading..." stopText="" id="uploading"/>
+            <br/><br/>            
+    </div>
+    </apex:form>
+</apex:page>

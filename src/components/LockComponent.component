@@ -1,0 +1,104 @@
+<!-- 
+Componenet    : WaitingComponent
+Author        : Neeraj (Appirio Off)
+Purpose       : Lock the Screen when ajax action Submitted and in process and UnLock when Process done, 
+                So by this when any action processing user cannot click on another action.
+How to Use    : 
+              : >> Use this Component anywhere on Page (Normally after Page Section or Page Block)
+              : >> Call following function onSubmit,onChange,..... any action as per the requirement:-
+                   lockScreen(true);
+                >> When action completes call the same function with false argument:-  
+                   lockScreen(false);
+-->
+
+<apex:component >
+<style>
+        .standardHeight{
+            Height:22px;
+        }       
+    .red{
+      background-color:#CC0000;
+      color:#000000;
+    }
+    .POP_LAYER {
+      width: 100%;
+      height: 100%;
+      min-height:100%;
+      position: absolute;
+      z-index: 1;
+      overflow: hidden;
+      left: 0px;
+      top: 0px;
+      opacity: .4;
+      filter: alpha(opacity=40);
+      background-color: #CCCCCC;
+    }
+
+    .POP_LAYER_NONE {
+      display:none;
+    } 
+    
+    .imgStatusIE{
+       height: 20%;
+       margin-left:38.5%;
+       margin-top: 13.5%;
+       margin-bottom: 15%;
+       text-align: center;
+       width: auto; vertical-align: bottom;"
+    }
+    
+    .imgStatus{
+       height: 20%;
+       margin-top: 30%;
+       margin-bottom: 45%;
+       text-align: center;
+       width: auto; vertical-align: middle;"
+    }
+    
+    
+    </style>
+    
+    <script>
+      function lockScreen(doLock){   
+      var detect = navigator.userAgent.toLowerCase();
+          var browser = detect.indexOf('msie') + 1;;
+            if(browser!=0){
+              document.getElementById('statusImage').className='imgStatusIE';
+            }
+                  
+        if(doLock)
+          document.getElementById('hiddenLayer').className='POP_LAYER';
+        else
+          document.getElementById('hiddenLayer').className='POP_LAYER_NONE';
+        return true;
+      }
+    </script>
+    <div id="hiddenLayer" class="POP_LAYER_NONE" style="height: 800px;">
+    <div id="statusImage" class="imgStatus">
+        <img src="/img/loading.gif" /><span style="color:red;"><b>&nbsp;Loading...</b></span>
+      </div>
+  </div>
+  
+    <script>
+      function lockScreenWithoutMsg(doLock){
+      var detect = navigator.userAgent.toLowerCase();
+          var browser = detect.indexOf('msie') + 1;;
+            if(browser!=0){
+              document.getElementById('statusImage2').className='imgStatusIE';
+            }
+        if(doLock)
+          document.getElementById('hiddenLayer2').className='POP_LAYER';
+        else
+          document.getElementById('hiddenLayer2').className='POP_LAYER_NONE';
+        return true;
+      }
+    </script>
+    <div id="hiddenLayer2" class="POP_LAYER_NONE" style="height: 800px;">
+    <div id="statusImage2" class="imgStatus">
+        <img src="/img/loading.gif" />
+      </div>
+  </div>
+    
+    
+  
+</apex:component>

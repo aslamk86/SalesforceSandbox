@@ -1,0 +1,33 @@
+<apex:page StandardController="Acquisition_Opportunity__c" extensions="RelatedAcquisitionProductServicesExt">
+<apex:form >
+    <apex:pageMessages />
+    <apex:pageBlock id="pblock" rendered="{!(listPortfolio2Product.size > 0)}">
+      
+      <apex:pageBlockButtons location="top">
+   	   	<apex:commandButton value="Export" onclick="window.open('/apex/ProductServicesForAcq_Export?Id={!Acquisition_Opportunity__c.Id}','_blank');return false;"/> 
+   	   </apex:pageBlockButtons>
+   	   
+      <apex:outputPanel >
+      <apex:actionStatus id="waitStatus" startText="Please wait..." startStyle="font-weight:bold;color:red" /> 
+      <apex:pageBlockTable value="{!listPortfolio2Product}" var="Portfolio2Product">
+        
+        <apex:column headerValue="{!$ObjectType.Product_or_Service__c.Fields.Name.Label}" >
+          <apex:facet name="header">
+           	 <apex:outputPanel >
+             <apex:commandLink action="{!sortData}" value="{!$ObjectType.Product_or_Service__c.Fields.Name.Label}" rerender="pblock" status="waitStatus">
+             	<apex:param value="Product_or_Service__r.Name" name="sort" assignTo="{!currentSortColumn}"/>   
+             </apex:commandLink>
+             <img src="{!IF(currentSortColumn = 'Product_or_Service__r.Name',IF(isAsc = true,'/img/sort_asc_arrow.gif','/img/sort_desc_arrow.gif'),'/s.gif')}" />
+             </apex:outputPanel>  
+           </apex:facet>
+           
+          <apex:outputLink value="/{!Portfolio2Product.Product_or_Service__c}" title="View Account" target="_blank">
+            <apex:outputField value="{!Portfolio2Product.Product_or_Service__r.Name}"/>
+          </apex:outputLink>           
+        </apex:column> 
+      </apex:pageBlockTable>
+     </apex:outputPanel>
+    
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

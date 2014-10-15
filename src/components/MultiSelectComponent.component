@@ -1,0 +1,44 @@
+<apex:component controller="MultiSelectComponentController">
+    <apex:attribute name="AvailableList" type="selectOption[]" description="Available List from the Page" assignTo="{!options}" required="True"/>
+    <apex:attribute name="ChosenList" type="selectOption[]" description="Chosen List from the Page" assignTo="{!selectedOptions}" required="True"/>
+     
+    <script type="text/javascript"> 
+        function selection() {
+            selection(); 
+        }
+        function deselection() {
+            deselection();
+        }
+    </script>
+<!-- Apex function called to move the selected values from available list to chosen list and vice versa -->
+    <apex:actionFunction name="selection" action="{!selecting}" reRender="multiselect"/>
+    <apex:actionFunction name="deselection" action="{!deselecting}" reRender="multiselect"/>
+    <apex:outputPanel id="panel">
+    <apex:pageBlockSection columns="4" >
+        <apex:selectList multiselect="true" size="5" value="{!selected}"> 
+            <apex:selectOption value="{!Available}"/>
+            <apex:selectOptions value="{!options}" />
+            <apex:actionSupport event="ondblclick" action="{!selecting}" rerender="panel" status="waitingStatus" />
+        </apex:selectList>
+            <apex:pageBlockSection columns="1">
+<!--            <apex:commandButton reRender="panel" id="select" Styleclass="picklistArrowRight" action="{!selecting}" value=">" status="waitingStatus"/>-->
+            <apex:commandLink reRender="panel" action="{!selecting}" status="waitingStatus">
+              <img src="/s.gif" alt="Add" class="picklistArrowRight" id="select" style="cursor:pointer;" title="Add"/>
+            </apex:commandLink>
+<!--            <apex:commandButton reRender="panel" id="deselect" action="{!deselecting}" value="<" status="waitingStatus"/>-->
+            
+            <apex:commandLink reRender="panel" action="{!deselecting}" status="waitingStatus">
+              <img src="/s.gif" alt="Remove" class="picklistArrowLeft" id="select" style="cursor:pointer;" title="Add"/>
+            </apex:commandLink>
+            
+            </apex:pageBlockSection>
+   <!-- An action status to show that the operation of moving between the lists is in progress--->
+            <apex:actionStatus id="waitingStatus" startText="Please wait..." stopText=""/>
+        <apex:selectList multiselect="true" size="5" value="{!deselected}">
+            <apex:selectOption value="{!Chosen}"/>
+            <apex:selectOptions value="{!selectedOptions}" />
+            <apex:actionSupport event="ondblclick" action="{!deselecting}" rerender="panel" status="waitingStatus" />
+        </apex:selectList>
+    </apex:pageBlockSection>
+    </apex:outputPanel>
+</apex:component>

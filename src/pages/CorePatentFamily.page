@@ -1,0 +1,69 @@
+<apex:page controller="CoreRecordController" id="thePage" title="Core Patent Family{!if(isnull(patentFamily), '', ': ' & patentFamily.Name)}" tabStyle="Assets__c"> 
+    
+    <apex:includeScript value="{!URLFOR($Resource.jquery, 'jquery-1.10.0.min.js')}"/>
+    
+    <script>
+        
+        $(document).ready(function() {
+            // update row highlights
+            //console.log("Entering doc ready with " + $("a.highlightMyRow").length + " items.");
+            $("a.highlightMyRow").closest("tr").addClass("selectedRow");
+        });
+        
+        function alertAPIResponseText() {
+		    // Adds an alert which displays the semi-raw api output for the passed row 
+		    alert("API Response Text (Patent Familes Endpoint):\n\n{!apiResponseText}");
+		}
+    
+    </script>
+    
+    <style>
+    
+        tr.selectedRow td {
+            background-color: #FFFDD4;
+        }
+    
+    </style>
+        
+    <apex:sectionHeader subtitle="{!patentFamily.Name}" title="Core Patent Family" description="This patent family is not currently stored in Salesforce. You are viewing the contents of the patent family as retrieved via the Core database API."/>
+    
+    <apex:form id="theForm">
+    
+        <apex:pagemessages id="pageMessages"/>
+    
+    
+        <apex:pageBlock title="Patent Family Detail" id="detailPageBlock" rendered="{!!isError}" mode="maindetail" ondblclick="alertAPIResponseText();">
+            
+            <apex:pageBlockSection columns="2">
+                <apex:repeat value="{!$ObjectType.Assets__c.FieldSets.Patent_Family_Detail}" var="field">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!field.label}"/>
+                        <apex:outputField value="{!patentFamily[field]}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat>
+            </apex:pageBlockSection>
+            
+        </apex:pageBlock>
+        
+        
+        <apex:pageBlock title="Patents" id="childrenPageBlock" rendered="{!!isError}" mode="detail" tabStyle="Patent__c">
+            
+            <apex:pageBlockTable value="{!childPatentRows}" var="row">
+                <apex:column headerValue="Patent ID" >
+                    <a href="{!row.patentDetailURL}" class="{!if(row.isInSalesforce, 'highlightMyRow', '')}" title="View patent detail" target="_top">{!row.patent.Name}{!if(row.isInSalesforce, '', '*')}</a>
+                </apex:column>
+                
+                <apex:repeat value="{!$ObjectType.Patent__c.FieldSets.Patent_Family_Related_List}" var="field">
+                    <apex:column value="{!row.patent[field]}" headerValue="{!field.label}" />
+                </apex:repeat>
+            </apex:pageBlockTable>
+            
+            <apex:facet name="footer">
+                <i><strong>* Note:</strong> Only the highlighted rows in the above table have been imported into Salesforce.</i>
+            </apex:facet>
+            
+        </apex:pageBlock>
+        
+        
+    </apex:form>  
+</apex:page>
