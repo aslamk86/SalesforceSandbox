@@ -1,4 +1,4 @@
-<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!initializeAttachment}">
+<apex:page standardController="Application__c" sidebar="false" showHeader="false" extensions="InsuranceApplicationExt" action="{!initializeAttachment}" title="RPXIS Insurance Application">
 <link rel="icon" type="image/png" href="{!$Resource.Favicon}" />
 <apex:stylesheet value="{!URLFOR($Resource.kube)}"/>
 
